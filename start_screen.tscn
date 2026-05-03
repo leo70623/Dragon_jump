@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://c7q8y2bnrk5oa"]
+
+[ext_resource type="Script" path="res://start_screen.gd" id="1_ss"]
+[ext_resource type="Texture2D" path="res://BG_start.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://Idle.png" id="3_idle"]
+
+[sub_resource type="AtlasTexture" id="AT_1"]
+atlas = ExtResource("3_idle")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AT_2"]
+atlas = ExtResource("3_idle")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AT_3"]
+atlas = ExtResource("3_idle")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AT_4"]
+atlas = ExtResource("3_idle")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SF_1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 8.0
+}]
+
+[node name="StartScreen" type="Node2D"]
+script = ExtResource("1_ss")
+
+[node name="Background" type="Sprite2D" parent="."]
+texture = ExtResource("2_bg")
+
+[node name="Character" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SF_1")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TitleLabel" type="Label" parent="UI"]
+offset_left = 0.0
+offset_top = 110.0
+offset_right = 360.0
+offset_bottom = 178.0
+theme_override_font_sizes/font_size = 56
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+text = "Dragon Jump"
+horizontal_alignment = 1
+
+[node name="TapLabel" type="Label" parent="UI"]
+offset_left = 0.0
+offset_top = 340.0
+offset_right = 360.0
+offset_bottom = 378.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+text = "Tap to Start"
+horizontal_alignment = 1
