@@ -8,7 +8,7 @@ Godot 4.6 game — a Doodle Jump-style vertical scroller named `dragon_test`. Us
 
 ## Running the project
 
-- Open in Godot 4.6 editor: `godot --path /Users/chlienoi-imac/Desktop/Godot/Game-01/dragon-test`
+- Open in Godot 4.6 editor: `godot --path /Users/chlienoi-imac/Desktop/dragon_jump`
 - Run: **F5** (project) or **F6** (current scene)
 - There are no build steps or test commands — GDScript errors surface in the editor's Output/Debugger panel.
 

@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://enemy_01.png" id="2_tex"]
 
 [sub_resource type="RectangleShape2D" id="RS_1"]
-size = Vector2(32, 32)
+size = Vector2(21, 21)
 
 [node name="Enemy" type="Area2D"]
 script = ExtResource("1_enemy")

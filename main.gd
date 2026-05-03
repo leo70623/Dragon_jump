@@ -32,6 +32,8 @@ static var s_regen_elapsed: float = 0.0
 @onready var _enemies_node: Node2D = $Enemies
 
 var _sfx_spin: AudioStreamPlayer
+var _sfx_death_shout: AudioStreamPlayer
+var _sfx_enemy_crush: AudioStreamPlayer
 var hearts: Array[Sprite2D] = []
 var next_spawn_y: float = 0.0
 var score: int = 0
@@ -42,6 +44,9 @@ var _y_since_last_white: float = 0.0
 var _last_spawn_y: float = 0.0
 var _eligible_since_last_enemy: int = 0
 var _invincible_timer: float = 0.0
+var _current_bg_level: int = 0
+var _bg_transitioning: bool = false
+var _bg_paths: Array[String] = ["res://BG_01.png", "res://BG_02.png", "res://BG_03.png", "res://BG_04.png"]
 var _dev_panel: Control = null
 var _dev_input: LineEdit = null
 
@@ -107,6 +112,18 @@ func _ready() -> void:
 		_sfx_spin.stream = spin_stream
 	add_child(_sfx_spin)
 
+	_sfx_death_shout = AudioStreamPlayer.new()
+	var death_shout_stream = load("res://death_shout.mp3")
+	if death_shout_stream:
+		_sfx_death_shout.stream = death_shout_stream
+	add_child(_sfx_death_shout)
+
+	_sfx_enemy_crush = AudioStreamPlayer.new()
+	var crush_stream = load("res://enemy_crush.wav")
+	if crush_stream:
+		_sfx_enemy_crush.stream = crush_stream
+	add_child(_sfx_enemy_crush)
+
 	if s_lives == 0:
 		game_over_flag = true
 		player.set_physics_process(false)
@@ -144,6 +161,7 @@ func _process(delta: float) -> void:
 	if new_score > score:
 		score = new_score
 		score_label.text = "Score  " + str(score)
+		_check_bg_switch()
 
 	var target_y := player.position.y - vp_h * 0.15
 	if target_y < camera.position.y:
@@ -190,7 +208,6 @@ func _update_cooldown_label() -> void:
 
 func _on_damage_cloud_hit_player() -> void:
 	if not game_over_flag:
-		player.play_death_sfx()
 		_show_game_over()
 
 func _show_game_over() -> void:
@@ -206,6 +223,9 @@ func _show_game_over() -> void:
 		_update_hearts_ui()
 	final_score_label.text = "Score: " + str(score)
 	_update_cooldown_label()
+	if _sfx_death_shout and _sfx_death_shout.stream:
+		_sfx_death_shout.play()
+	player.visible = false
 	_spawn_death_spin()
 
 func _spawn_death_spin() -> void:
@@ -372,19 +392,12 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	e.setup(p, moving, spd)
 	_enemies_node.add_child(e)
 	e.hit_player.connect(_on_enemy_hit_player)
+	e.stomped.connect(_on_enemy_stomped)
 
 func _on_enemy_hit_player() -> void:
-	if game_over_flag or _invincible_timer > 0.0:
+	if game_over_flag:
 		return
-	player.play_death_sfx()
-	if s_lives > 0:
-		s_lives -= 1
-		s_regen_elapsed = 0.0
-		_update_hearts_ui()
-	if s_lives == 0:
-		_show_game_over()
-	else:
-		_invincible_timer = INVINCIBLE_DURATION
+	_show_game_over()
 
 func _setup_dev_ui() -> void:
 	var vp := get_viewport_rect().size
@@ -435,3 +448,30 @@ func _on_dev_ok_pressed() -> void:
 		score_label.text = "Score  " + str(score)
 	if _dev_panel:
 		_dev_panel.visible = false
+
+func _on_enemy_stomped() -> void:
+	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
+		_sfx_enemy_crush.play()
+
+func _check_bg_switch() -> void:
+	var level := mini(score / 200, 3)
+	if level != _current_bg_level and not _bg_transitioning:
+		_current_bg_level = level
+		_transition_background(level)
+
+func _transition_background(level: int) -> void:
+	_bg_transitioning = true
+	var vp := get_viewport_rect().size
+	var tw := create_tween()
+	tw.tween_property(background, "modulate:a", 0.0, 0.25)
+	tw.tween_callback(func():
+		var tex: Texture2D = load(_bg_paths[level])
+		if tex:
+			background.texture = tex
+			var bg_tex_size := tex.get_size()
+			background.scale = Vector2(vp.x / bg_tex_size.x, vp.y / bg_tex_size.y)
+	)
+	tw.tween_property(background, "modulate:a", 1.0, 0.25)
+	tw.tween_callback(func():
+		_bg_transitioning = false
+	)

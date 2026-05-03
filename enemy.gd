@@ -4,7 +4,7 @@ signal stomped
 signal hit_player
 
 const Platform := preload("res://platform.gd")
-const ENEMY_SIZE := 32.0
+const ENEMY_SIZE := 21.0
 const FRAME_RATE := 8.0
 
 var platform: Node2D = null
@@ -36,7 +36,7 @@ func _ready() -> void:
 		print("[Enemy] $AnimatedSprite2D FOUND  scale=", (anim_node as Node2D).scale)
 		if anim_node is Sprite2D and (anim_node as Sprite2D).texture:
 			print("[Enemy] texture size=", (anim_node as Sprite2D).texture.get_size())
-		$AnimatedSprite2D.scale = Vector2(0.3, 0.3)
+		$AnimatedSprite2D.scale = Vector2(0.2, 0.2)
 		print("[Enemy] scale forced -> ", $AnimatedSprite2D.scale)
 	else:
 		print("[Enemy] ERROR: $AnimatedSprite2D NOT FOUND")

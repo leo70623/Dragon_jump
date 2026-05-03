@@ -1,3 +1,18 @@
-# Godot 4+ specific ignores
+# Godot 編輯器快取（每台電腦自動產生，不需同步）
 .godot/
-/android/
+
+# 匯出成品
+*.exe
+*.apk
+*.aab
+*.ipa
+*.dmg
+*.zip
+export_presets.cfg
+
+# Mac 系統檔
+.DS_Store
+**/.DS_Store
+
+# VSCode 設定（可選，若想同步設定請移除這行）
+.vscode/
