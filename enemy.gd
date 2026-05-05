@@ -13,6 +13,7 @@ var move_speed: float = 60.0
 var _move_dir: float = 1.0
 var _dying: bool = false
 var _frame_timer: float = 0.0
+var _static_x_offset: float = 0.0
 
 @onready var _sprite: Sprite2D = $AnimatedSprite2D
 
@@ -21,10 +22,25 @@ func setup(p: Node2D, moving: bool, spd: float) -> void:
 	can_move = moving
 	move_speed = spd
 	_move_dir = 1.0 if randf() > 0.5 else -1.0
-	var surf_y := Platform.CLOUD_H * 0.5
+	var hw: float = p.get("half_w") if "half_w" in p else Platform.CLOUD_W * 0.5
+	var cloud_half_h: float = Platform.CLOUD_H * 0.5
 	if "platform_type" in p and p.platform_type == Platform.Type.BRICK:
-		surf_y = Platform.BRICK_H * 0.5
-	position = Vector2(p.position.x, p.position.y - surf_y - ENEMY_SIZE * 0.5)
+		cloud_half_h = Platform.BRICK_H * 0.5
+	var enemy_half_h: float = ENEMY_SIZE * 0.5
+	var y_offset: float = cloud_half_h + enemy_half_h
+	print("[Enemy setup] platform.y=", p.position.y,
+		"  cloud_half_h=", cloud_half_h,
+		"  enemy_half_h=", enemy_half_h,
+		"  y_offset=", y_offset,
+		"  final_y=", p.position.y - y_offset)
+	var spawn_x: float
+	if not moving:
+		var side: float = 1.0 if randf() > 0.5 else -1.0
+		_static_x_offset = side * (hw - ENEMY_SIZE * 0.5)
+		spawn_x = p.position.x + _static_x_offset
+	else:
+		spawn_x = p.position.x
+	position = Vector2(spawn_x, p.position.y - y_offset)
 
 func _ready() -> void:
 	print("[Enemy] --- node tree ---")
@@ -36,7 +52,7 @@ func _ready() -> void:
 		print("[Enemy] $AnimatedSprite2D FOUND  scale=", (anim_node as Node2D).scale)
 		if anim_node is Sprite2D and (anim_node as Sprite2D).texture:
 			print("[Enemy] texture size=", (anim_node as Sprite2D).texture.get_size())
-		$AnimatedSprite2D.scale = Vector2(0.2, 0.2)
+		$AnimatedSprite2D.scale = Vector2(0.15, 0.15)
 		print("[Enemy] scale forced -> ", $AnimatedSprite2D.scale)
 	else:
 		print("[Enemy] ERROR: $AnimatedSprite2D NOT FOUND")
@@ -50,10 +66,10 @@ func _process(delta: float) -> void:
 		queue_free()
 		return
 
-	var surf_y := Platform.CLOUD_H * 0.5
+	var cloud_half_h: float = Platform.CLOUD_H * 0.5
 	if "platform_type" in platform and platform.platform_type == Platform.Type.BRICK:
-		surf_y = Platform.BRICK_H * 0.5
-	position.y = platform.position.y - surf_y - ENEMY_SIZE * 0.5
+		cloud_half_h = Platform.BRICK_H * 0.5
+	position.y = platform.position.y - cloud_half_h - ENEMY_SIZE * 0.5
 
 	if can_move:
 		var hw: float = platform.get("half_w") if "half_w" in platform else Platform.CLOUD_W * 0.5
@@ -67,11 +83,12 @@ func _process(delta: float) -> void:
 			position.x = left_bound
 			_move_dir = 1.0
 	else:
-		position.x = platform.position.x
+		position.x = platform.position.x + _static_x_offset
 
 	_frame_timer += delta
 	_sprite.frame = int(_frame_timer * FRAME_RATE) % 4
-	_sprite.flip_h = _move_dir < 0.0
+	if can_move:
+		_sprite.flip_h = _move_dir < 0.0
 
 func _on_body_entered(body: Node) -> void:
 	if _dying or not body is CharacterBody2D:

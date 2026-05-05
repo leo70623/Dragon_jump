@@ -89,9 +89,73 @@ body {
 	text-align: center;
 	z-index: 1;
 }
+
+/* Dragon Jump Firebase – overlays */
+#djf-name-dialog, #djf-lb-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 5000;
+  display: flex; align-items: center; justify-content: center;
+  touch-action: auto;
+}
+.djf-box {
+  background: linear-gradient(160deg,#0f2d4a,#1e4a7a);
+  border: 2px solid #5bc8f5; border-radius: 20px;
+  padding: 24px 20px; width: 300px; max-width: 90vw;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(91,200,245,.3);
+  font-family: 'Fredoka One', cursive; color: #fff;
+}
+.djf-lb-box {
+  background: linear-gradient(160deg,#0f2d4a,#1e4a7a);
+  border: 2px solid #5bc8f5; border-radius: 20px;
+  padding: 20px 16px 16px; width: 330px; max-width: 94vw;
+  max-height: 82vh; display: flex; flex-direction: column;
+  font-family: 'Fredoka One', cursive; color: #fff;
+  box-shadow: 0 0 30px rgba(91,200,245,.3);
+}
+.djf-h2 { font-size: 26px; margin: 0 0 8px; }
+.djf-sub { font-size: 15px; color: #a0d4f0; margin: 0 0 14px; }
+.djf-input {
+  width: 100%; padding: 10px 14px;
+  font-size: 18px; font-family: 'Fredoka One', cursive;
+  background: rgba(255,255,255,.1); border: 2px solid #5bc8f5;
+  border-radius: 10px; color: #fff; box-sizing: border-box;
+  outline: none; margin-bottom: 14px;
+}
+.djf-input::placeholder { color: rgba(255,255,255,.4); }
+.djf-btn-row { display: flex; gap: 10px; justify-content: center; }
+.djf-btn {
+  font-family: 'Fredoka One', cursive; font-size: 17px;
+  padding: 10px 22px; border: none; border-radius: 10px;
+  cursor: pointer; touch-action: auto;
+}
+.djf-btn-ok { background: linear-gradient(135deg,#4fc3f7,#0288d1); color: #fff; }
+.djf-btn-cancel { background: rgba(255,255,255,.15); color: #ccc; }
+.djf-btn-close {
+  background: linear-gradient(135deg,#ef5350,#b71c1c); color: #fff;
+  width: 100%; margin-top: 10px; font-family: 'Fredoka One', cursive;
+  font-size: 17px; padding: 10px; border: none; border-radius: 10px; cursor: pointer;
+}
+.djf-list { overflow-y: auto; flex: 1; padding: 2px 0; }
+.djf-row {
+  display: flex; align-items: center; padding: 7px 8px;
+  border-radius: 8px; margin-bottom: 3px;
+  background: rgba(255,255,255,.05); font-size: 15px;
+}
+.djf-row.djf-me { background: rgba(91,200,245,.2); border: 1px solid #5bc8f5; }
+.djf-rank { width: 34px; text-align: center; font-size: 17px; }
+.djf-name { flex: 1; text-align: left; padding: 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.djf-flag { width: 28px; text-align: center; font-size: 17px; }
+.djf-score { width: 50px; text-align: right; color: #f5c842; font-size: 17px; }
+.djf-note { color: #a0d4f0; text-align: center; padding: 20px; font-size: 15px; }
+
 		</style>
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="dragon_test.icon.png" />
 <link rel="apple-touch-icon" href="dragon_test.apple-touch-icon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
 	</head>
 	<body>
@@ -107,6 +171,26 @@ body {
 			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="dragon_test.png" alt="">
 			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
+		</div>
+
+		<!-- Dragon Jump Firebase UI -->
+		<div id="djf-name-dialog" style="display:none">
+			<div class="djf-box">
+				<p class="djf-h2">🐉 Dragon Jump</p>
+				<p class="djf-sub">Enter your player name</p>
+				<input id="djf-name-input" class="djf-input" type="text" maxlength="20" placeholder="Your name" autocomplete="off">
+				<div class="djf-btn-row">
+					<button id="djf-name-cancel" class="djf-btn djf-btn-cancel" onclick="DragonJumpFirebase.cancelNameDialog()">Cancel</button>
+					<button class="djf-btn djf-btn-ok" onclick="DragonJumpFirebase.saveName()">OK</button>
+				</div>
+			</div>
+		</div>
+		<div id="djf-lb-overlay" style="display:none">
+			<div class="djf-lb-box">
+				<p class="djf-h2" style="text-align:center">🏆 Leaderboard</p>
+				<div id="djf-lb-list" class="djf-list"></div>
+				<button class="djf-btn-close" onclick="DragonJumpFirebase.hideLeaderboard()">✕ Close</button>
+			</div>
 		</div>
 
 		<script src="dragon_test.js"></script>
@@ -214,6 +298,133 @@ const engine = new Engine(GODOT_CONFIG);
 		}, displayFailureNotice);
 	}
 }());
+		</script>
+		<script>
+/* Dragon Jump Firebase integration */
+window.DragonJumpFirebase = {
+  db: null,
+  playerName: null,
+  playerCountry: 'XX',
+
+  init() {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDfMRL--8qTzpKIxbfdbJL0Ifzg8NYP1II",
+      authDomain: "dragon-jump-f2b22.firebaseapp.com",
+      projectId: "dragon-jump-f2b22",
+      storageBucket: "dragon-jump-f2b22.firebasestorage.app",
+      messagingSenderId: "119626794252",
+      appId: "1:119626794252:web:cfe7b41369f04541aeb529"
+    });
+    this.db = firebase.firestore();
+    this.playerName = localStorage.getItem('djPlayerName');
+    this.playerCountry = localStorage.getItem('djCountry') || 'XX';
+    this._fetchCountry();
+    if (!this.playerName) {
+      document.getElementById('djf-name-cancel').style.display = 'none';
+      document.getElementById('djf-name-input').value = '';
+      document.getElementById('canvas').style.pointerEvents = 'none';
+      document.getElementById('djf-name-dialog').style.display = 'flex';
+    }
+  },
+
+  async _fetchCountry() {
+    if (localStorage.getItem('djCountry')) return;
+    try {
+      const r = await fetch('https://ipapi.co/json/');
+      const d = await r.json();
+      if (d.country_code) {
+        this.playerCountry = d.country_code;
+        localStorage.setItem('djCountry', d.country_code);
+      }
+    } catch(e) { /* ignore */ }
+  },
+
+  showNameDialog(isFirstTime) {
+    document.getElementById('djf-name-cancel').style.display = isFirstTime ? 'none' : '';
+    document.getElementById('djf-name-input').value = this.playerName || '';
+    document.getElementById('canvas').style.pointerEvents = 'none';
+    document.getElementById('djf-name-dialog').style.display = 'flex';
+    setTimeout(() => document.getElementById('djf-name-input').focus(), 80);
+  },
+
+  saveName() {
+    const input = document.getElementById('djf-name-input');
+    const name = input.value.trim().slice(0, 20);
+    if (!name) { input.style.borderColor = '#f55'; return; }
+    input.style.borderColor = '';
+    this.playerName = name;
+    localStorage.setItem('djPlayerName', name);
+    document.getElementById('djf-name-dialog').style.display = 'none';
+    document.getElementById('canvas').style.pointerEvents = '';
+  },
+
+  cancelNameDialog() {
+    document.getElementById('djf-name-dialog').style.display = 'none';
+    document.getElementById('canvas').style.pointerEvents = '';
+  },
+
+  async submitScore(score) {
+    if (!this.playerName || !this.db) return;
+    const docRef = this.db.collection('leaderboard').doc(this.playerName);
+    try {
+      await this.db.runTransaction(async (t) => {
+        const doc = await t.get(docRef);
+        if (!doc.exists || doc.data().score < score) {
+          t.set(docRef, {
+            name: this.playerName,
+            score: score,
+            country: this.playerCountry,
+            date: new Date().toISOString().slice(0, 10)
+          });
+        }
+      });
+    } catch(e) { console.error('[DragonJump] submitScore:', e); }
+  },
+
+  async showLeaderboard() {
+    if (!this.db) return;
+    const list = document.getElementById('djf-lb-list');
+    list.innerHTML = '<div class="djf-note">Loading...</div>';
+    document.getElementById('canvas').style.pointerEvents = 'none';
+    document.getElementById('djf-lb-overlay').style.display = 'flex';
+    try {
+      const snap = await this.db.collection('leaderboard')
+        .orderBy('score', 'desc').limit(20).get();
+      list.innerHTML = '';
+      if (snap.empty) { list.innerHTML = '<div class="djf-note">No scores yet!</div>'; return; }
+      snap.docs.forEach((doc, i) => {
+        const d = doc.data();
+        const medal = i < 3 ? ['🥇','🥈','🥉'][i] : String(i + 1);
+        const row = document.createElement('div');
+        row.className = 'djf-row' + (d.name === this.playerName ? ' djf-me' : '');
+        row.innerHTML = '<span class="djf-rank">' + medal + '</span>'
+          + '<span class="djf-name">' + d.name + '</span>'
+          + '<span class="djf-flag">' + this._flag(d.country) + '</span>'
+          + '<span class="djf-score">' + d.score + '</span>';
+        list.appendChild(row);
+      });
+    } catch(e) {
+      list.innerHTML = '<div class="djf-note">Error loading scores.</div>';
+      console.error(e);
+    }
+  },
+
+  hideLeaderboard() {
+    document.getElementById('djf-lb-overlay').style.display = 'none';
+    document.getElementById('canvas').style.pointerEvents = '';
+  },
+
+  _flag(code) {
+    if (!code || code.length !== 2) return '🌍';
+    const b = 0x1F1E6;
+    return String.fromCodePoint(
+      b + code.toUpperCase().charCodeAt(0) - 65,
+      b + code.toUpperCase().charCodeAt(1) - 65
+    );
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => { DragonJumpFirebase.init(); });
 		</script>
 	</body>
 </html>

@@ -32,6 +32,26 @@ func _ready() -> void:
 		add_child(_music)
 		_music.play()
 
+	var lb_btn := Button.new()
+	lb_btn.text = "排行榜"
+	lb_btn.add_theme_font_size_override("font_size", 18)
+	if font:
+		lb_btn.add_theme_font_override("font", font)
+	lb_btn.custom_minimum_size = Vector2(110, 36)
+	lb_btn.position = Vector2(vp.x * 0.5 - 55.0, vp.y - 72.0)
+	lb_btn.pressed.connect(_on_leaderboard_pressed)
+	$UI.add_child(lb_btn)
+
+	var nm_btn := Button.new()
+	nm_btn.text = "改名"
+	nm_btn.add_theme_font_size_override("font_size", 14)
+	if font:
+		nm_btn.add_theme_font_override("font", font)
+	nm_btn.custom_minimum_size = Vector2(68, 28)
+	nm_btn.position = Vector2(vp.x - 76.0, 8.0)
+	nm_btn.pressed.connect(_on_change_name_pressed)
+	$UI.add_child(nm_btn)
+
 func _process(delta: float) -> void:
 	var vp_w := get_viewport_rect().size.x
 	_char.position.x += CHAR_SPEED * _char_dir * delta
@@ -47,9 +67,17 @@ func _process(delta: float) -> void:
 		_char.flip_h = false
 		_char.position.y = randf_range(400.0, 530.0)
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if (event is InputEventScreenTouch and event.pressed) or \
 	   (event is InputEventMouseButton and event.pressed):
 		if is_instance_valid(_music):
 			_music.stop()
 		get_tree().change_scene_to_file("res://main.tscn")
+
+func _on_leaderboard_pressed() -> void:
+	if OS.get_name() == "Web":
+		JavaScriptBridge.eval("DragonJumpFirebase.showLeaderboard()")
+
+func _on_change_name_pressed() -> void:
+	if OS.get_name() == "Web":
+		JavaScriptBridge.eval("DragonJumpFirebase.showNameDialog(false)")

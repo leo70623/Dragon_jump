@@ -223,6 +223,18 @@ func _show_game_over() -> void:
 		_update_hearts_ui()
 	final_score_label.text = "Score: " + str(score)
 	_update_cooldown_label()
+	if OS.get_name() == "Web":
+		JavaScriptBridge.eval("DragonJumpFirebase.submitScore(" + str(score) + ")")
+	var lb_font: FontFile = load("res://FredokaOne-Regular.ttf")
+	var lb_btn := Button.new()
+	lb_btn.text = "排行榜"
+	lb_btn.add_theme_font_size_override("font_size", 18)
+	if lb_font:
+		lb_btn.add_theme_font_override("font", lb_font)
+	lb_btn.size = Vector2(120, 38)
+	lb_btn.position = Vector2(120.0, 465.0)
+	lb_btn.pressed.connect(_on_leaderboard_pressed)
+	game_over_screen.add_child(lb_btn)
 	if _sfx_death_shout and _sfx_death_shout.stream:
 		_sfx_death_shout.play()
 	player.visible = false
@@ -265,7 +277,7 @@ func _spawn_death_spin() -> void:
 		game_over_screen.visible = true
 	)
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if not game_over_flag:
 		return
 	if s_lives == 0:
@@ -380,6 +392,8 @@ func _get_enemy_threshold() -> int:
 func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	if ptype != Platform.Type.NORMAL and ptype != Platform.Type.BRICK:
 		return
+	if "speed" in p and p.speed != 0.0:
+		return
 	_eligible_since_last_enemy += 1
 	if _eligible_since_last_enemy < _get_enemy_threshold():
 		return
@@ -448,6 +462,10 @@ func _on_dev_ok_pressed() -> void:
 		score_label.text = "Score  " + str(score)
 	if _dev_panel:
 		_dev_panel.visible = false
+
+func _on_leaderboard_pressed() -> void:
+	if OS.get_name() == "Web":
+		JavaScriptBridge.eval("DragonJumpFirebase.showLeaderboard()")
 
 func _on_enemy_stomped() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
