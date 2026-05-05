@@ -15,6 +15,9 @@ var _http_fetch: HTTPRequest
 var _http_check: HTTPRequest
 var _http_patch: HTTPRequest
 
+# Canvas layer (keeps UI above all game CanvasLayers)
+var _canvas: CanvasLayer = null
+
 # UI nodes
 var _name_dialog: Control = null
 var _name_input: LineEdit = null
@@ -56,6 +59,11 @@ func _ready() -> void:
 	_http_patch.name = "HttpPatch"
 	add_child(_http_patch)
 	_http_patch.request_completed.connect(_on_patch_completed)
+
+	# CanvasLayer so UI renders above all game CanvasLayers (layer 1)
+	_canvas = CanvasLayer.new()
+	_canvas.layer = 10
+	add_child(_canvas)
 
 	# Build UI
 	_build_name_dialog()
@@ -121,7 +129,7 @@ func _build_name_dialog() -> void:
 	_name_dialog.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_name_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
 	_name_dialog.visible = false
-	add_child(_name_dialog)
+	_canvas.add_child(_name_dialog)
 
 	# Centered panel
 	var panel := PanelContainer.new()
@@ -195,7 +203,7 @@ func _build_leaderboard_screen() -> void:
 	_lb_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_lb_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	_lb_overlay.visible = false
-	add_child(_lb_overlay)
+	_canvas.add_child(_lb_overlay)
 
 	# Centered panel
 	_lb_panel = PanelContainer.new()
