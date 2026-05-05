@@ -9,18 +9,18 @@ const CLOUD_H := 50.0
 const BRICK_W := 110.0
 const BRICK_H := 60.0
 
-const _TEX_CLOUD_01: Texture2D = preload("res://cloud_01.png")
-const _TEX_CLOUD_02: Texture2D = preload("res://cloud_02.png")
-const _TEX_CLOUD_03: Texture2D = preload("res://cloud_03.png")
-const _TEX_BROWN_01: Texture2D = preload("res://brown_cloud_01.png")
-const _TEX_BROWN_02: Texture2D = preload("res://brown_cloud_02.png")
-const _TEX_BROWN_03: Texture2D = preload("res://brown_cloud_03.png")
-const _TEX_CRUMBLE_01: Texture2D = preload("res://cloud_crumbling_01.png")
-const _TEX_CRUMBLE_02: Texture2D = preload("res://cloud_crumbling_02.png")
-const _TEX_DARK_01: Texture2D = preload("res://dark_cloud_01.png")
-const _TEX_DARK_02: Texture2D = preload("res://dark_cloud_02.png")
-const _TEX_DARK_HIT: Texture2D = preload("res://dark_cloud_hit.png")
-const _TEX_METAL: Texture2D = preload("res://metal_cloud.png")
+const _TEX_CLOUD_01: Texture2D = preload("res://assets/platforms/cloud_01.png")
+const _TEX_CLOUD_02: Texture2D = preload("res://assets/platforms/cloud_02.png")
+const _TEX_CLOUD_03: Texture2D = preload("res://assets/platforms/cloud_03.png")
+const _TEX_BROWN_01: Texture2D = preload("res://assets/platforms/brown_cloud_01.png")
+const _TEX_BROWN_02: Texture2D = preload("res://assets/platforms/brown_cloud_02.png")
+const _TEX_BROWN_03: Texture2D = preload("res://assets/platforms/brown_cloud_03.png")
+const _TEX_CRUMBLE_01: Texture2D = preload("res://assets/platforms/cloud_crumbling_01.png")
+const _TEX_CRUMBLE_02: Texture2D = preload("res://assets/platforms/cloud_crumbling_02.png")
+const _TEX_DARK_01: Texture2D = preload("res://assets/platforms/dark_cloud_01.png")
+const _TEX_DARK_02: Texture2D = preload("res://assets/platforms/dark_cloud_02.png")
+const _TEX_DARK_HIT: Texture2D = preload("res://assets/platforms/dark_cloud_hit.png")
+const _TEX_METAL: Texture2D = preload("res://assets/platforms/metal_cloud.png")
 
 var platform_type: Type = Type.NORMAL
 var speed: float = 0.0
@@ -72,7 +72,7 @@ func _ready() -> void:
 				_sprite.scale = Vector2(BRICK_W / tex_size.x, BRICK_H / tex_size.y)
 				print("[BRICK] metal_cloud.png loaded OK, size=", tex_size, " scale=", _sprite.scale)
 			else:
-				push_error("[BRICK] metal_cloud.png failed to load at res://metal_cloud.png")
+				push_error("[BRICK] metal_cloud.png failed to load at res://assets/platforms/metal_cloud.png")
 
 func _setup_sprite_frames() -> void:
 	var tex_w: float = _TEX_CLOUD_01.get_width()

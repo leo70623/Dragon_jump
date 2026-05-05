@@ -1,0 +1,476 @@
+extends Node
+
+const API_KEY := "AIzaSyDfMRL--8qTzpKIxbfdbJL0Ifzg8NYP1II"
+const FIRESTORE_BASE := "https://firestore.googleapis.com/v1/projects/dragon-jump-f2b22/databases/(default)/documents"
+const CFG_PATH := "user://player.cfg"
+const CFG_SECTION := "player"
+
+var player_name: String = ""
+var player_country: String = "XX"
+
+var _pending_lb: bool = false
+
+# HTTP nodes
+var _http_fetch: HTTPRequest
+var _http_check: HTTPRequest
+var _http_patch: HTTPRequest
+
+# UI nodes
+var _name_dialog: Control = null
+var _name_input: LineEdit = null
+var _lb_overlay: Control = null
+var _lb_vbox: VBoxContainer = null
+var _lb_panel: PanelContainer = null
+
+# Score to submit (set before check/patch flow)
+var _submit_score_value: int = 0
+
+# Font
+var _font: FontFile = null
+
+func _ready() -> void:
+	_font = load("res://FredokaOne-Regular.ttf")
+
+	# Load config
+	var cfg := ConfigFile.new()
+	if cfg.load(CFG_PATH) == OK:
+		player_name = cfg.get_value(CFG_SECTION, "name", "")
+		player_country = cfg.get_value(CFG_SECTION, "country", "XX")
+
+	# Fetch country if not saved
+	if player_country == "XX" or player_country == "":
+		_fetch_country()
+
+	# Build HTTP nodes
+	_http_fetch = HTTPRequest.new()
+	_http_fetch.name = "HttpFetch"
+	add_child(_http_fetch)
+	_http_fetch.request_completed.connect(_on_fetch_completed)
+
+	_http_check = HTTPRequest.new()
+	_http_check.name = "HttpCheck"
+	add_child(_http_check)
+	_http_check.request_completed.connect(_on_check_completed)
+
+	_http_patch = HTTPRequest.new()
+	_http_patch.name = "HttpPatch"
+	add_child(_http_patch)
+	_http_patch.request_completed.connect(_on_patch_completed)
+
+	# Build UI
+	_build_name_dialog()
+	_build_leaderboard_screen()
+
+	# Show name dialog on first run
+	if player_name == "":
+		show_name_dialog(true)
+
+# ─────────────────────────────────────────────
+# Country fetch via ipapi.co
+# ─────────────────────────────────────────────
+var _http_country: HTTPRequest = null
+
+func _fetch_country() -> void:
+	_http_country = HTTPRequest.new()
+	_http_country.name = "HttpCountry"
+	add_child(_http_country)
+	_http_country.request_completed.connect(_on_country_completed)
+	_http_country.request("https://ipapi.co/json/")
+
+func _on_country_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	if response_code == 200:
+		var json := JSON.new()
+		if json.parse(body.get_string_from_utf8()) == OK:
+			var data = json.get_data()
+			if data is Dictionary and data.has("country_code"):
+				player_country = data["country_code"]
+				_save_config()
+	if is_instance_valid(_http_country):
+		_http_country.queue_free()
+		_http_country = null
+
+# ─────────────────────────────────────────────
+# Config save / load
+# ─────────────────────────────────────────────
+func _save_config() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value(CFG_SECTION, "name", player_name)
+	cfg.set_value(CFG_SECTION, "country", player_country)
+	cfg.save(CFG_PATH)
+
+# ─────────────────────────────────────────────
+# Country flag emoji helper
+# ─────────────────────────────────────────────
+func _flag_emoji(code: String) -> String:
+	if code.length() != 2:
+		return "🌍"
+	var upper := code.to_upper()
+	var a := upper.unicode_at(0)
+	var b := upper.unicode_at(1)
+	if a < 65 or a > 90 or b < 65 or b > 90:
+		return "🌍"
+	return String.chr(0x1F1E6 + a - 65) + String.chr(0x1F1E6 + b - 65)
+
+# ─────────────────────────────────────────────
+# Build Name Dialog UI
+# ─────────────────────────────────────────────
+func _build_name_dialog() -> void:
+	# Full-screen overlay
+	_name_dialog = ColorRect.new()
+	(_name_dialog as ColorRect).color = Color(0, 0, 0, 0.85)
+	_name_dialog.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_name_dialog.mouse_filter = Control.MOUSE_FILTER_STOP
+	_name_dialog.visible = false
+	add_child(_name_dialog)
+
+	# Centered panel
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(300, 210)
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.grow_horizontal = 2
+	panel.grow_vertical = 2
+	_name_dialog.add_child(panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 12)
+	panel.add_child(vbox)
+
+	# Title
+	var title := Label.new()
+	title.text = "Dragon Jump"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 28)
+	if _font:
+		title.add_theme_font_override("font", _font)
+	vbox.add_child(title)
+
+	# Subtitle
+	var sub := Label.new()
+	sub.text = "Enter your player name"
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.add_theme_font_size_override("font_size", 16)
+	if _font:
+		sub.add_theme_font_override("font", _font)
+	vbox.add_child(sub)
+
+	# LineEdit
+	_name_input = LineEdit.new()
+	_name_input.max_length = 20
+	_name_input.placeholder_text = "Your name"
+	_name_input.add_theme_font_size_override("font_size", 18)
+	if _font:
+		_name_input.add_theme_font_override("font", _font)
+	vbox.add_child(_name_input)
+
+	# Button row
+	var btn_row := HBoxContainer.new()
+	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_row.add_theme_constant_override("separation", 10)
+	vbox.add_child(btn_row)
+
+	var cancel_btn := Button.new()
+	cancel_btn.name = "CancelBtn"
+	cancel_btn.text = "Cancel"
+	cancel_btn.add_theme_font_size_override("font_size", 16)
+	if _font:
+		cancel_btn.add_theme_font_override("font", _font)
+	cancel_btn.pressed.connect(_on_name_cancel)
+	btn_row.add_child(cancel_btn)
+
+	var ok_btn := Button.new()
+	ok_btn.text = "OK"
+	ok_btn.add_theme_font_size_override("font_size", 16)
+	if _font:
+		ok_btn.add_theme_font_override("font", _font)
+	ok_btn.pressed.connect(_on_name_ok)
+	btn_row.add_child(ok_btn)
+
+# ─────────────────────────────────────────────
+# Build Leaderboard Screen UI
+# ─────────────────────────────────────────────
+func _build_leaderboard_screen() -> void:
+	# Full-screen dark overlay (blocks game canvas when visible)
+	_lb_overlay = ColorRect.new()
+	(_lb_overlay as ColorRect).color = Color(0, 0, 0, 0.85)
+	_lb_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_lb_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_lb_overlay.visible = false
+	add_child(_lb_overlay)
+
+	# Centered panel
+	_lb_panel = PanelContainer.new()
+	_lb_panel.custom_minimum_size = Vector2(320, 530)
+	_lb_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_lb_panel.grow_horizontal = 2
+	_lb_panel.grow_vertical = 2
+	_lb_overlay.add_child(_lb_panel)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 8)
+	_lb_panel.add_child(vbox)
+
+	# Title
+	var title := Label.new()
+	title.text = "Leaderboard"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 28)
+	if _font:
+		title.add_theme_font_override("font", _font)
+	vbox.add_child(title)
+
+	# ScrollContainer
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(300, 420)
+	vbox.add_child(scroll)
+
+	_lb_vbox = VBoxContainer.new()
+	_lb_vbox.custom_minimum_size = Vector2(300, 0)
+	_lb_vbox.add_theme_constant_override("separation", 4)
+	scroll.add_child(_lb_vbox)
+
+	# Close button
+	var close_btn := Button.new()
+	close_btn.text = "Close"
+	close_btn.add_theme_font_size_override("font_size", 18)
+	if _font:
+		close_btn.add_theme_font_override("font", _font)
+	close_btn.pressed.connect(_on_lb_close)
+	vbox.add_child(close_btn)
+
+# ─────────────────────────────────────────────
+# Public API
+# ─────────────────────────────────────────────
+func show_name_dialog(first_time: bool) -> void:
+	if not is_instance_valid(_name_dialog):
+		return
+	_name_input.text = player_name
+	# Show/hide Cancel button based on first_time
+	var cancel_btn := _name_dialog.find_child("CancelBtn", true, false)
+	if is_instance_valid(cancel_btn):
+		cancel_btn.visible = not first_time
+	_name_dialog.visible = true
+	_name_input.grab_focus()
+
+func show_leaderboard() -> void:
+	if player_name == "":
+		_pending_lb = true
+		show_name_dialog(true)
+		return
+	if not is_instance_valid(_lb_overlay):
+		return
+	_lb_overlay.visible = true
+	_clear_lb_entries()
+	var loading := Label.new()
+	loading.text = "Loading..."
+	loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if _font:
+		loading.add_theme_font_override("font", _font)
+	_lb_vbox.add_child(loading)
+	_do_fetch_leaderboard()
+
+func submit_score(score: int) -> void:
+	if player_name == "":
+		return
+	_submit_score_value = score
+	_do_check_score()
+
+# ─────────────────────────────────────────────
+# Name dialog callbacks
+# ─────────────────────────────────────────────
+func _on_name_ok() -> void:
+	var name := _name_input.text.strip_edges().substr(0, 20)
+	if name == "":
+		return
+	player_name = name
+	_save_config()
+	_name_dialog.visible = false
+	if _pending_lb:
+		_pending_lb = false
+		show_leaderboard()
+
+func _on_name_cancel() -> void:
+	_name_dialog.visible = false
+
+# ─────────────────────────────────────────────
+# Leaderboard close
+# ─────────────────────────────────────────────
+func _on_lb_close() -> void:
+	if is_instance_valid(_lb_overlay):
+		_lb_overlay.visible = false
+
+# ─────────────────────────────────────────────
+# Firebase: Fetch leaderboard (POST runQuery)
+# ─────────────────────────────────────────────
+func _do_fetch_leaderboard() -> void:
+	var url := FIRESTORE_BASE + ":runQuery?key=" + API_KEY
+	var headers := PackedStringArray(["Content-Type: application/json"])
+	var body := '{"structuredQuery":{"from":[{"collectionId":"leaderboard"}],"orderBy":[{"field":{"fieldPath":"score"},"direction":"DESCENDING"}],"limit":20}}'
+	_http_fetch.request(url, headers, HTTPClient.METHOD_POST, body)
+
+func _on_fetch_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	_clear_lb_entries()
+	if response_code != 200:
+		_add_lb_message("Error loading scores (" + str(response_code) + ")")
+		return
+	var json := JSON.new()
+	if json.parse(body.get_string_from_utf8()) != OK:
+		_add_lb_message("Parse error")
+		return
+	var data = json.get_data()
+	if not data is Array or data.size() == 0:
+		_add_lb_message("No scores yet!")
+		return
+
+	var rank: int = 0
+	for item in data:
+		if not item is Dictionary:
+			continue
+		if not item.has("document"):
+			continue
+		var doc = item["document"]
+		if not doc is Dictionary or not doc.has("fields"):
+			continue
+		var fields = doc["fields"]
+		var name_val: String = ""
+		var score_val: int = 0
+		var country_val: String = "XX"
+		var date_val: String = ""
+		if fields.has("name") and fields["name"].has("stringValue"):
+			name_val = fields["name"]["stringValue"]
+		if fields.has("score"):
+			var sv = fields["score"]
+			if sv.has("integerValue"):
+				score_val = int(str(sv["integerValue"]))
+		if fields.has("country") and fields["country"].has("stringValue"):
+			country_val = fields["country"]["stringValue"]
+		if fields.has("date") and fields["date"].has("stringValue"):
+			date_val = fields["date"]["stringValue"]
+		rank += 1
+		_add_lb_entry(rank, name_val, country_val, score_val, date_val)
+
+func _add_lb_message(msg: String) -> void:
+	var lbl := Label.new()
+	lbl.text = msg
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if _font:
+		lbl.add_theme_font_override("font", _font)
+	_lb_vbox.add_child(lbl)
+
+func _add_lb_entry(rank: int, name_val: String, country_val: String, score_val: int, date_val: String) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	_lb_vbox.add_child(row)
+
+	# Rank medal or number
+	var rank_lbl := Label.new()
+	if rank == 1:
+		rank_lbl.text = "1"
+	elif rank == 2:
+		rank_lbl.text = "2"
+	elif rank == 3:
+		rank_lbl.text = "3"
+	else:
+		rank_lbl.text = str(rank)
+	rank_lbl.custom_minimum_size = Vector2(30, 0)
+	rank_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rank_lbl.add_theme_font_size_override("font_size", 15)
+	if _font:
+		rank_lbl.add_theme_font_override("font", _font)
+	row.add_child(rank_lbl)
+
+	# Name
+	var name_lbl := Label.new()
+	name_lbl.text = name_val
+	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_lbl.add_theme_font_size_override("font_size", 15)
+	if _font:
+		name_lbl.add_theme_font_override("font", _font)
+	if name_val == player_name:
+		name_lbl.add_theme_color_override("font_color", Color(0.36, 0.78, 0.96, 1.0))
+	row.add_child(name_lbl)
+
+	# Country flag
+	var flag_lbl := Label.new()
+	flag_lbl.text = _flag_emoji(country_val)
+	flag_lbl.custom_minimum_size = Vector2(28, 0)
+	flag_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	flag_lbl.add_theme_font_size_override("font_size", 15)
+	row.add_child(flag_lbl)
+
+	# Score
+	var score_lbl := Label.new()
+	score_lbl.text = str(score_val)
+	score_lbl.custom_minimum_size = Vector2(50, 0)
+	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	score_lbl.add_theme_font_size_override("font_size", 15)
+	score_lbl.add_theme_color_override("font_color", Color(0.96, 0.78, 0.26, 1.0))
+	if _font:
+		score_lbl.add_theme_font_override("font", _font)
+	row.add_child(score_lbl)
+
+	# Date
+	var date_lbl := Label.new()
+	date_lbl.text = date_val.substr(0, 10) if date_val.length() >= 10 else date_val
+	date_lbl.custom_minimum_size = Vector2(70, 0)
+	date_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	date_lbl.add_theme_font_size_override("font_size", 12)
+	date_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1.0))
+	if _font:
+		date_lbl.add_theme_font_override("font", _font)
+	row.add_child(date_lbl)
+
+func _clear_lb_entries() -> void:
+	if is_instance_valid(_lb_vbox):
+		for child in _lb_vbox.get_children():
+			child.queue_free()
+
+# ─────────────────────────────────────────────
+# Firebase: Check existing score (GET)
+# ─────────────────────────────────────────────
+func _do_check_score() -> void:
+	var url := FIRESTORE_BASE + "/leaderboard/" + player_name.uri_encode() + "?key=" + API_KEY
+	_http_check.request(url, PackedStringArray(), HTTPClient.METHOD_GET, "")
+
+func _on_check_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	if response_code == 404:
+		# No existing doc — submit directly
+		_do_patch_score()
+		return
+	if response_code == 200:
+		var json := JSON.new()
+		if json.parse(body.get_string_from_utf8()) == OK:
+			var data = json.get_data()
+			if data is Dictionary and data.has("fields"):
+				var fields = data["fields"]
+				if fields.has("score") and fields["score"].has("integerValue"):
+					var existing: int = int(str(fields["score"]["integerValue"]))
+					if _submit_score_value > existing:
+						_do_patch_score()
+					else:
+						print("[Leaderboard] Score not a new best (", _submit_score_value, " <= ", existing, "), skip.")
+					return
+		# Parse failed — submit anyway
+		_do_patch_score()
+	else:
+		print("[Leaderboard] Check score error code: ", response_code, " — skipping submit.")
+
+# ─────────────────────────────────────────────
+# Firebase: Patch/update score (PATCH)
+# ─────────────────────────────────────────────
+func _do_patch_score() -> void:
+	var today := Time.get_datetime_string_from_system().substr(0, 10)
+	var url := FIRESTORE_BASE + "/leaderboard/" + player_name.uri_encode() \
+		+ "?key=" + API_KEY \
+		+ "&updateMask.fieldPaths=name&updateMask.fieldPaths=score&updateMask.fieldPaths=country&updateMask.fieldPaths=date"
+	var headers := PackedStringArray(["Content-Type: application/json"])
+	var body := '{"fields":{"name":{"stringValue":"' + player_name.replace('"', '\\"') \
+		+ '"},"score":{"integerValue":"' + str(_submit_score_value) \
+		+ '"},"country":{"stringValue":"' + player_country.replace('"', '\\"') \
+		+ '"},"date":{"stringValue":"' + today + '"}}}'
+	_http_patch.request(url, headers, HTTPClient.METHOD_PATCH, body)
+
+func _on_patch_completed(_result: int, response_code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
+	if response_code == 200 or response_code == 201:
+		print("[Leaderboard] Score submitted successfully: ", _submit_score_value)
+	else:
+		print("[Leaderboard] Score submit error code: ", response_code)

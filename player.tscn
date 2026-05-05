@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b5jqm7dtn4kpx"]
 
 [ext_resource type="Script" uid="uid://c2npmj1hgouyh" path="res://player.gd" id="1_player"]
-[ext_resource type="Texture2D" uid="uid://c7limva72s2t2" path="res://jump_up.png" id="2_jump_up"]
+[ext_resource type="Texture2D" uid="uid://c7limva72s2t2" path="res://assets/characters/jump_up.png" id="2_jump_up"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_001"]
 height = 20.0

@@ -24,7 +24,7 @@ func _ready() -> void:
 	_char.position = Vector2(CHAR_HALF_W, randf_range(400.0, 530.0))
 
 	_music = AudioStreamPlayer.new()
-	var stream = load("res://start_music.mp3")
+	var stream = load("res://assets/audio/music/start_music.mp3")
 	if stream:
 		if stream is AudioStreamMP3:
 			(stream as AudioStreamMP3).loop = true
@@ -75,9 +75,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_tree().change_scene_to_file("res://main.tscn")
 
 func _on_leaderboard_pressed() -> void:
-	if OS.get_name() == "Web":
-		JavaScriptBridge.eval("DragonJumpFirebase.showLeaderboard()")
+	print("排行榜按鈕點擊")
+	Leaderboard.show_leaderboard()
 
 func _on_change_name_pressed() -> void:
-	if OS.get_name() == "Web":
-		JavaScriptBridge.eval("DragonJumpFirebase.showNameDialog(false)")
+	Leaderboard.show_name_dialog(false)

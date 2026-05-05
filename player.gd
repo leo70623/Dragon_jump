@@ -5,9 +5,9 @@ const GRAVITY := 1800.0
 const MOVE_SPEED := 300.0
 const LAND_DISPLAY_TIME := 0.1
 
-const _TEX_UP: Texture2D = preload("res://jump_up.png")
-const _TEX_DOWN: Texture2D = preload("res://jump_down.png")
-const _TEX_LAND: Texture2D = preload("res://jump_land.png")
+const _TEX_UP: Texture2D = preload("res://assets/characters/jump_up.png")
+const _TEX_DOWN: Texture2D = preload("res://assets/characters/jump_down.png")
+const _TEX_LAND: Texture2D = preload("res://assets/characters/jump_land.png")
 const Platform := preload("res://platform.gd")
 
 signal landed_on(platform: Node)
@@ -25,10 +25,10 @@ var _touch_dir: float = 0.0
 var _touch_active: Dictionary = {}  # finger index -> bool (true = left half)
 
 func _ready() -> void:
-	_sfx_jump    = _make_sfx("res://jump.wav")
-	_sfx_crumble = _make_sfx("res://crumble.wav")
-	_sfx_brick   = _make_sfx("res://brick_hit.wav")
-	_sfx_death   = _make_sfx("res://death.wav")
+	_sfx_jump    = _make_sfx("res://assets/audio/sfx/jump.wav")
+	_sfx_crumble = _make_sfx("res://assets/audio/sfx/crumble.wav")
+	_sfx_brick   = _make_sfx("res://assets/audio/sfx/brick_hit.wav")
+	_sfx_death   = _make_sfx("res://assets/audio/sfx/death.wav")
 
 func _make_sfx(path: String) -> AudioStreamPlayer:
 	var asp := AudioStreamPlayer.new()

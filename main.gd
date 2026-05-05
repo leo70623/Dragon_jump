@@ -46,12 +46,12 @@ var _eligible_since_last_enemy: int = 0
 var _invincible_timer: float = 0.0
 var _current_bg_level: int = 0
 var _bg_transitioning: bool = false
-var _bg_paths: Array[String] = ["res://BG_01.png", "res://BG_02.png", "res://BG_03.png", "res://BG_04.png"]
+var _bg_paths: Array[String] = ["res://assets/backgrounds/BG_01.png", "res://assets/backgrounds/BG_02.png", "res://assets/backgrounds/BG_03.png", "res://assets/backgrounds/BG_04.png"]
 var _dev_panel: Control = null
 var _dev_input: LineEdit = null
 
 func _ready() -> void:
-	var life_tex: Texture2D = load("res://life_01.png")
+	var life_tex: Texture2D = load("res://assets/ui/life_01.png")
 	var icon_scale := Vector2(0.25, 0.25)
 	var tex_size := life_tex.get_size() if life_tex else Vector2(128, 128)
 	var display_size := tex_size * icon_scale
@@ -107,19 +107,19 @@ func _ready() -> void:
 	_bgm.play()
 
 	_sfx_spin = AudioStreamPlayer.new()
-	var spin_stream = load("res://spin.wav")
+	var spin_stream = load("res://assets/audio/sfx/spin.wav")
 	if spin_stream:
 		_sfx_spin.stream = spin_stream
 	add_child(_sfx_spin)
 
 	_sfx_death_shout = AudioStreamPlayer.new()
-	var death_shout_stream = load("res://death_shout.mp3")
+	var death_shout_stream = load("res://assets/audio/sfx/death_shout.mp3")
 	if death_shout_stream:
 		_sfx_death_shout.stream = death_shout_stream
 	add_child(_sfx_death_shout)
 
 	_sfx_enemy_crush = AudioStreamPlayer.new()
-	var crush_stream = load("res://enemy_crush.wav")
+	var crush_stream = load("res://assets/audio/sfx/enemy_crush.wav")
 	if crush_stream:
 		_sfx_enemy_crush.stream = crush_stream
 	add_child(_sfx_enemy_crush)
@@ -223,8 +223,7 @@ func _show_game_over() -> void:
 		_update_hearts_ui()
 	final_score_label.text = "Score: " + str(score)
 	_update_cooldown_label()
-	if OS.get_name() == "Web":
-		JavaScriptBridge.eval("DragonJumpFirebase.submitScore(" + str(score) + ")")
+	Leaderboard.submit_score(score)
 	var lb_font: FontFile = load("res://FredokaOne-Regular.ttf")
 	var lb_btn := Button.new()
 	lb_btn.text = "排行榜"
@@ -233,7 +232,7 @@ func _show_game_over() -> void:
 		lb_btn.add_theme_font_override("font", lb_font)
 	lb_btn.size = Vector2(120, 38)
 	lb_btn.position = Vector2(120.0, 465.0)
-	lb_btn.pressed.connect(_on_leaderboard_pressed)
+	lb_btn.pressed.connect(func(): Leaderboard.show_leaderboard())
 	game_over_screen.add_child(lb_btn)
 	if _sfx_death_shout and _sfx_death_shout.stream:
 		_sfx_death_shout.play()
@@ -241,7 +240,7 @@ func _show_game_over() -> void:
 	_spawn_death_spin()
 
 func _spawn_death_spin() -> void:
-	var tex: Texture2D = load("res://game_over_spin.png")
+	var tex: Texture2D = load("res://assets/enemies/game_over_spin.png")
 	if not tex:
 		game_over_screen.visible = true
 		return
@@ -462,10 +461,6 @@ func _on_dev_ok_pressed() -> void:
 		score_label.text = "Score  " + str(score)
 	if _dev_panel:
 		_dev_panel.visible = false
-
-func _on_leaderboard_pressed() -> void:
-	if OS.get_name() == "Web":
-		JavaScriptBridge.eval("DragonJumpFirebase.showLeaderboard()")
 
 func _on_enemy_stomped() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:

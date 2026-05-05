@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://c7q8y2bnrk5oa"]
 
 [ext_resource type="Script" path="res://start_screen.gd" id="1_ss"]
-[ext_resource type="Texture2D" path="res://BG_start.png" id="2_bg"]
-[ext_resource type="Texture2D" path="res://Idle.png" id="3_idle"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/BG_start.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/characters/Idle.png" id="3_idle"]
 
 [sub_resource type="AtlasTexture" id="AT_1"]
 atlas = ExtResource("3_idle")

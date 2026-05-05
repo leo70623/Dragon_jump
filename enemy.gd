@@ -4,7 +4,7 @@ signal stomped
 signal hit_player
 
 const Platform := preload("res://platform.gd")
-const ENEMY_SIZE := 21.0
+const ENEMY_SIZE := 19.0
 const FRAME_RATE := 8.0
 
 var platform: Node2D = null
@@ -23,13 +23,14 @@ func setup(p: Node2D, moving: bool, spd: float) -> void:
 	move_speed = spd
 	_move_dir = 1.0 if randf() > 0.5 else -1.0
 	var hw: float = p.get("half_w") if "half_w" in p else Platform.CLOUD_W * 0.5
-	var cloud_half_h: float = Platform.CLOUD_H * 0.5
+	# Use collision-box top (half of 8 px body = 4) so enemy stands where player lands
+	var cloud_half_h: float = 4.0
 	if "platform_type" in p and p.platform_type == Platform.Type.BRICK:
 		cloud_half_h = Platform.BRICK_H * 0.5
 	var enemy_half_h: float = ENEMY_SIZE * 0.5
 	var y_offset: float = cloud_half_h + enemy_half_h
 	print("[Enemy setup] platform.y=", p.position.y,
-		"  cloud_half_h=", cloud_half_h,
+		"  surf_half_h=", cloud_half_h,
 		"  enemy_half_h=", enemy_half_h,
 		"  y_offset=", y_offset,
 		"  final_y=", p.position.y - y_offset)
@@ -66,7 +67,7 @@ func _process(delta: float) -> void:
 		queue_free()
 		return
 
-	var cloud_half_h: float = Platform.CLOUD_H * 0.5
+	var cloud_half_h: float = 4.0
 	if "platform_type" in platform and platform.platform_type == Platform.Type.BRICK:
 		cloud_half_h = Platform.BRICK_H * 0.5
 	position.y = platform.position.y - cloud_half_h - ENEMY_SIZE * 0.5

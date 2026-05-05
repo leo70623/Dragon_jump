@@ -16,3 +16,14 @@ export_presets.cfg
 
 # VSCode 設定（可選，若想同步設定請移除這行）
 .vscode/
+
+# Design source files
+*.psd
+*.ai
+*.sketch
+*.afdesign
+
+# System / temp
+*.tmp
+*.log
+Thumbs.db
