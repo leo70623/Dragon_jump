@@ -28,11 +28,7 @@ var _lb_panel: PanelContainer = null
 # Score to submit (set before check/patch flow)
 var _submit_score_value: int = 0
 
-# Font
-var _font: FontFile = null
-
 func _ready() -> void:
-	_font = load("res://FredokaOne-Regular.ttf")
 
 	# Load config
 	var cfg := ConfigFile.new()
@@ -135,8 +131,8 @@ func _build_name_dialog() -> void:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(300, 210)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.grow_horizontal = 2
-	panel.grow_vertical = 2
+	panel.grow_horizontal = Control.GROW_DIRECTION_END
+	panel.grow_vertical = Control.GROW_DIRECTION_END
 	_name_dialog.add_child(panel)
 
 	var vbox := VBoxContainer.new()
@@ -148,8 +144,6 @@ func _build_name_dialog() -> void:
 	title.text = "Dragon Jump"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
-	if _font:
-		title.add_theme_font_override("font", _font)
 	vbox.add_child(title)
 
 	# Subtitle
@@ -157,8 +151,6 @@ func _build_name_dialog() -> void:
 	sub.text = "Enter your player name"
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sub.add_theme_font_size_override("font_size", 16)
-	if _font:
-		sub.add_theme_font_override("font", _font)
 	vbox.add_child(sub)
 
 	# LineEdit
@@ -166,8 +158,6 @@ func _build_name_dialog() -> void:
 	_name_input.max_length = 20
 	_name_input.placeholder_text = "Your name"
 	_name_input.add_theme_font_size_override("font_size", 18)
-	if _font:
-		_name_input.add_theme_font_override("font", _font)
 	vbox.add_child(_name_input)
 
 	# Button row
@@ -180,16 +170,12 @@ func _build_name_dialog() -> void:
 	cancel_btn.name = "CancelBtn"
 	cancel_btn.text = "Cancel"
 	cancel_btn.add_theme_font_size_override("font_size", 16)
-	if _font:
-		cancel_btn.add_theme_font_override("font", _font)
 	cancel_btn.pressed.connect(_on_name_cancel)
 	btn_row.add_child(cancel_btn)
 
 	var ok_btn := Button.new()
 	ok_btn.text = "OK"
 	ok_btn.add_theme_font_size_override("font_size", 16)
-	if _font:
-		ok_btn.add_theme_font_override("font", _font)
 	ok_btn.pressed.connect(_on_name_ok)
 	btn_row.add_child(ok_btn)
 
@@ -209,8 +195,8 @@ func _build_leaderboard_screen() -> void:
 	_lb_panel = PanelContainer.new()
 	_lb_panel.custom_minimum_size = Vector2(320, 530)
 	_lb_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_lb_panel.grow_horizontal = 2
-	_lb_panel.grow_vertical = 2
+	_lb_panel.grow_horizontal = Control.GROW_DIRECTION_END
+	_lb_panel.grow_vertical = Control.GROW_DIRECTION_END
 	_lb_overlay.add_child(_lb_panel)
 
 	var vbox := VBoxContainer.new()
@@ -222,8 +208,6 @@ func _build_leaderboard_screen() -> void:
 	title.text = "Leaderboard"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 28)
-	if _font:
-		title.add_theme_font_override("font", _font)
 	vbox.add_child(title)
 
 	# ScrollContainer
@@ -240,8 +224,6 @@ func _build_leaderboard_screen() -> void:
 	var close_btn := Button.new()
 	close_btn.text = "Close"
 	close_btn.add_theme_font_size_override("font_size", 18)
-	if _font:
-		close_btn.add_theme_font_override("font", _font)
 	close_btn.pressed.connect(_on_lb_close)
 	vbox.add_child(close_btn)
 
@@ -271,8 +253,6 @@ func show_leaderboard() -> void:
 	var loading := Label.new()
 	loading.text = "Loading..."
 	loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	if _font:
-		loading.add_theme_font_override("font", _font)
 	_lb_vbox.add_child(loading)
 	_do_fetch_leaderboard()
 
@@ -360,8 +340,6 @@ func _add_lb_message(msg: String) -> void:
 	var lbl := Label.new()
 	lbl.text = msg
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	if _font:
-		lbl.add_theme_font_override("font", _font)
 	_lb_vbox.add_child(lbl)
 
 func _add_lb_entry(rank: int, name_val: String, country_val: String, score_val: int, date_val: String) -> void:
@@ -382,8 +360,6 @@ func _add_lb_entry(rank: int, name_val: String, country_val: String, score_val: 
 	rank_lbl.custom_minimum_size = Vector2(30, 0)
 	rank_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rank_lbl.add_theme_font_size_override("font_size", 15)
-	if _font:
-		rank_lbl.add_theme_font_override("font", _font)
 	row.add_child(rank_lbl)
 
 	# Name
@@ -391,8 +367,6 @@ func _add_lb_entry(rank: int, name_val: String, country_val: String, score_val: 
 	name_lbl.text = name_val
 	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_lbl.add_theme_font_size_override("font_size", 15)
-	if _font:
-		name_lbl.add_theme_font_override("font", _font)
 	if name_val == player_name:
 		name_lbl.add_theme_color_override("font_color", Color(0.36, 0.78, 0.96, 1.0))
 	row.add_child(name_lbl)
@@ -412,8 +386,6 @@ func _add_lb_entry(rank: int, name_val: String, country_val: String, score_val: 
 	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	score_lbl.add_theme_font_size_override("font_size", 15)
 	score_lbl.add_theme_color_override("font_color", Color(0.96, 0.78, 0.26, 1.0))
-	if _font:
-		score_lbl.add_theme_font_override("font", _font)
 	row.add_child(score_lbl)
 
 	# Date
@@ -423,8 +395,6 @@ func _add_lb_entry(rank: int, name_val: String, country_val: String, score_val: 
 	date_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	date_lbl.add_theme_font_size_override("font_size", 12)
 	date_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1.0))
-	if _font:
-		date_lbl.add_theme_font_override("font", _font)
 	row.add_child(date_lbl)
 
 func _clear_lb_entries() -> void:

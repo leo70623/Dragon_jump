@@ -16,11 +16,6 @@ func _ready() -> void:
 		_bg.scale = Vector2(vp.x / tex_size.x, vp.y / tex_size.y)
 	_bg.position = Vector2(vp.x * 0.5, vp.y * 0.5)
 
-	var font: FontFile = load("res://FredokaOne-Regular.ttf")
-	if font:
-		$UI/TitleLabel.add_theme_font_override("font", font)
-		$UI/TapLabel.add_theme_font_override("font", font)
-
 	_char.position = Vector2(CHAR_HALF_W, randf_range(400.0, 530.0))
 
 	_music = AudioStreamPlayer.new()
@@ -35,8 +30,6 @@ func _ready() -> void:
 	var lb_btn := Button.new()
 	lb_btn.text = "排行榜"
 	lb_btn.add_theme_font_size_override("font_size", 18)
-	if font:
-		lb_btn.add_theme_font_override("font", font)
 	lb_btn.custom_minimum_size = Vector2(110, 36)
 	lb_btn.position = Vector2(vp.x * 0.5 - 55.0, vp.y - 72.0)
 	lb_btn.pressed.connect(_on_leaderboard_pressed)
@@ -45,8 +38,6 @@ func _ready() -> void:
 	var nm_btn := Button.new()
 	nm_btn.text = "改名"
 	nm_btn.add_theme_font_size_override("font_size", 14)
-	if font:
-		nm_btn.add_theme_font_override("font", font)
 	nm_btn.custom_minimum_size = Vector2(68, 28)
 	nm_btn.position = Vector2(vp.x - 76.0, 8.0)
 	nm_btn.pressed.connect(_on_change_name_pressed)

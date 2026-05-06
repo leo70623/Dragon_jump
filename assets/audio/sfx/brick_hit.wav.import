@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://b6aylh4qskcgy"
-path="res://.godot/imported/brick_hit.wav-a066ec8b6565b8c3d942153c1f7855f6.sample"
+path="res://.godot/imported/brick_hit.wav-9527b284b874ec4993a8d59329d56b15.sample"
 
 [deps]
 
-source_file="res://brick_hit.wav"
-dest_files=["res://.godot/imported/brick_hit.wav-a066ec8b6565b8c3d942153c1f7855f6.sample"]
+source_file="res://assets/audio/sfx/brick_hit.wav"
+dest_files=["res://.godot/imported/brick_hit.wav-9527b284b874ec4993a8d59329d56b15.sample"]
 
 [params]
 

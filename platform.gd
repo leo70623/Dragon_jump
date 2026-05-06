@@ -53,6 +53,7 @@ func _ready() -> void:
 			_sprite.visible = false
 			_area.monitoring = false
 			_col.one_way_collision = true
+			_anim.modulate = Color(1, 1, 1, 1)
 			_anim.play("brown")
 		Type.DAMAGE:
 			_sprite.visible = false
@@ -123,7 +124,7 @@ func _setup_collision_shapes() -> void:
 	_col.shape = body_shape
 
 	var area_shape := RectangleShape2D.new()
-	area_shape.size = Vector2(CLOUD_W, CLOUD_H)
+	area_shape.size = Vector2(80.0, 20.0)
 	_area_col.shape = area_shape
 
 func _process(delta: float) -> void:

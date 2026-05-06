@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tdg5b362ssnv"
-path="res://.godot/imported/dark_cloud_01.png-6b69ad88387fe928229b318f6c84fe71.ctex"
+path="res://.godot/imported/dark_cloud_01.png-18d8ebc83079c0b036cb1568a8763c32.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://dark_cloud_01.png"
-dest_files=["res://.godot/imported/dark_cloud_01.png-6b69ad88387fe928229b318f6c84fe71.ctex"]
+source_file="res://assets/platforms/dark_cloud_01.png"
+dest_files=["res://.godot/imported/dark_cloud_01.png-18d8ebc83079c0b036cb1568a8763c32.ctex"]
 
 [params]
 

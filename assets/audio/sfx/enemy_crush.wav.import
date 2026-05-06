@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://cpkil41nbro72"
-path="res://.godot/imported/enemy_crush.wav-06c0a56195734eb3e320d5b8ee6d20ae.sample"
+path="res://.godot/imported/enemy_crush.wav-5148de52d5bf60563b91eecb286f96ac.sample"
 
 [deps]
 
-source_file="res://enemy_crush.wav"
-dest_files=["res://.godot/imported/enemy_crush.wav-06c0a56195734eb3e320d5b8ee6d20ae.sample"]
+source_file="res://assets/audio/sfx/enemy_crush.wav"
+dest_files=["res://.godot/imported/enemy_crush.wav-5148de52d5bf60563b91eecb286f96ac.sample"]
 
 [params]
 

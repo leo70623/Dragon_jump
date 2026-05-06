@@ -6,7 +6,7 @@ const SPACING_MIN := 85.0
 const SPACING_MAX := 125.0
 const SPACING_LEVEL_STEP := 10.0
 const SPACING_MIN_CAP := 140.0
-const SPACING_MAX_CAP := 152.0
+const SPACING_MAX_CAP := 142.0
 const PLATFORM_MARGIN := 65.0
 const JUMP_HEIGHT := 178.0
 const MAX_LIVES := 5
@@ -14,6 +14,8 @@ const REGEN_INTERVAL := 1800.0  # 30 minutes
 const ENEMY_SCENE := preload("res://enemy.tscn")
 const MAX_ENEMIES := 5
 const INVINCIBLE_DURATION := 2.0
+const ITEM_SCENE := preload("res://item.tscn")
+const ITEM_SPAWN_INTERVAL := 3
 
 static var s_lives: int = 5
 static var s_regen_elapsed: float = 0.0
@@ -28,8 +30,10 @@ static var s_regen_elapsed: float = 0.0
 @onready var final_score_label: Label = $UI/GameOverScreen/FinalScoreLabel
 @onready var hint_label: Label = $UI/GameOverScreen/HintLabel
 @onready var cooldown_label: Label = $UI/GameOverScreen/CooldownLabel
+@onready var _restart_btn: Button = $UI/GameOverScreen/RestartButton
 @onready var _bgm: AudioStreamPlayer = $BGM
 @onready var _enemies_node: Node2D = $Enemies
+@onready var _items_node: Node2D = $Items
 
 var _sfx_spin: AudioStreamPlayer
 var _sfx_death_shout: AudioStreamPlayer
@@ -43,6 +47,7 @@ var _last_two_types: Array[int] = []
 var _y_since_last_white: float = 0.0
 var _last_spawn_y: float = 0.0
 var _eligible_since_last_enemy: int = 0
+var _item_counter: int = 0
 var _invincible_timer: float = 0.0
 var _current_bg_level: int = 0
 var _bg_transitioning: bool = false
@@ -71,9 +76,6 @@ func _ready() -> void:
 		hearts.append(spr)
 	_update_hearts_ui()
 
-	var font: FontFile = load("res://FredokaOne-Regular.ttf")
-	if font:
-		score_label.add_theme_font_override("font", font)
 	score_label.text = "Score  0"
 
 	var vp := get_viewport_rect().size
@@ -101,6 +103,7 @@ func _ready() -> void:
 
 	player.landed_on.connect(_on_player_landed_on)
 	player.ceiling_hit.connect(_on_player_ceiling_hit)
+	_restart_btn.pressed.connect(_on_restart_btn_pressed)
 
 	if _bgm.stream is AudioStreamMP3:
 		(_bgm.stream as AudioStreamMP3).loop = true
@@ -172,9 +175,13 @@ func _process(delta: float) -> void:
 		next_spawn_y -= _get_spacing()
 
 	var cull_y := camera.position.y + vp_h * 0.65
+	var cull_top_y := camera.position.y - vp_h * 1.5
 	for p in platforms_node.get_children():
 		if p.position.y > cull_y:
 			p.queue_free()
+	for item in _items_node.get_children():
+		if item.position.y > cull_y or item.position.y < cull_top_y:
+			item.queue_free()
 
 	if player.position.y > camera.position.y + vp_h * 0.55:
 		_show_game_over()
@@ -224,12 +231,9 @@ func _show_game_over() -> void:
 	final_score_label.text = "Score: " + str(score)
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
-	var lb_font: FontFile = load("res://FredokaOne-Regular.ttf")
 	var lb_btn := Button.new()
 	lb_btn.text = "排行榜"
 	lb_btn.add_theme_font_size_override("font_size", 18)
-	if lb_font:
-		lb_btn.add_theme_font_override("font", lb_font)
 	lb_btn.size = Vector2(120, 38)
 	lb_btn.position = Vector2(120.0, 465.0)
 	lb_btn.pressed.connect(func(): Leaderboard.show_leaderboard())
@@ -276,20 +280,15 @@ func _spawn_death_spin() -> void:
 		game_over_screen.visible = true
 	)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not game_over_flag:
-		return
-	if s_lives == 0:
-		return
-	if (event is InputEventScreenTouch and event.pressed) or \
-	   (event is InputEventMouseButton and event.pressed):
+func _on_restart_btn_pressed() -> void:
+	if game_over_flag and s_lives > 0:
 		get_tree().reload_current_scene()
 
 func _get_spacing() -> float:
 	var level := score / 100
 	var sp_min := minf(SPACING_MIN + level * SPACING_LEVEL_STEP, SPACING_MIN_CAP)
 	var sp_max := minf(SPACING_MAX + level * SPACING_LEVEL_STEP * 1.3, SPACING_MAX_CAP)
-	return randf_range(sp_min, sp_max)
+	return minf(randf_range(sp_min, sp_max), JUMP_HEIGHT * 0.8)
 
 func _no_overlap(x: float, y: float) -> bool:
 	for child in platforms_node.get_children():
@@ -304,6 +303,11 @@ func _no_overlap(x: float, y: float) -> bool:
 func _spawn_platform(y: float) -> void:
 	var vp_w := get_viewport_rect().size.x
 	var ptype := _pick_constrained_type()
+	if ptype == Platform.Type.BRICK:
+		for child in platforms_node.get_children():
+			if "platform_type" in child and absf((child as Node2D).position.y - y) < 80.0:
+				ptype = Platform.Type.NORMAL
+				break
 	var p := PLATFORM_SCENE.instantiate()
 
 	var spawn_x: float = randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
@@ -322,7 +326,16 @@ func _spawn_platform(y: float) -> void:
 
 	if ptype == Platform.Type.DAMAGE:
 		p.hit_player.connect(_on_damage_cloud_hit_player)
+		print("[DAMAGE] score=%d 生成黑雲" % score)
 	platforms_node.add_child(p)
+
+	print("[ITEM_DEBUG] _spawn_platform: score=%d  _item_counter=%d  ptype=%d" % [score, _item_counter, ptype])
+	if score >= 100 and ptype == Platform.Type.NORMAL:
+		_item_counter += 1
+		if _item_counter >= ITEM_SPAWN_INTERVAL:
+			_item_counter = 0
+			_try_spawn_item(Vector2(p.position.x, p.position.y - 50.0))
+
 	_try_spawn_enemy(p, ptype)
 
 	var has_companion: bool = false
@@ -337,6 +350,19 @@ func _spawn_platform(y: float) -> void:
 		pw.platform_type = Platform.Type.NORMAL
 		platforms_node.add_child(pw)
 		_try_spawn_enemy(pw, Platform.Type.NORMAL)
+		has_companion = true
+
+	if ptype == Platform.Type.BRICK:
+		var comp_y := y + 65.0
+		var comp_x := randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
+		for _try in 3:
+			if _no_overlap(comp_x, comp_y):
+				break
+			comp_x = randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
+		var pw := PLATFORM_SCENE.instantiate()
+		pw.position = Vector2(comp_x, comp_y)
+		pw.platform_type = Platform.Type.NORMAL
+		platforms_node.add_child(pw)
 		has_companion = true
 
 	var spacing := maxf(0.0, _last_spawn_y - y)
@@ -359,6 +385,9 @@ func _pick_constrained_type() -> int:
 		var b_haz := b == Platform.Type.CRUMBLE or b == Platform.Type.DAMAGE
 		if a_haz and b_haz:
 			return Platform.Type.NORMAL if randf() < 0.85 else Platform.Type.BRICK
+	if _last_two_types.size() > 0 and _last_two_types.back() == Platform.Type.BRICK:
+		var candidate := _pick_platform_type()
+		return candidate if candidate != Platform.Type.BRICK else Platform.Type.NORMAL
 	return _pick_platform_type()
 
 func _pick_platform_type() -> int:
@@ -465,6 +494,26 @@ func _on_dev_ok_pressed() -> void:
 func _on_enemy_stomped() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
 		_sfx_enemy_crush.play()
+
+func _try_spawn_item(pos: Vector2) -> void:
+	print("[ITEM] 嘗試生成道具")
+	var item := ITEM_SCENE.instantiate()
+	item.item_type = 0 if randf() < 0.15 else 1
+	item.position = pos
+	_items_node.add_child(item)
+	item.collected.connect(_on_item_collected)
+	print("道具生成：位置 x=%f y=%f type=%d" % [pos.x, pos.y, item.item_type])
+
+func _on_item_collected(type: int) -> void:
+	print("[ITEM] collected signal 收到  type=%d" % type)
+	match type:
+		0:  # EXTRA_LIFE
+			if s_lives < MAX_LIVES:
+				s_lives += 1
+				_update_hearts_ui()
+		1:  # BOOST
+			print("[ITEM] → 呼叫 player.apply_boost()")
+			player.apply_boost()
 
 func _check_bg_switch() -> void:
 	var level := mini(score / 200, 3)

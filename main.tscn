@@ -22,6 +22,8 @@ stream = ExtResource("4_bgm")
 
 [node name="Enemies" type="Node2D" parent="."]
 
+[node name="Items" type="Node2D" parent="."]
+
 [node name="UI" type="CanvasLayer" parent="."]
 
 [node name="ScoreLabel" type="Label" parent="UI"]
@@ -45,6 +47,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="RestartButton" type="Button" parent="UI/GameOverScreen"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
 
 [node name="Overlay" type="ColorRect" parent="UI/GameOverScreen"]
 layout_mode = 3

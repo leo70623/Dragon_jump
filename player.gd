@@ -23,6 +23,8 @@ var _sfx_death: AudioStreamPlayer
 
 var _touch_dir: float = 0.0
 var _touch_active: Dictionary = {}  # finger index -> bool (true = left half)
+var _boost_timer: float = 0.0
+var _afterimage_timer: float = 0.0
 
 func _ready() -> void:
 	_sfx_jump    = _make_sfx("res://assets/audio/sfx/jump.wav")
@@ -55,6 +57,26 @@ func _input(event: InputEvent) -> void:
 		_touch_active[event.index] = event.position.x < half_w
 		_recalc_touch_dir()
 
+func apply_boost(duration: float = 5.0) -> void:
+	print("殘影啟動")
+	_boost_timer = duration
+	_afterimage_timer = 0.0
+
+func _spawn_afterimage() -> void:
+	if not sprite.texture:
+		return
+	var ghost := Sprite2D.new()
+	ghost.texture = sprite.texture
+	ghost.scale = sprite.scale
+	ghost.flip_h = sprite.flip_h
+	ghost.position = position
+	ghost.modulate = Color(0.5, 0.8, 1.0, 0.5)
+	ghost.z_index = z_index - 1
+	get_parent().add_child(ghost)
+	var tw := ghost.create_tween()
+	tw.tween_property(ghost, "modulate:a", 0.0, 0.25)
+	tw.tween_callback(ghost.queue_free)
+
 func _recalc_touch_dir() -> void:
 	var has_left := false
 	var has_right := false
@@ -71,6 +93,12 @@ func _recalc_touch_dir() -> void:
 		_touch_dir = 0.0
 
 func _physics_process(delta: float) -> void:
+	if _boost_timer > 0.0:
+		_boost_timer -= delta
+		_afterimage_timer -= delta
+		if _afterimage_timer <= 0.0:
+			_afterimage_timer = 0.08
+			_spawn_afterimage()
 	velocity.y += GRAVITY * delta
 
 	var key_dir := Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
@@ -108,7 +136,7 @@ func _physics_process(delta: float) -> void:
 		_land_timer = LAND_DISPLAY_TIME
 
 	if is_on_floor():
-		velocity.y = JUMP_VELOCITY
+		velocity.y = JUMP_VELOCITY * (1.4 if _boost_timer > 0.0 else 1.0)
 
 	if _land_timer > 0.0:
 		_land_timer -= delta

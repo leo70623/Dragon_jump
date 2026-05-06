@@ -3,12 +3,12 @@
 importer="mp3"
 type="AudioStreamMP3"
 uid="uid://duai7g8f637x5"
-path="res://.godot/imported/death_shout.mp3-3f5e5f7fffc0fa95a8e433166afb2335.mp3str"
+path="res://.godot/imported/death_shout.mp3-7db90007ee3f0ff6f968f834ad94bf78.mp3str"
 
 [deps]
 
-source_file="res://death_shout.mp3"
-dest_files=["res://.godot/imported/death_shout.mp3-3f5e5f7fffc0fa95a8e433166afb2335.mp3str"]
+source_file="res://assets/audio/sfx/death_shout.mp3"
+dest_files=["res://.godot/imported/death_shout.mp3-7db90007ee3f0ff6f968f834ad94bf78.mp3str"]
 
 [params]
 
