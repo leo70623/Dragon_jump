@@ -47,11 +47,13 @@ func _ready() -> void:
 		Type.NORMAL:
 			_sprite.visible = false
 			_area.monitoring = false
+			_area.collision_mask = 0
 			_col.one_way_collision = true
 			_anim.play("normal")
 		Type.CRUMBLE:
 			_sprite.visible = false
 			_area.monitoring = false
+			_area.collision_mask = 0
 			_col.one_way_collision = true
 			_anim.modulate = Color(1, 1, 1, 1)
 			_anim.play("brown")
@@ -65,6 +67,7 @@ func _ready() -> void:
 			_anim.visible = false
 			_sprite.visible = true
 			_area.monitoring = false
+			_area.collision_mask = 0
 			_col.one_way_collision = false
 			half_w = BRICK_W * 0.5
 			_sprite.texture = _TEX_METAL

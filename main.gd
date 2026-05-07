@@ -12,10 +12,11 @@ const JUMP_HEIGHT := 178.0
 const MAX_LIVES := 5
 const REGEN_INTERVAL := 1800.0  # 30 minutes
 const ENEMY_SCENE := preload("res://enemy.tscn")
-const MAX_ENEMIES := 5
-const INVINCIBLE_DURATION := 2.0
+const MAX_ENEMIES := 3
+const INVINCIBLE_DURATION := 5.0
 const ITEM_SCENE := preload("res://item.tscn")
-const ITEM_SPAWN_INTERVAL := 3
+const ITEM_SPAWN_INTERVAL := 6
+const DEV_ENEMY_TEST := false
 
 static var s_lives: int = 5
 static var s_regen_elapsed: float = 0.0
@@ -54,6 +55,7 @@ var _bg_transitioning: bool = false
 var _bg_paths: Array[String] = ["res://assets/backgrounds/BG_01.png", "res://assets/backgrounds/BG_02.png", "res://assets/backgrounds/BG_03.png", "res://assets/backgrounds/BG_04.png"]
 var _dev_panel: Control = null
 var _dev_input: LineEdit = null
+var _status_label: Label = null
 
 func _ready() -> void:
 	var life_tex: Texture2D = load("res://assets/ui/life_01.png")
@@ -82,6 +84,9 @@ func _ready() -> void:
 	player.position = Vector2(vp.x * 0.5, vp.y - 120.0)
 	camera.position = Vector2(vp.x * 0.5, player.position.y - vp.y * 0.15)
 	start_y = player.position.y
+	score = 100
+	start_y = player.position.y + float(score) * 100.0
+	score_label.text = "Score  " + str(score)
 
 	if background.texture:
 		var bg_tex_size := background.texture.get_size()
@@ -103,6 +108,7 @@ func _ready() -> void:
 
 	player.landed_on.connect(_on_player_landed_on)
 	player.ceiling_hit.connect(_on_player_ceiling_hit)
+	player.damaged.connect(_on_player_damaged)
 	_restart_btn.pressed.connect(_on_restart_btn_pressed)
 
 	if _bgm.stream is AudioStreamMP3:
@@ -133,6 +139,11 @@ func _ready() -> void:
 		_update_cooldown_label()
 		game_over_screen.visible = true
 
+	_status_label = Label.new()
+	_status_label.position = Vector2(8.0, 48.0)
+	_status_label.add_theme_font_size_override("font_size", 20)
+	_ui.add_child(_status_label)
+
 	if OS.is_debug_build():
 		_setup_dev_ui()
 
@@ -157,6 +168,15 @@ func _process(delta: float) -> void:
 		if _invincible_timer <= 0.0:
 			_invincible_timer = 0.0
 			player.modulate.a = 1.0
+
+	var _status := ""
+	if _invincible_timer > 0.0:
+		_status += "無敵 %ds" % ceili(_invincible_timer)
+	if player._boost_timer > 0.0:
+		if _status != "":
+			_status += "  "
+		_status += "跳高 %ds" % ceili(player._boost_timer)
+	_status_label.text = _status
 
 	var vp_h := get_viewport_rect().size.y
 
@@ -214,7 +234,7 @@ func _update_cooldown_label() -> void:
 		cooldown_label.text = "Next life in: %02d:%02d" % [mins, secs]
 
 func _on_damage_cloud_hit_player() -> void:
-	if not game_over_flag:
+	if not game_over_flag and _invincible_timer <= 0.0:
 		_show_game_over()
 
 func _show_game_over() -> void:
@@ -334,7 +354,7 @@ func _spawn_platform(y: float) -> void:
 		_item_counter += 1
 		if _item_counter >= ITEM_SPAWN_INTERVAL:
 			_item_counter = 0
-			_try_spawn_item(Vector2(p.position.x, p.position.y - 50.0))
+			_try_spawn_item(Vector2(p.position.x, camera.position.y - randf_range(50.0, 200.0)))
 
 	_try_spawn_enemy(p, ptype)
 
@@ -403,6 +423,7 @@ func _pick_platform_type() -> int:
 	elif r < normal_prob + crumble_prob:
 		return Platform.Type.CRUMBLE
 	elif r < normal_prob + crumble_prob + damage_prob:
+		print("[DAMAGE_DEBUG] DAMAGE 被選中 score=%d  damage_prob=%.2f" % [score, damage_prob])
 		return Platform.Type.DAMAGE
 	else:
 		return Platform.Type.BRICK
@@ -418,26 +439,39 @@ func _get_enemy_threshold() -> int:
 		return 3
 
 func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
+	print("[ENEMY_DEBUG] score=%d  ptype=%d  eligible=%d  threshold=%d  enemies=%d" % [score, ptype, _eligible_since_last_enemy, _get_enemy_threshold(), _enemies_node.get_child_count()])
 	if ptype != Platform.Type.NORMAL and ptype != Platform.Type.BRICK:
+		print("[ENEMY_DEBUG] ptype 不符跳過")
 		return
 	if "speed" in p and p.speed != 0.0:
-		return
+		print("[ENEMY_DEBUG] 移動平台跳過 speed=%.1f  ptype=%d" % [p.speed, ptype])
 	_eligible_since_last_enemy += 1
-	if _eligible_since_last_enemy < _get_enemy_threshold():
+	var threshold := 2 if DEV_ENEMY_TEST else _get_enemy_threshold()
+	print("[ENEMY_DEBUG] eligible 累計=%d  需達到=%d" % [_eligible_since_last_enemy, threshold])
+	if _eligible_since_last_enemy < threshold:
 		return
 	if _enemies_node.get_child_count() >= MAX_ENEMIES:
+		print("[ENEMY_DEBUG] 已滿 %d 隻跳過" % MAX_ENEMIES)
 		return
 	_eligible_since_last_enemy = 0
 	var moving := score >= 300
 	var spd := 100.0 if score >= 400 else 60.0
 	var e := ENEMY_SCENE.instantiate()
-	e.setup(p, moving, spd)
+	e.cloud_ref = p
+	e.speed = spd if moving else 0.0
+	e.direction = 1.0 if randf() > 0.5 else -1.0
+	var cloud_half_h := Platform.BRICK_H * 0.5 if ptype == Platform.Type.BRICK else 4.0
 	_enemies_node.add_child(e)
-	e.hit_player.connect(_on_enemy_hit_player)
+	e.global_position = Vector2(p.global_position.x, p.global_position.y - cloud_half_h - 10.0)
 	e.stomped.connect(_on_enemy_stomped)
+	e.hit_player.connect(_on_player_damaged)
+	if DEV_ENEMY_TEST:
+		print("[TEST] 強制生成敵人 position=%s" % str(e.position))
+	else:
+		print("[ENEMY_DEBUG] 敵人生成！ score=%d  moving=%s" % [score, str(moving)])
 
-func _on_enemy_hit_player() -> void:
-	if game_over_flag:
+func _on_player_damaged() -> void:
+	if game_over_flag or _invincible_timer > 0.0:
 		return
 	_show_game_over()
 
@@ -507,7 +541,9 @@ func _try_spawn_item(pos: Vector2) -> void:
 func _on_item_collected(type: int) -> void:
 	print("[ITEM] collected signal 收到  type=%d" % type)
 	match type:
-		0:  # EXTRA_LIFE
+		0:  # EXTRA_LIFE / 無敵
+			_invincible_timer = INVINCIBLE_DURATION
+			print("無敵啟動")
 			if s_lives < MAX_LIVES:
 				s_lives += 1
 				_update_hearts_ui()

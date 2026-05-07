@@ -79,11 +79,23 @@ Main (Node2D + main.gd)
                                  enemy_crush.wav, death_shout.mp3, spin.wav)
 ```
 
-## 今日修改記錄 (2026-05-06)
+## 修改記錄
+
+### 2026-05-07（feature/enemy-item-fix）
+
+- **敵人渲染根本修復**：enemy.tscn 節點從 Sprite2D 完整改為 `AnimatedSprite2D + SpriteFrames`；sprite sheet 1536×1024（12×8 格，每格 128×128），idle 動畫取前 4 幀（AtlasTexture region 0/128/256/384）
+- **道具系統**
+  - 無敵（type=0）持續時間 2s → 5s
+  - 黑雲碰撞加入無敵判斷（原本直接死亡，修復後無敵期間免疫）
+  - 跳高殘影（type=1）修正 `global_position` 設定時機，改為 `add_child` 後再設以確保世界座標正確
+  - UI 狀態列（左上角）即時顯示無敵/跳高剩餘秒數
+- **分支管理**：建立 `feature/enemy-item-fix` 保存穩定成果
+
+### 2026-05-06
 
 - **排行榜修復**: 改用 Godot HTTPRequest + Firebase Firestore REST API，完全移除 JavaScriptBridge 依賴；leaderboard.gd 作為 autoload singleton 登錄於 project.godot
 - **Restart 點擊修復**: GameOverScreen/Overlay 加入 `mouse_filter = 2 (MOUSE_FILTER_IGNORE)`，確保點擊事件穿透至 `_unhandled_input`
-- **敵人圖片修復**: enemy.tscn 設定 `hframes=12, vframes=8`（對應 128x128 per frame），`ENEMY_SIZE` 調整為 19
+- **敵人圖片修復**: enemy.tscn 設定 hframes=12, vframes=8（對應 128×128 per frame）
 - **敵人 y 定位修正**: 以碰撞框頂部 (4px) 為基準計算位移，修正敵人浮空問題
 - **資料夾整理**: 全部素材移入 `assets/` 子目錄，並同步更新所有 .gd/.tscn/.import 的路徑參考
 - **HTML 清理**: 移除 dragon_test.html 中的 Firebase JS SDK、CSS overlay 及 `window.DragonJumpFirebase` 物件

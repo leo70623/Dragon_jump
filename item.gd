@@ -8,7 +8,7 @@ var _already_collected: bool = false
 signal collected(type: int)
 
 func _ready() -> void:
-	collision_layer = 2
+	collision_layer = 4
 	collision_mask = 1
 	body_entered.connect(_on_body_entered)
 	queue_redraw()
@@ -36,5 +36,6 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if body is CharacterBody2D:
 		_already_collected = true
+		print("[ITEM] 道具吃到，不應死亡  type=%d  body=%s" % [int(item_type), body.name])
 		collected.emit(int(item_type))
 		queue_free()

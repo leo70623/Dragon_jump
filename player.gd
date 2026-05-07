@@ -12,6 +12,7 @@ const Platform := preload("res://platform.gd")
 
 signal landed_on(platform: Node)
 signal ceiling_hit(platform: Node)
+signal damaged
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -27,6 +28,7 @@ var _boost_timer: float = 0.0
 var _afterimage_timer: float = 0.0
 
 func _ready() -> void:
+	collision_mask = collision_mask | 2
 	_sfx_jump    = _make_sfx("res://assets/audio/sfx/jump.wav")
 	_sfx_crumble = _make_sfx("res://assets/audio/sfx/crumble.wav")
 	_sfx_brick   = _make_sfx("res://assets/audio/sfx/brick_hit.wav")
@@ -57,6 +59,9 @@ func _input(event: InputEvent) -> void:
 		_touch_active[event.index] = event.position.x < half_w
 		_recalc_touch_dir()
 
+func _take_damage() -> void:
+	damaged.emit()
+
 func apply_boost(duration: float = 5.0) -> void:
 	print("殘影啟動")
 	_boost_timer = duration
@@ -69,10 +74,11 @@ func _spawn_afterimage() -> void:
 	ghost.texture = sprite.texture
 	ghost.scale = sprite.scale
 	ghost.flip_h = sprite.flip_h
-	ghost.position = position
-	ghost.modulate = Color(0.5, 0.8, 1.0, 0.5)
-	ghost.z_index = z_index - 1
+	ghost.position = global_position
+	ghost.modulate = Color(0.5, 0.8, 1.0, 0.8)
+	ghost.z_index = 5
 	get_parent().add_child(ghost)
+	ghost.global_position = global_position
 	var tw := ghost.create_tween()
 	tw.tween_property(ghost, "modulate:a", 0.0, 0.25)
 	tw.tween_callback(ghost.queue_free)
@@ -117,8 +123,21 @@ func _physics_process(delta: float) -> void:
 	for i in get_slide_collision_count():
 		var col := get_slide_collision(i)
 		var n := col.get_normal()
+		var collider := col.get_collider()
+		if collider.is_in_group("enemy"):
+			print("[ENEMY COLLISION] 玩家位置：%s  敵人位置：%s  法線：%s  距離：%f" % [
+				global_position,
+				collider.global_position,
+				n,
+				global_position.distance_to(collider.global_position)
+			])
+			if n.y < -0.7:
+				collider.die()
+				velocity.y = JUMP_VELOCITY
+			elif abs(n.x) > 0.7 and abs(n.y) < 0.3:
+				collider.hit_player.emit()
+			continue
 		if n.y < -0.5 and not was_on_floor:
-			var collider := col.get_collider()
 			landed_on.emit(collider)
 			just_landed = true
 			if "platform_type" in collider:
@@ -127,7 +146,6 @@ func _physics_process(delta: float) -> void:
 					Platform.Type.CRUMBLE: _sfx_crumble.play()
 					Platform.Type.BRICK:   _sfx_brick.play()
 		elif n.y > 0.5:
-			var collider := col.get_collider()
 			ceiling_hit.emit(collider)
 			if "platform_type" in collider and collider.platform_type == Platform.Type.BRICK:
 				_sfx_brick.play()
