@@ -29,10 +29,8 @@ func die() -> void:
 	if _dead:
 		return
 	_dead = true
+	speed = 0.0
 	stomped.emit()
 	$CollisionShape2D.set_deferred("disabled", true)
-	var tw := create_tween()
-	tw.set_parallel(true)
-	tw.tween_property(self, "rotation", PI * 2.0, 0.5)
-	tw.tween_property(self, "scale", Vector2.ZERO, 0.5)
-	tw.chain().tween_callback(queue_free)
+	$AnimatedSprite2D.play("hit")
+	$AnimatedSprite2D.animation_finished.connect(queue_free, CONNECT_ONE_SHOT)

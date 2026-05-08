@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://enemy.gd" id="1_enemy"]
 [ext_resource type="Texture2D" path="res://assets/enemies/enemy_01.png" id="2_tex"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_hit.png" id="3_hit"]
 
 [sub_resource type="AtlasTexture" id="AT_0"]
 atlas = ExtResource("2_tex")
@@ -18,6 +19,18 @@ region = Rect2(256, 0, 128, 128)
 [sub_resource type="AtlasTexture" id="AT_3"]
 atlas = ExtResource("2_tex")
 region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AT_4"]
+atlas = ExtResource("3_hit")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AT_5"]
+atlas = ExtResource("3_hit")
+region = Rect2(64, 0, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AT_6"]
+atlas = ExtResource("3_hit")
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="SpriteFrames" id="SF_1"]
 animations = [{
@@ -37,6 +50,20 @@ animations = [{
 "loop": true,
 "name": &"idle",
 "speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AT_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AT_6")
+}],
+"loop": false,
+"name": &"hit",
+"speed": 12.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RS_1"]

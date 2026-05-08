@@ -83,6 +83,7 @@ Main (Node2D + main.gd)
 
 ### 2026-05-08（main — 正式發布）
 
+- **敵人踩踏動畫**：enemy.tscn SpriteFrames 加入 `hit` 動畫（`enemy_hit.png` 192×64，3 幀 64×64，FPS=12，loop=false）；`die()` 改為播放 hit 動畫取代旋轉縮小 tween，動畫結束後 `queue_free`，同時停止移動
 - **移除所有 debug print**：main.gd / player.gd / item.gd 清除全部 `[ITEM_DEBUG]`、`[ENEMY_DEBUG]`、`[DAMAGE_DEBUG]`、`[ENEMY COLLISION]`、`[GHOST]`、`[TEST]` 等輸出
 - **重置測試設定**：`MAX_ENEMIES` 恢復正常值 5；`DEV_ENEMY_TEST` 保持 `false`；`score` 初始值暫保留 100（測試用）
 - **截圖排除**：`.gitignore` 加入 `截圖 *.png` / `截圖 *.png.import` 規則
