@@ -12,7 +12,7 @@ const JUMP_HEIGHT := 178.0
 const MAX_LIVES := 5
 const REGEN_INTERVAL := 1800.0  # 30 minutes
 const ENEMY_SCENE := preload("res://enemy.tscn")
-const MAX_ENEMIES := 3
+const MAX_ENEMIES := 5
 const INVINCIBLE_DURATION := 5.0
 const ITEM_SCENE := preload("res://item.tscn")
 const ITEM_SPAWN_INTERVAL := 6
@@ -62,7 +62,6 @@ func _ready() -> void:
 	var icon_scale := Vector2(0.25, 0.25)
 	var tex_size := life_tex.get_size() if life_tex else Vector2(128, 128)
 	var display_size := tex_size * icon_scale
-	print("[LIFE ICON] tex_size=", tex_size, "  display_size=", display_size, "  scale=", icon_scale)
 
 	var x_start: float = 16.0 + display_size.x * 0.5
 	var icon_y: float = 74.0 + display_size.y * 0.5
@@ -73,7 +72,6 @@ func _ready() -> void:
 		spr.texture = life_tex
 		spr.scale = icon_scale
 		spr.position = Vector2(x_start + i * x_step, icon_y)
-		print("[HEART ", i, "] position=", spr.position, "  scale=", spr.scale)
 		_ui.add_child(spr)
 		hearts.append(spr)
 	_update_hearts_ui()
@@ -346,10 +344,8 @@ func _spawn_platform(y: float) -> void:
 
 	if ptype == Platform.Type.DAMAGE:
 		p.hit_player.connect(_on_damage_cloud_hit_player)
-		print("[DAMAGE] score=%d 生成黑雲" % score)
 	platforms_node.add_child(p)
 
-	print("[ITEM_DEBUG] _spawn_platform: score=%d  _item_counter=%d  ptype=%d" % [score, _item_counter, ptype])
 	if score >= 100 and ptype == Platform.Type.NORMAL:
 		_item_counter += 1
 		if _item_counter >= ITEM_SPAWN_INTERVAL:
@@ -423,7 +419,6 @@ func _pick_platform_type() -> int:
 	elif r < normal_prob + crumble_prob:
 		return Platform.Type.CRUMBLE
 	elif r < normal_prob + crumble_prob + damage_prob:
-		print("[DAMAGE_DEBUG] DAMAGE 被選中 score=%d  damage_prob=%.2f" % [score, damage_prob])
 		return Platform.Type.DAMAGE
 	else:
 		return Platform.Type.BRICK
@@ -439,19 +434,13 @@ func _get_enemy_threshold() -> int:
 		return 3
 
 func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
-	print("[ENEMY_DEBUG] score=%d  ptype=%d  eligible=%d  threshold=%d  enemies=%d" % [score, ptype, _eligible_since_last_enemy, _get_enemy_threshold(), _enemies_node.get_child_count()])
 	if ptype != Platform.Type.NORMAL and ptype != Platform.Type.BRICK:
-		print("[ENEMY_DEBUG] ptype 不符跳過")
 		return
-	if "speed" in p and p.speed != 0.0:
-		print("[ENEMY_DEBUG] 移動平台跳過 speed=%.1f  ptype=%d" % [p.speed, ptype])
 	_eligible_since_last_enemy += 1
 	var threshold := 2 if DEV_ENEMY_TEST else _get_enemy_threshold()
-	print("[ENEMY_DEBUG] eligible 累計=%d  需達到=%d" % [_eligible_since_last_enemy, threshold])
 	if _eligible_since_last_enemy < threshold:
 		return
 	if _enemies_node.get_child_count() >= MAX_ENEMIES:
-		print("[ENEMY_DEBUG] 已滿 %d 隻跳過" % MAX_ENEMIES)
 		return
 	_eligible_since_last_enemy = 0
 	var moving := score >= 300
@@ -465,10 +454,6 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	e.global_position = Vector2(p.global_position.x, p.global_position.y - cloud_half_h - 10.0)
 	e.stomped.connect(_on_enemy_stomped)
 	e.hit_player.connect(_on_player_damaged)
-	if DEV_ENEMY_TEST:
-		print("[TEST] 強制生成敵人 position=%s" % str(e.position))
-	else:
-		print("[ENEMY_DEBUG] 敵人生成！ score=%d  moving=%s" % [score, str(moving)])
 
 func _on_player_damaged() -> void:
 	if game_over_flag or _invincible_timer > 0.0:
@@ -530,25 +515,20 @@ func _on_enemy_stomped() -> void:
 		_sfx_enemy_crush.play()
 
 func _try_spawn_item(pos: Vector2) -> void:
-	print("[ITEM] 嘗試生成道具")
 	var item := ITEM_SCENE.instantiate()
 	item.item_type = 0 if randf() < 0.15 else 1
 	item.position = pos
 	_items_node.add_child(item)
 	item.collected.connect(_on_item_collected)
-	print("道具生成：位置 x=%f y=%f type=%d" % [pos.x, pos.y, item.item_type])
 
 func _on_item_collected(type: int) -> void:
-	print("[ITEM] collected signal 收到  type=%d" % type)
 	match type:
 		0:  # EXTRA_LIFE / 無敵
 			_invincible_timer = INVINCIBLE_DURATION
-			print("無敵啟動")
 			if s_lives < MAX_LIVES:
 				s_lives += 1
 				_update_hearts_ui()
 		1:  # BOOST
-			print("[ITEM] → 呼叫 player.apply_boost()")
 			player.apply_boost()
 
 func _check_bg_switch() -> void:

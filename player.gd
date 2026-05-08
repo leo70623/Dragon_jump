@@ -63,7 +63,6 @@ func _take_damage() -> void:
 	damaged.emit()
 
 func apply_boost(duration: float = 5.0) -> void:
-	print("殘影啟動")
 	_boost_timer = duration
 	_afterimage_timer = 0.0
 
@@ -125,12 +124,6 @@ func _physics_process(delta: float) -> void:
 		var n := col.get_normal()
 		var collider := col.get_collider()
 		if collider.is_in_group("enemy"):
-			print("[ENEMY COLLISION] 玩家位置：%s  敵人位置：%s  法線：%s  距離：%f" % [
-				global_position,
-				collider.global_position,
-				n,
-				global_position.distance_to(collider.global_position)
-			])
 			if n.y < -0.7:
 				collider.die()
 				velocity.y = JUMP_VELOCITY

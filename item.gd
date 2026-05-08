@@ -36,6 +36,5 @@ func _on_body_entered(body: Node) -> void:
 		return
 	if body is CharacterBody2D:
 		_already_collected = true
-		print("[ITEM] 道具吃到，不應死亡  type=%d  body=%s" % [int(item_type), body.name])
 		collected.emit(int(item_type))
 		queue_free()

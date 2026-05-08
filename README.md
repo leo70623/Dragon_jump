@@ -81,6 +81,13 @@ Main (Node2D + main.gd)
 
 ## 修改記錄
 
+### 2026-05-08（main — 正式發布）
+
+- **移除所有 debug print**：main.gd / player.gd / item.gd 清除全部 `[ITEM_DEBUG]`、`[ENEMY_DEBUG]`、`[DAMAGE_DEBUG]`、`[ENEMY COLLISION]`、`[GHOST]`、`[TEST]` 等輸出
+- **重置測試設定**：`MAX_ENEMIES` 恢復正常值 5；`DEV_ENEMY_TEST` 保持 `false`；`score` 初始值暫保留 100（測試用）
+- **截圖排除**：`.gitignore` 加入 `截圖 *.png` / `截圖 *.png.import` 規則
+- **feature/enemy-item-fix → main merge**：本版本為穩定可發布狀態
+
 ### 2026-05-07（feature/enemy-item-fix）
 
 - **敵人渲染根本修復**：enemy.tscn 節點從 Sprite2D 完整改為 `AnimatedSprite2D + SpriteFrames`；sprite sheet 1536×1024（12×8 格，每格 128×128），idle 動畫取前 4 幀（AtlasTexture region 0/128/256/384）

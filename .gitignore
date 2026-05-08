@@ -27,3 +27,7 @@ export_presets.cfg
 *.tmp
 *.log
 Thumbs.db
+
+# Screenshots
+截圖 *.png
+截圖 *.png.import
