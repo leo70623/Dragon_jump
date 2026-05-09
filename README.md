@@ -81,6 +81,14 @@ Main (Node2D + main.gd)
 
 ## 修改記錄
 
+### 2026-05-10（feature/enemy-collision-item-visual）
+
+- **敵人碰撞修復**：任何方向碰到敵人都扣命；只有從正上方踩頭（`n.y < -0.7`）才消滅敵人並讓玩家反彈，移除先前「從下方穿透忽略」的邏輯
+- **無敵黑雲閃爍**：玩家處於無敵狀態碰到黑雲時，黑雲改為閃爍三下（alpha 0↔1，每次 0.2 秒）後消失，不扣命也不觸發 Game Over；非無敵狀態維持原本扣命邏輯
+- **道具視覺更新**：type=0（星星）使用 `item_power_idle.png`，type=1（彈簧鞋）使用 `item_shoes_idle.png`，兩者都套用 `item_power.gdshader` 對角線鏡面掃光效果，移除原本 `_draw()` 程式繪製及 modulate 閃爍
+- **標題字型修復**：`start_screen.gd` 改為以 `FontFile` 載入 `BubblegumSans-Regular.ttf` 並套用至每個字母 Label，載入失敗時 fallback 至系統字型
+- **敵人站立位置修正**：`enemy.gd` 的 Y offset 根據平台類型調整（BRICK 平台 `cloud_half_h = 30.0`，其餘 `4.0`），修正敵人在磚塊平台上浮空的問題；移除 `[ENEMY Y]` debug print
+
 ### 2026-05-09（feature/title-animation-shader）
 
 - **遊戲名稱重製**：Start Screen 標題改為 "Not-so-ugly\nDragon" 兩行，使用 `BubblegumSans-Regular.ttf` 字型

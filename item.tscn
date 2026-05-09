@@ -1,12 +1,33 @@
 [gd_scene format=3 uid="uid://bitem001x1akv"]
 
 [ext_resource type="Script" path="res://item.gd" id="1_item"]
+[ext_resource type="Texture2D" path="res://assets/ui/item_power_idle.png" id="2_tex"]
+[ext_resource type="Shader" path="res://assets/ui/item_power.gdshader" id="3_shader"]
+[ext_resource type="Texture2D" path="res://assets/ui/item_shoes_idle.png" id="4_tex"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_1"]
+shader = ExtResource("3_shader")
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_2"]
+shader = ExtResource("3_shader")
 
 [sub_resource type="CircleShape2D" id="CS_1"]
 radius = 15.0
 
 [node name="Item" type="Area2D"]
 script = ExtResource("1_item")
+
+[node name="PowerSprite" type="Sprite2D" parent="."]
+visible = false
+scale = Vector2(0.115, 0.115)
+texture = ExtResource("2_tex")
+material = SubResource("ShaderMat_1")
+
+[node name="BoostSprite" type="Sprite2D" parent="."]
+visible = false
+scale = Vector2(0.115, 0.115)
+texture = ExtResource("4_tex")
+material = SubResource("ShaderMat_2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CS_1")

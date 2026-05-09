@@ -1,37 +1,37 @@
 [gd_scene format=3 uid="uid://c3enemyx5yqmb"]
 
 [ext_resource type="Script" path="res://enemy.gd" id="1_enemy"]
-[ext_resource type="Texture2D" path="res://assets/enemies/enemy_01.png" id="2_tex"]
+[ext_resource type="Texture2D" path="res://assets/enemies/enemy_idle.png" id="2_tex"]
 [ext_resource type="Texture2D" path="res://assets/enemies/enemy_hit.png" id="3_hit"]
 [ext_resource type="Shader" path="res://assets/enemies/enemy_sweep.gdshader" id="4_shader"]
 
 [sub_resource type="AtlasTexture" id="AT_0"]
 atlas = ExtResource("2_tex")
-region = Rect2(0, 0, 64, 64)
+region = Rect2(0, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AT_1"]
 atlas = ExtResource("2_tex")
-region = Rect2(64, 0, 64, 64)
+region = Rect2(512, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AT_2"]
 atlas = ExtResource("2_tex")
-region = Rect2(128, 0, 64, 64)
+region = Rect2(1024, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AT_3"]
 atlas = ExtResource("2_tex")
-region = Rect2(192, 0, 64, 64)
+region = Rect2(1536, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AT_4"]
 atlas = ExtResource("3_hit")
-region = Rect2(0, 0, 64, 64)
+region = Rect2(0, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AT_5"]
 atlas = ExtResource("3_hit")
-region = Rect2(64, 0, 64, 64)
+region = Rect2(512, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AT_6"]
 atlas = ExtResource("3_hit")
-region = Rect2(128, 0, 64, 64)
+region = Rect2(1024, 0, 512, 512)
 
 [sub_resource type="SpriteFrames" id="SF_1"]
 animations = [{
@@ -79,7 +79,7 @@ collision_mask = 1
 script = ExtResource("1_enemy")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(1.0, 1.0)
+scale = Vector2(0.125, 0.125)
 material = SubResource("ShaderMat_1")
 sprite_frames = SubResource("SF_1")
 

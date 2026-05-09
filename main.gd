@@ -227,8 +227,13 @@ func _update_cooldown_label() -> void:
 		var secs := int(remaining) % 60
 		cooldown_label.text = "Next life in: %02d:%02d" % [mins, secs]
 
-func _on_damage_cloud_hit_player() -> void:
-	if not game_over_flag and _invincible_timer <= 0.0:
+func _on_damage_cloud_hit_player(platform: Node2D) -> void:
+	if game_over_flag:
+		return
+	if _invincible_timer > 0.0:
+		if is_instance_valid(platform):
+			platform.flash_and_free()
+	else:
 		_show_game_over()
 
 func _show_game_over() -> void:
@@ -339,7 +344,7 @@ func _spawn_platform(y: float) -> void:
 		p.direction = 1.0 if randf() > 0.5 else -1.0
 
 	if ptype == Platform.Type.DAMAGE:
-		p.hit_player.connect(_on_damage_cloud_hit_player)
+		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
 	platforms_node.add_child(p)
 
 	if score >= 100 and ptype == Platform.Type.NORMAL:

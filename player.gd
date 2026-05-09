@@ -127,7 +127,7 @@ func _physics_process(delta: float) -> void:
 			if n.y < -0.7:
 				collider.die()
 				velocity.y = JUMP_VELOCITY
-			elif abs(n.x) > 0.7 and abs(n.y) < 0.3:
+			else:
 				collider.hit_player.emit()
 			continue
 		if n.y < -0.5 and not was_on_floor:

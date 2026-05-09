@@ -164,6 +164,14 @@ func _on_area_body_entered(body: Node2D) -> void:
 	_anim.play("dark_hit")
 	hit_player.emit()
 
+func flash_and_free() -> void:
+	_damage_hit = true
+	var tw := create_tween()
+	for i in 3:
+		tw.tween_property(self, "modulate:a", 0.0, 0.2)
+		tw.tween_property(self, "modulate:a", 1.0, 0.2)
+	tw.tween_callback(queue_free)
+
 func start_crumble() -> void:
 	if not _crumble_shake and not _crumbling:
 		_base_x = position.x
