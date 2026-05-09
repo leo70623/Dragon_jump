@@ -81,6 +81,14 @@ Main (Node2D + main.gd)
 
 ## 修改記錄
 
+### 2026-05-09（feature/title-animation-shader）
+
+- **遊戲名稱重製**：Start Screen 標題改為 "Not-so-ugly\nDragon" 兩行，使用 `BubblegumSans-Regular.ttf` 字型
+- **標題視覺樣式**：黃橘漸層填色（`LABEL_GRADIENT` shader）搭配深綠色外框 (`outline_size=8`)，提升辨識度
+- **字母彈跳動畫**：Tween 逐字母垂直彈跳（正弦錯開），標題入場即自動播放，循環不中斷
+- **敵人鏡面掃光 shader**：`enemy_sweep.gdshader` 對角線掃光（`diagonal = UV.x + UV.y`），以 `col.a` 為 mask 避免透明區域殘光，修復 GL Compatibility `return` 編譯錯誤
+- **敵人踩踏動畫**：`enemy_hit.png` 3 幀 192×64（每幀 64×64），`die()` 播放 `hit` 動畫後 `queue_free`
+
 ### 2026-05-09（main）
 
 - **敵人圖片修復**：重製 `enemy_01.png` 為正確尺寸 256×64 sprite sheet（4 幀 64×64），修正先前 hframes/vframes 設定錯誤導致的渲染破圖問題
