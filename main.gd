@@ -105,7 +105,6 @@ func _ready() -> void:
 		next_spawn_y -= _get_spacing()
 
 	player.landed_on.connect(_on_player_landed_on)
-	player.ceiling_hit.connect(_on_player_ceiling_hit)
 	player.damaged.connect(_on_player_damaged)
 	_restart_btn.pressed.connect(_on_restart_btn_pressed)
 
@@ -211,9 +210,6 @@ func _on_player_landed_on(platform: Node) -> void:
 		return
 	if platform.platform_type == Platform.Type.CRUMBLE:
 		platform.start_crumble()
-
-func _on_player_ceiling_hit(_platform: Node) -> void:
-	pass
 
 func _update_hearts_ui() -> void:
 	for i in MAX_LIVES:
@@ -438,7 +434,6 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 		return
 	if p.speed != 0.0:
 		return
-	print("[ENEMY SPAWN] platform speed=%f" % p.speed)
 	_eligible_since_last_enemy += 1
 	var threshold := 2 if DEV_ENEMY_TEST else _get_enemy_threshold()
 	if _eligible_since_last_enemy < threshold:

@@ -424,13 +424,11 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 					var existing: int = int(str(fields["score"]["integerValue"]))
 					if _submit_score_value > existing:
 						_do_patch_score()
-					else:
-						print("[Leaderboard] Score not a new best (", _submit_score_value, " <= ", existing, "), skip.")
 					return
 		# Parse failed — submit anyway
 		_do_patch_score()
 	else:
-		print("[Leaderboard] Check score error code: ", response_code, " — skipping submit.")
+		push_warning("[Leaderboard] Check score error code: %d — skipping submit." % response_code)
 
 # ─────────────────────────────────────────────
 # Firebase: Patch/update score (PATCH)
@@ -448,7 +446,5 @@ func _do_patch_score() -> void:
 	_http_patch.request(url, headers, HTTPClient.METHOD_PATCH, body)
 
 func _on_patch_completed(_result: int, response_code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
-	if response_code == 200 or response_code == 201:
-		print("[Leaderboard] Score submitted successfully: ", _submit_score_value)
-	else:
-		print("[Leaderboard] Score submit error code: ", response_code)
+	if response_code != 200 and response_code != 201:
+		push_error("[Leaderboard] Score submit error code: %d" % response_code)

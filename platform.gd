@@ -33,6 +33,7 @@ var _crumble_timer: float = 0.0
 var _base_x: float = 0.0
 
 var _damage_hit: bool = false
+var _vp_w: float = 0.0
 
 @onready var _anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var _sprite: Sprite2D = $Sprite2D
@@ -41,6 +42,7 @@ var _damage_hit: bool = false
 @onready var _area_col: CollisionShape2D = $Area2D/CollisionShape2D
 
 func _ready() -> void:
+	_vp_w = get_viewport_rect().size.x
 	_setup_sprite_frames()
 	_setup_collision_shapes()
 	match platform_type:
@@ -74,7 +76,6 @@ func _ready() -> void:
 			if _sprite.texture:
 				var tex_size: Vector2 = _sprite.texture.get_size()
 				_sprite.scale = Vector2(BRICK_W / tex_size.x, BRICK_H / tex_size.y)
-				print("[BRICK] metal_cloud.png loaded OK, size=", tex_size, " scale=", _sprite.scale)
 			else:
 				push_error("[BRICK] metal_cloud.png failed to load at res://assets/platforms/metal_cloud.png")
 
@@ -138,8 +139,7 @@ func _process(delta: float) -> void:
 
 	if speed != 0.0 and not _crumble_shake and not _crumbling:
 		position.x += speed * direction * delta
-		var vp_w := get_viewport_rect().size.x
-		if position.x > vp_w - 20.0:
+		if position.x > _vp_w - 20.0:
 			direction = -1.0
 		elif position.x < 20.0:
 			direction = 1.0

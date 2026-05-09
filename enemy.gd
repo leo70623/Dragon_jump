@@ -16,10 +16,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if _dead or not is_instance_valid(cloud_ref):
 		return
-	if is_instance_valid(cloud_ref):
-		var cloud_half_h: float = 50.0 if cloud_ref.get("platform_type") == 3 else 4.0
-		print("[ENEMY Y] platform_type=%d  cloud_half_h=%f" % [cloud_ref.get("platform_type"), cloud_half_h])
-		global_position.y = cloud_ref.global_position.y - cloud_half_h - 32.0
+	global_position.y = cloud_ref.global_position.y - cloud_ref_half_h - 32.0
 	if speed > 0.0:
 		position.x += speed * direction * delta
 		$AnimatedSprite2D.flip_h = direction < 0.0
@@ -33,8 +30,6 @@ func _physics_process(delta: float) -> void:
 func die() -> void:
 	if _dead:
 		return
-	print("[DIE] 開始播放 hit 動畫，sprite_frames=%s" % str($AnimatedSprite2D.sprite_frames != null))
-	print("[DIE] 動畫列表：", $AnimatedSprite2D.sprite_frames.get_animation_names())
 	_dead = true
 	speed = 0.0
 	stomped.emit()

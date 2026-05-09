@@ -144,7 +144,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_tree().change_scene_to_file("res://main.tscn")
 
 func _on_leaderboard_pressed() -> void:
-	print("排行榜按鈕點擊")
 	Leaderboard.show_leaderboard()
 
 func _on_change_name_pressed() -> void:
