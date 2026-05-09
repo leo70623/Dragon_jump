@@ -3,22 +3,23 @@
 [ext_resource type="Script" path="res://enemy.gd" id="1_enemy"]
 [ext_resource type="Texture2D" path="res://assets/enemies/enemy_01.png" id="2_tex"]
 [ext_resource type="Texture2D" path="res://assets/enemies/enemy_hit.png" id="3_hit"]
+[ext_resource type="Shader" path="res://assets/enemies/enemy_sweep.gdshader" id="4_shader"]
 
 [sub_resource type="AtlasTexture" id="AT_0"]
 atlas = ExtResource("2_tex")
-region = Rect2(0, 0, 128, 128)
+region = Rect2(0, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AT_1"]
 atlas = ExtResource("2_tex")
-region = Rect2(128, 0, 128, 128)
+region = Rect2(64, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AT_2"]
 atlas = ExtResource("2_tex")
-region = Rect2(256, 0, 128, 128)
+region = Rect2(128, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AT_3"]
 atlas = ExtResource("2_tex")
-region = Rect2(384, 0, 128, 128)
+region = Rect2(192, 0, 64, 64)
 
 [sub_resource type="AtlasTexture" id="AT_4"]
 atlas = ExtResource("3_hit")
@@ -66,6 +67,9 @@ animations = [{
 "speed": 12.0
 }]
 
+[sub_resource type="ShaderMaterial" id="ShaderMat_1"]
+shader = ExtResource("4_shader")
+
 [sub_resource type="RectangleShape2D" id="RS_1"]
 size = Vector2(20, 20)
 
@@ -75,7 +79,8 @@ collision_mask = 1
 script = ExtResource("1_enemy")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.5, 0.5)
+scale = Vector2(1.0, 1.0)
+material = SubResource("ShaderMat_1")
 sprite_frames = SubResource("SF_1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

@@ -31,6 +31,10 @@ func _draw_star(center: Vector2, outer_r: float, inner_r: float, pts: int, color
 		polygon.append(center + Vector2(cos(angle), sin(angle)) * r)
 	draw_polygon(polygon, PackedColorArray([color]))
 
+func _process(_delta: float) -> void:
+	if item_type == Type.EXTRA_LIFE:
+		modulate = Color(1.0, 1.0, 0.5 + sin(Time.get_ticks_msec() * 0.005) * 0.5, 1.0)
+
 func _on_body_entered(body: Node) -> void:
 	if _already_collected:
 		return

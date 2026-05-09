@@ -436,6 +436,9 @@ func _get_enemy_threshold() -> int:
 func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	if ptype != Platform.Type.NORMAL and ptype != Platform.Type.BRICK:
 		return
+	if p.speed != 0.0:
+		return
+	print("[ENEMY SPAWN] platform speed=%f" % p.speed)
 	_eligible_since_last_enemy += 1
 	var threshold := 2 if DEV_ENEMY_TEST else _get_enemy_threshold()
 	if _eligible_since_last_enemy < threshold:
@@ -447,11 +450,12 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	var spd := 100.0 if score >= 400 else 60.0
 	var e := ENEMY_SCENE.instantiate()
 	e.cloud_ref = p
+	e.cloud_ref_half_h = Platform.BRICK_H * 0.5 if ptype == Platform.Type.BRICK else Platform.CLOUD_H * 0.5
 	e.speed = spd if moving else 0.0
 	e.direction = 1.0 if randf() > 0.5 else -1.0
-	var cloud_half_h := Platform.BRICK_H * 0.5 if ptype == Platform.Type.BRICK else 4.0
+	var cloud_half_h: float = e.cloud_ref_half_h
 	_enemies_node.add_child(e)
-	e.global_position = Vector2(p.global_position.x, p.global_position.y - cloud_half_h - 10.0)
+	e.global_position = Vector2(p.global_position.x, p.global_position.y - cloud_half_h - 32.0)
 	e.stomped.connect(_on_enemy_stomped)
 	e.hit_player.connect(_on_player_damaged)
 

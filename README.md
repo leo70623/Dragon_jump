@@ -81,6 +81,15 @@ Main (Node2D + main.gd)
 
 ## 修改記錄
 
+### 2026-05-09（main）
+
+- **敵人圖片修復**：重製 `enemy_01.png` 為正確尺寸 256×64 sprite sheet（4 幀 64×64），修正先前 hframes/vframes 設定錯誤導致的渲染破圖問題
+- **敵人踩踏動畫**：`enemy_hit.png` 3 幀 192×64（每幀 64×64），`die()` 播放 `hit` 動畫後 `queue_free`，視覺反饋更清楚
+- **敵人掃光 shader**：新增 `enemy_sweep.gdshader`，對角線掃光效果（`diagonal = UV.x + UV.y`），以 `col.a` 為 mask 避免透明區域殘光，修復 GL Compatibility 不支援 `return` 的編譯錯誤
+- **道具系統穩定**：黃色星星（無敵）、橘色彈簧（跳高）穩定運作，黑雲免疫判斷正確
+- **排行榜 UI 修復**：CanvasLayer layer=10 確保排行榜顯示在所有遊戲層之上
+- **敵人懸空持續修復**：加入 `platform_type` 判斷，BRICK 平台（type=3）的 `cloud_half_h` 改為 50.0，修正敵人在磚塊平台上的 Y 軸定位
+
 ### 2026-05-08（main — 正式發布）
 
 - **敵人踩踏動畫**：enemy.tscn SpriteFrames 加入 `hit` 動畫（`enemy_hit.png` 192×64，3 幀 64×64，FPS=12，loop=false）；`die()` 改為播放 hit 動畫取代旋轉縮小 tween，動畫結束後 `queue_free`，同時停止移動

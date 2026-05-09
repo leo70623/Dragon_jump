@@ -131,8 +131,8 @@ func _build_name_dialog() -> void:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(300, 210)
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.grow_horizontal = Control.GROW_DIRECTION_END
-	panel.grow_vertical = Control.GROW_DIRECTION_END
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_name_dialog.add_child(panel)
 
 	var vbox := VBoxContainer.new()
@@ -195,8 +195,8 @@ func _build_leaderboard_screen() -> void:
 	_lb_panel = PanelContainer.new()
 	_lb_panel.custom_minimum_size = Vector2(320, 530)
 	_lb_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_lb_panel.grow_horizontal = Control.GROW_DIRECTION_END
-	_lb_panel.grow_vertical = Control.GROW_DIRECTION_END
+	_lb_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_lb_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_lb_overlay.add_child(_lb_panel)
 
 	var vbox := VBoxContainer.new()
