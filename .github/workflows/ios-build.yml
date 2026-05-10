@@ -7,14 +7,7 @@ on:
       - main
 
 env:
-  GODOT_VERSION: "4.6.2"
-  GODOT_STATUS: stable
-  GODOT_TEMPLATE_VERSION: "4.6.2.stable"
-  GODOT_MACOS_URL: https://github.com/godotengine/godot/releases/download/4.6.2-stable/Godot_v4.6.2-stable_macos.universal.zip
-  GODOT_EXPORT_TEMPLATES_URL: https://github.com/godotengine/godot/releases/download/4.6.2-stable/Godot_v4.6.2-stable_export_templates.tpz
-  IOS_PRESET: iOS
   IOS_BUNDLE_ID: com.leo.notsouglydragon
-  EXPORT_DIR: ios-build
   XCODE_PROJECT: ios-build/notsouglydragon_v1.xcodeproj
   ARCHIVE_PATH: build/DragonJump.xcarchive
   IPA_EXPORT_PATH: build/ipa
@@ -28,35 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install Godot
-        run: |
-          set -euo pipefail
-
-          curl --fail --location --show-error "$GODOT_MACOS_URL" -o "$RUNNER_TEMP/godot.zip"
-          unzip -tq "$RUNNER_TEMP/godot.zip"
-          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
-
-          GODOT_APP="$(/usr/bin/find "$RUNNER_TEMP/godot" -name 'Godot*.app' -type d -print -quit)"
-          if [ -z "$GODOT_APP" ]; then
-            echo "Godot.app not found after unzip"
-            exit 1
-          fi
-
-          GODOT_BIN="$GODOT_APP/Contents/MacOS/Godot"
-          chmod +x "$GODOT_BIN"
-          echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
-
-      - name: Install Godot export templates
-        run: |
-          set -euo pipefail
-          TEMPLATE_DIR="$HOME/Library/Application Support/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
-
-          curl --fail --location --show-error "$GODOT_EXPORT_TEMPLATES_URL" -o "$RUNNER_TEMP/export_templates.tpz"
-          unzip -tq "$RUNNER_TEMP/export_templates.tpz"
-          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
-          mkdir -p "$TEMPLATE_DIR"
-          cp -R "$RUNNER_TEMP/export_templates/templates/." "$TEMPLATE_DIR/"
+        with:
+          lfs: true
 
       - name: Import Apple signing assets
         env:
@@ -105,62 +71,6 @@ jobs:
           echo "PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
           echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
           echo "Installed provisioning profile: $PROFILE_NAME ($PROFILE_UUID)"
-
-      - name: Prepare iOS export preset for CI
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          set -euo pipefail
-          echo "Team ID being used: $APPLE_TEAM_ID"
-          ruby <<'RUBY'
-          path = "export_presets.cfg"
-          text = File.read(path)
-          preset = /^\[preset\.1\.options\]\n.*?(?=^\[preset\.|\z)/m
-          unless text.match?(preset)
-            warn "iOS preset options block was not found in #{path}"
-            exit 1
-          end
-
-          team_id = ENV.fetch("APPLE_TEAM_ID")
-          bundle_id = ENV.fetch("IOS_BUNDLE_ID")
-
-          text.sub!(preset) do |block|
-            block
-              .gsub(/^custom_template\/debug=.*/, %(custom_template/debug=""))
-              .gsub(/^custom_template\/release=.*/, %(custom_template/release=""))
-              .gsub(/^application\/app_store_team_id=.*/, %(application/app_store_team_id="#{team_id}"))
-              .gsub(/^application\/export_method_debug=.*/, "application/export_method_debug=0")
-              .gsub(/^application\/export_method_release=.*/, "application/export_method_release=0")
-              .gsub(/^application\/code_sign_identity_debug=.*/, %(application/code_sign_identity_debug=""))
-              .gsub(/^application\/code_sign_identity_release=.*/, %(application/code_sign_identity_release=""))
-              .gsub(/^application\/provisioning_profile_specifier_debug=.*/, %(application/provisioning_profile_specifier_debug=""))
-              .gsub(/^application\/provisioning_profile_specifier_release=.*/, %(application/provisioning_profile_specifier_release=""))
-              .gsub(/^application\/bundle_identifier=.*/, %(application/bundle_identifier="#{bundle_id}"))
-              .gsub(/^application\/export_project_only=.*/, "application/export_project_only=true")
-          end
-
-          File.write(path, text)
-          RUBY
-
-          sed -n '/^\[preset\.1\]/,/^privacy\/camera_usage_description=/p' export_presets.cfg
-
-      - name: Export iOS Xcode project with Godot
-        run: |
-          set -euo pipefail
-          echo "=== export_presets.cfg content ==="
-          cat export_presets.cfg
-          echo "=== end ==="
-          rm -rf "$EXPORT_DIR"
-          mkdir -p "$EXPORT_DIR"
-          set +e
-          "$GODOT_BIN" --headless --verbose --export-release "$IOS_PRESET" "$XCODE_PROJECT" \
-            2>&1 | tee "$RUNNER_TEMP/godot-ios-export.log"
-          GODOT_EXPORT_STATUS="${PIPESTATUS[0]}"
-          set -e
-          if [ "$GODOT_EXPORT_STATUS" -ne 0 ]; then
-            echo "Godot iOS export failed with exit code $GODOT_EXPORT_STATUS"
-            exit "$GODOT_EXPORT_STATUS"
-          fi
 
       - name: Build IPA with Xcode
         env:
