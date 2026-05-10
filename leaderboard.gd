@@ -28,6 +28,9 @@ var _lb_panel: PanelContainer = null
 # Score to submit (set before check/patch flow)
 var _submit_score_value: int = 0
 
+# Holds JavaScriptObject reference so GC doesn't collect it
+var _js_keyboard_cb = null
+
 func _ready() -> void:
 
 	# Load config
@@ -241,12 +244,12 @@ func show_name_dialog(first_time: bool) -> void:
 	if not is_instance_valid(_name_dialog):
 		return
 	_name_input.text = player_name
-	# Show/hide Cancel button based on first_time
 	var cancel_btn := _name_dialog.find_child("CancelBtn", true, false)
 	if is_instance_valid(cancel_btn):
 		cancel_btn.visible = not first_time
 	_name_dialog.visible = true
 	_name_input.grab_focus()
+	_open_mobile_keyboard()
 
 func show_leaderboard() -> void:
 	if player_name == "":
@@ -278,12 +281,14 @@ func _on_name_ok() -> void:
 		return
 	player_name = name
 	_save_config()
+	_close_mobile_keyboard()
 	_name_dialog.visible = false
 	if _pending_lb:
 		_pending_lb = false
 		show_leaderboard()
 
 func _on_name_cancel() -> void:
+	_close_mobile_keyboard()
 	_name_dialog.visible = false
 
 # ─────────────────────────────────────────────
@@ -455,6 +460,48 @@ func _do_patch_score() -> void:
 func _on_patch_completed(_result: int, response_code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
 	if response_code != 200 and response_code != 201:
 		push_error("[Leaderboard] Score submit error code: %d" % response_code)
+
+# ─────────────────────────────────────────────
+# Mobile keyboard helpers (Web only)
+# ─────────────────────────────────────────────
+func _open_mobile_keyboard() -> void:
+	if OS.get_name() != "Web":
+		return
+	_js_keyboard_cb = JavaScriptBridge.create_callback(func(args: Array):
+		if args.size() > 0 and is_instance_valid(_name_input):
+			_name_input.text = str(args[0])
+			_name_input.caret_column = _name_input.text.length()
+	)
+	var window := JavaScriptBridge.get_interface("window")
+	window._godotKbCb = _js_keyboard_cb
+
+	var safe_val := _name_input.text.replace("\\", "\\\\").replace("'", "\\'")
+	var js := "(function(){"
+	js += "var o=document.getElementById('_gkb');if(o)o.remove();"
+	js += "var e=document.createElement('input');"
+	js += "e.id='_gkb';e.type='text';e.maxLength=20;e.value='" + safe_val + "';"
+	# opacity:0.01 (not 0) — iOS won't focus invisible elements
+	js += "e.style.cssText='position:fixed;opacity:0.01;top:50%;left:50%;width:1px;height:1px;border:none;outline:none;z-index:9999;';"
+	js += "document.body.appendChild(e);"
+	js += "e.focus();"
+	# Canvas touchstart handler: iOS requires focus() inside a user-gesture callback
+	js += "var c=document.querySelector('canvas');"
+	js += "if(c){e._th=function(){e.focus();};c.addEventListener('touchstart',e._th,{passive:true});}"
+	js += "e.addEventListener('input',function(){window._godotKbCb([e.value]);});"
+	js += "e.addEventListener('blur',function(){window._godotKbCb([e.value]);});"
+	js += "})();"
+	JavaScriptBridge.eval(js)
+
+func _close_mobile_keyboard() -> void:
+	if OS.get_name() != "Web":
+		return
+	var js := "var e=document.getElementById('_gkb');"
+	js += "if(e){"
+	js += "var c=document.querySelector('canvas');"
+	js += "if(c&&e._th)c.removeEventListener('touchstart',e._th);"
+	js += "e.remove();}"
+	JavaScriptBridge.eval(js)
+	_js_keyboard_cb = null
 
 # ─────────────────────────────────────────────
 # Share

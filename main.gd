@@ -251,7 +251,7 @@ func _show_game_over() -> void:
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
 	var lb_btn := Button.new()
-	lb_btn.text = "排行榜"
+	lb_btn.text = "Leaderboard"
 	lb_btn.add_theme_font_size_override("font_size", 18)
 	lb_btn.size = Vector2(120, 38)
 	lb_btn.position = Vector2(20.0, 465.0)
@@ -259,7 +259,7 @@ func _show_game_over() -> void:
 	game_over_screen.add_child(lb_btn)
 
 	var share_btn := Button.new()
-	share_btn.text = "分享"
+	share_btn.text = "Share"
 	share_btn.add_theme_font_size_override("font_size", 18)
 	share_btn.size = Vector2(120, 38)
 	share_btn.position = Vector2(220.0, 465.0)
