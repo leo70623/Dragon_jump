@@ -81,6 +81,13 @@ Main (Node2D + main.gd)
 
 ## 修改記錄
 
+### 2026-05-11（feature/v0.8-share-githubpages-ios）
+
+- **GitHub Pages 上線**：遊戲可直接於瀏覽器遊玩，網址由 GitHub Pages 自動部署，無需安裝
+- **分享按鈕**：Game Over 畫面新增「分享成績」按鈕，支援 Web Share API，可分享至 LINE / IG 等平台
+- **GitHub Actions iOS 自動 build**：`.github/workflows/ios-build.yml` 完整流程，push main 即觸發；使用 pre-exported Xcode 專案（`ios-build/`），xcodebuild automatic signing，development 方式打包 IPA
+- **IPA 成功安裝至 iPhone**：CI 產出 `dragon-jump-ios-ipa`（32 MB），透過 Xcode Devices & Simulators 側載，成功在實體 iPhone 上執行
+
 ### 2026-05-10（feature/enemy-collision-item-visual）
 
 - **敵人碰撞修復**：任何方向碰到敵人都扣命；只有從正上方踩頭（`n.y < -0.7`）才消滅敵人並讓玩家反彈，移除先前「從下方穿透忽略」的邏輯
