@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kjcga842lskh"
-path="res://.godot/imported/dragon_test.icon.png-6b131228c923af398d3b2dd3b4502326.ctex"
+path="res://.godot/imported/dragon_test.icon.png-e024daf142a0be7af5430a484d261f68.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://web-build/dragon_test.icon.png"
-dest_files=["res://.godot/imported/dragon_test.icon.png-6b131228c923af398d3b2dd3b4502326.ctex"]
+source_file="res://docs/dragon_test.icon.png"
+dest_files=["res://.godot/imported/dragon_test.icon.png-e024daf142a0be7af5430a484d261f68.ctex"]
 
 [params]
 

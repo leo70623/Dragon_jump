@@ -220,6 +220,13 @@ func _build_leaderboard_screen() -> void:
 	_lb_vbox.add_theme_constant_override("separation", 4)
 	scroll.add_child(_lb_vbox)
 
+	# Share button
+	var share_btn := Button.new()
+	share_btn.text = "分享成績"
+	share_btn.add_theme_font_size_override("font_size", 18)
+	share_btn.pressed.connect(func(): share_score(_submit_score_value))
+	vbox.add_child(share_btn)
+
 	# Close button
 	var close_btn := Button.new()
 	close_btn.text = "Close"
@@ -448,3 +455,34 @@ func _do_patch_score() -> void:
 func _on_patch_completed(_result: int, response_code: int, _headers: PackedStringArray, _body: PackedByteArray) -> void:
 	if response_code != 200 and response_code != 201:
 		push_error("[Leaderboard] Score submit error code: %d" % response_code)
+
+# ─────────────────────────────────────────────
+# Share
+# ─────────────────────────────────────────────
+func share_score(score_val: int) -> void:
+	var share_text := "我在 Not-so-ugly Dragon 跳了 %d 分！來挑戰我！" % score_val
+	var share_url := "https://leo70623.github.io/Dragon_jump/"
+	if OS.get_name() == "Web":
+		var safe_text := share_text.replace("\\", "\\\\").replace("'", "\\'")
+		var js := "var t='" + safe_text + "';var u='" + share_url + "';"
+		js += "if(navigator.share){navigator.share({title:'Not-so-ugly Dragon',text:t,url:u})}"
+		js += "else{navigator.clipboard.writeText(t+' '+u).then(function(){alert('已複製！')})}"
+		JavaScriptBridge.eval(js)
+	else:
+		DisplayServer.clipboard_set(share_text + " " + share_url)
+		_show_copy_toast()
+
+func _show_copy_toast() -> void:
+	var toast := Label.new()
+	toast.text = "已複製！"
+	toast.add_theme_font_size_override("font_size", 22)
+	toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	toast.set_anchors_preset(Control.PRESET_CENTER)
+	toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	toast.grow_vertical = Control.GROW_DIRECTION_BOTH
+	toast.offset_top = -30.0
+	_canvas.add_child(toast)
+	var tw := toast.create_tween()
+	tw.tween_interval(1.5)
+	tw.tween_property(toast, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(func(): if is_instance_valid(toast): toast.queue_free())
