@@ -147,7 +147,15 @@ jobs:
           set -euo pipefail
           rm -rf "$EXPORT_DIR"
           mkdir -p "$EXPORT_DIR"
-          "$GODOT_BIN" --headless --verbose --export-release "$IOS_PRESET" "$XCODE_PROJECT"
+          set +e
+          "$GODOT_BIN" --headless --verbose --export-release "$IOS_PRESET" "$XCODE_PROJECT" \
+            2>&1 | tee "$RUNNER_TEMP/godot-ios-export.log"
+          GODOT_EXPORT_STATUS="${PIPESTATUS[0]}"
+          set -e
+          if [ "$GODOT_EXPORT_STATUS" -ne 0 ]; then
+            echo "Godot iOS export failed with exit code $GODOT_EXPORT_STATUS"
+            exit "$GODOT_EXPORT_STATUS"
+          fi
 
       - name: Build IPA with Xcode
         env:
