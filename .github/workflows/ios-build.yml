@@ -10,6 +10,8 @@ env:
   GODOT_VERSION: "4.6.2"
   GODOT_STATUS: stable
   GODOT_TEMPLATE_VERSION: "4.6.2.stable"
+  GODOT_MACOS_URL: https://github.com/godotengine/godot/releases/download/4.6.2-stable/Godot_v4.6.2-stable_macos.universal.zip
+  GODOT_EXPORT_TEMPLATES_URL: https://github.com/godotengine/godot/releases/download/4.6.2-stable/Godot_v4.6.2-stable_export_templates.tpz
   IOS_PRESET: iOS
   IOS_BUNDLE_ID: com.leo.notsouglydragon
   EXPORT_DIR: ios-build
@@ -30,10 +32,9 @@ jobs:
       - name: Install Godot
         run: |
           set -euo pipefail
-          GODOT_ZIP="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_macos.universal.zip"
-          GODOT_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/${GODOT_ZIP}"
 
-          curl -L "$GODOT_URL" -o "$RUNNER_TEMP/godot.zip"
+          curl --fail --location --show-error "$GODOT_MACOS_URL" -o "$RUNNER_TEMP/godot.zip"
+          unzip -tq "$RUNNER_TEMP/godot.zip"
           unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
 
           GODOT_APP="$(/usr/bin/find "$RUNNER_TEMP/godot" -name 'Godot*.app' -type d -print -quit)"
@@ -49,11 +50,10 @@ jobs:
       - name: Install Godot export templates
         run: |
           set -euo pipefail
-          TEMPLATE_ZIP="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
-          TEMPLATE_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/${TEMPLATE_ZIP}"
           TEMPLATE_DIR="$HOME/Library/Application Support/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
 
-          curl -L "$TEMPLATE_URL" -o "$RUNNER_TEMP/export_templates.tpz"
+          curl --fail --location --show-error "$GODOT_EXPORT_TEMPLATES_URL" -o "$RUNNER_TEMP/export_templates.tpz"
+          unzip -tq "$RUNNER_TEMP/export_templates.tpz"
           unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
           mkdir -p "$TEMPLATE_DIR"
           cp -R "$RUNNER_TEMP/export_templates/templates/." "$TEMPLATE_DIR/"
