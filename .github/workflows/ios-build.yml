@@ -111,6 +111,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
+          echo "Team ID being used: $APPLE_TEAM_ID"
           ruby <<'RUBY'
           path = "export_presets.cfg"
           text = File.read(path)
@@ -146,7 +147,9 @@ jobs:
       - name: Export iOS Xcode project with Godot
         run: |
           set -euo pipefail
+          echo "=== export_presets.cfg content ==="
           cat export_presets.cfg
+          echo "=== end ==="
           rm -rf "$EXPORT_DIR"
           mkdir -p "$EXPORT_DIR"
           set +e
