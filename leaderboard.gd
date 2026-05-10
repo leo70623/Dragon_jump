@@ -276,7 +276,12 @@ func submit_score(score: int) -> void:
 # Name dialog callbacks
 # ─────────────────────────────────────────────
 func _on_name_ok() -> void:
-	var name := _name_input.text.strip_edges().substr(0, 20)
+	var raw: String = _name_input.text
+	if OS.get_name() == "Web":
+		var val = JavaScriptBridge.eval("(document.getElementById('_gkb')||{value:''}).value")
+		if val is String:
+			raw = val
+	var name := raw.strip_edges().substr(0, 20)
 	if name == "":
 		return
 	player_name = name
@@ -467,10 +472,12 @@ func _on_patch_completed(_result: int, response_code: int, _headers: PackedStrin
 func _open_mobile_keyboard() -> void:
 	if OS.get_name() != "Web":
 		return
-	_js_keyboard_cb = JavaScriptBridge.create_callback(func(args: Array):
-		if args.size() > 0 and is_instance_valid(_name_input):
-			_name_input.text = str(args[0])
-			_name_input.caret_column = _name_input.text.length()
+	_js_keyboard_cb = JavaScriptBridge.create_callback(func(_args: Array):
+		if is_instance_valid(_name_input):
+			var val = JavaScriptBridge.eval("document.getElementById('_gkb')?.value??''")
+			if val is String:
+				_name_input.text = val
+				_name_input.caret_column = _name_input.text.length()
 	)
 	var window := JavaScriptBridge.get_interface("window")
 	window._godotKbCb = _js_keyboard_cb
