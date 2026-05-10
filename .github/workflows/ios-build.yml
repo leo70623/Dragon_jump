@@ -117,8 +117,12 @@ jobs:
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           mkdir -p build "$IPA_EXPORT_PATH"
+
+          xcodebuild -version
+          xcodebuild -showsdks
+          xcodebuild -list -project "$XCODE_PROJECT"
 
           SCHEME="$(xcodebuild -list -project "$XCODE_PROJECT" | awk '/Schemes:/{getline; gsub(/^[ \t]+|[ \t]+$/, ""); print; exit}')"
           if [ -z "$SCHEME" ]; then
@@ -128,7 +132,20 @@ jobs:
           fi
           echo "Using Xcode scheme: $SCHEME"
 
-          xcodebuild archive \
+          xcodebuild -showBuildSettings \
+            -project "$XCODE_PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Development" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PROVISIONING_PROFILE="$PROFILE_UUID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID"
+
+          set +e
+          xcodebuild -verbose archive \
             -project "$XCODE_PROJECT" \
             -scheme "$SCHEME" \
             -configuration Release \
@@ -141,7 +158,14 @@ jobs:
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             PROVISIONING_PROFILE="$PROFILE_UUID" \
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
-            PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID"
+            PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID" \
+            2>&1 | tee "$RUNNER_TEMP/xcodebuild-archive.log"
+          ARCHIVE_STATUS="${PIPESTATUS[0]}"
+          set -e
+          if [ "$ARCHIVE_STATUS" -ne 0 ]; then
+            echo "xcodebuild archive failed with exit code $ARCHIVE_STATUS"
+            exit "$ARCHIVE_STATUS"
+          fi
 
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -165,10 +189,20 @@ jobs:
           </plist>
           EOF
 
-          xcodebuild -exportArchive \
+          cat "$RUNNER_TEMP/ExportOptions.plist"
+
+          set +e
+          xcodebuild -verbose -exportArchive \
             -archivePath "$ARCHIVE_PATH" \
             -exportPath "$IPA_EXPORT_PATH" \
-            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            2>&1 | tee "$RUNNER_TEMP/xcodebuild-export.log"
+          EXPORT_STATUS="${PIPESTATUS[0]}"
+          set -e
+          if [ "$EXPORT_STATUS" -ne 0 ]; then
+            echo "xcodebuild -exportArchive failed with exit code $EXPORT_STATUS"
+            exit "$EXPORT_STATUS"
+          fi
 
           ls -lah "$IPA_EXPORT_PATH"
 
