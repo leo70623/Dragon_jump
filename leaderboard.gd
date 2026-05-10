@@ -280,11 +280,13 @@ func _on_name_ok() -> void:
 	var raw: String = _name_input.text
 	print("[DEBUG] _name_input.text = '%s'" % raw)
 	if OS.get_name() == "Web":
-		var val = JavaScriptBridge.eval("(document.getElementById('_gkb')||{value:''}).value")
-		print("[DEBUG] JS _gkb value = '%s' (type: %s)" % [val, typeof(val)])
-		if val is String:
-			raw = val
-			print("[DEBUG] Using JS value: '%s'" % raw)
+		var elem = JavaScriptBridge.eval("document.getElementById('_gkb')")
+		if elem != null:
+			var val = JavaScriptBridge.eval("document.getElementById('_gkb').value")
+			print("[DEBUG] JS _gkb value = '%s' (type: %s)" % [val, typeof(val)])
+			if val is String:
+				raw = val
+				print("[DEBUG] Using JS value: '%s'" % raw)
 	var name := raw.strip_edges().substr(0, 20)
 	print("[DEBUG] Final name after strip/substr = '%s'" % name)
 	if name == "":
@@ -489,6 +491,7 @@ func _open_mobile_keyboard() -> void:
 	if OS.get_name() != "Web":
 		print("[DEBUG] Not Web, returning")
 		return
+
 	_js_keyboard_cb = JavaScriptBridge.create_callback(func(_args: Array):
 		print("[DEBUG] JS callback triggered with args: %s" % _args)
 		if is_instance_valid(_name_input):
