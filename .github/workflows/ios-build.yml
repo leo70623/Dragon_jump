@@ -146,6 +146,7 @@ jobs:
       - name: Export iOS Xcode project with Godot
         run: |
           set -euo pipefail
+          cat export_presets.cfg
           rm -rf "$EXPORT_DIR"
           mkdir -p "$EXPORT_DIR"
           set +e
