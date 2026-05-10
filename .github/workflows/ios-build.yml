@@ -64,6 +64,8 @@ jobs:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          IOS_BUNDLE_ID: ${{ env.IOS_BUNDLE_ID }}
         run: |
           set -euo pipefail
           CERTIFICATE_PATH="$RUNNER_TEMP/apple_development.p12"
@@ -78,16 +80,31 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security import "$CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
           security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
 
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           security cms -D -i "$PROFILE_PATH" > "$RUNNER_TEMP/profile.plist"
           PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print UUID' "$RUNNER_TEMP/profile.plist")"
           PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print Name' "$RUNNER_TEMP/profile.plist")"
+          PROFILE_TEAM_ID="$(/usr/libexec/PlistBuddy -c 'Print TeamIdentifier:0' "$RUNNER_TEMP/profile.plist")"
+          PROFILE_APP_ID="$(/usr/libexec/PlistBuddy -c 'Print Entitlements:application-identifier' "$RUNNER_TEMP/profile.plist")"
           cp "$PROFILE_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+          if [ "$PROFILE_TEAM_ID" != "$APPLE_TEAM_ID" ]; then
+            echo "Provisioning profile team '$PROFILE_TEAM_ID' does not match APPLE_TEAM_ID '$APPLE_TEAM_ID'"
+            exit 1
+          fi
+
+          if [ "$PROFILE_APP_ID" != "$APPLE_TEAM_ID.$IOS_BUNDLE_ID" ] && [ "$PROFILE_APP_ID" != "$APPLE_TEAM_ID.*" ]; then
+            echo "Provisioning profile app id '$PROFILE_APP_ID' does not match '$APPLE_TEAM_ID.$IOS_BUNDLE_ID' or '$APPLE_TEAM_ID.*'"
+            exit 1
+          fi
 
           echo "PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
           echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          echo "Installed provisioning profile: $PROFILE_NAME ($PROFILE_UUID)"
 
       - name: Export iOS Xcode project with Godot
         run: |
@@ -115,11 +132,14 @@ jobs:
             -project "$XCODE_PROJECT" \
             -scheme "$SCHEME" \
             -configuration Release \
+            -sdk iphoneos \
             -archivePath "$ARCHIVE_PATH" \
             -destination "generic/platform=iOS" \
+            -allowProvisioningUpdates \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Development" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PROVISIONING_PROFILE="$PROFILE_UUID" \
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID"
 
@@ -137,8 +157,10 @@ jobs:
             <key>provisioningProfiles</key>
             <dict>
               <key>$IOS_BUNDLE_ID</key>
-              <string>$PROFILE_NAME</string>
+              <string>$PROFILE_UUID</string>
             </dict>
+            <key>compileBitcode</key>
+            <false/>
           </dict>
           </plist>
           EOF
