@@ -107,6 +107,8 @@ jobs:
           echo "Installed provisioning profile: $PROFILE_NAME ($PROFILE_UUID)"
 
       - name: Prepare iOS export preset for CI
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
           ruby <<'RUBY'
@@ -118,13 +120,14 @@ jobs:
             exit 1
           end
 
+          team_id = ENV.fetch("APPLE_TEAM_ID")
           bundle_id = ENV.fetch("IOS_BUNDLE_ID")
 
           text.sub!(preset) do |block|
             block
               .gsub(/^custom_template\/debug=.*/, %(custom_template/debug=""))
               .gsub(/^custom_template\/release=.*/, %(custom_template/release=""))
-              .gsub(/^application\/app_store_team_id=.*/, %(application/app_store_team_id=""))
+              .gsub(/^application\/app_store_team_id=.*/, %(application/app_store_team_id="#{team_id}"))
               .gsub(/^application\/export_method_debug=.*/, "application/export_method_debug=0")
               .gsub(/^application\/export_method_release=.*/, "application/export_method_release=0")
               .gsub(/^application\/code_sign_identity_debug=.*/, %(application/code_sign_identity_debug=""))
