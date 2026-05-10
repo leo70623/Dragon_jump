@@ -1,0 +1,158 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  GODOT_VERSION: "4.6.2"
+  GODOT_STATUS: stable
+  GODOT_TEMPLATE_VERSION: "4.6.2.stable"
+  IOS_PRESET: iOS
+  IOS_BUNDLE_ID: com.leo.notsouglydragon
+  EXPORT_DIR: ios-build
+  XCODE_PROJECT: ios-build/notsouglydragon_v1.xcodeproj
+  ARCHIVE_PATH: build/DragonJump.xcarchive
+  IPA_EXPORT_PATH: build/ipa
+
+jobs:
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot
+        run: |
+          set -euo pipefail
+          GODOT_ZIP="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_macos.universal.zip"
+          GODOT_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/${GODOT_ZIP}"
+
+          curl -L "$GODOT_URL" -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+
+          GODOT_APP="$(/usr/bin/find "$RUNNER_TEMP/godot" -name 'Godot*.app' -type d -print -quit)"
+          if [ -z "$GODOT_APP" ]; then
+            echo "Godot.app not found after unzip"
+            exit 1
+          fi
+
+          GODOT_BIN="$GODOT_APP/Contents/MacOS/Godot"
+          chmod +x "$GODOT_BIN"
+          echo "GODOT_BIN=$GODOT_BIN" >> "$GITHUB_ENV"
+
+      - name: Install Godot export templates
+        run: |
+          set -euo pipefail
+          TEMPLATE_ZIP="Godot_v${GODOT_VERSION}-${GODOT_STATUS}_export_templates.tpz"
+          TEMPLATE_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_STATUS}/${TEMPLATE_ZIP}"
+          TEMPLATE_DIR="$HOME/Library/Application Support/Godot/export_templates/${GODOT_TEMPLATE_VERSION}"
+
+          curl -L "$TEMPLATE_URL" -o "$RUNNER_TEMP/export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/export_templates.tpz" -d "$RUNNER_TEMP/export_templates"
+          mkdir -p "$TEMPLATE_DIR"
+          cp -R "$RUNNER_TEMP/export_templates/templates/." "$TEMPLATE_DIR/"
+
+      - name: Import Apple signing assets
+        env:
+          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERTIFICATE_PATH="$RUNNER_TEMP/apple_development.p12"
+          PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+
+          echo "$APPLE_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          echo "$APPLE_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          security cms -D -i "$PROFILE_PATH" > "$RUNNER_TEMP/profile.plist"
+          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print UUID' "$RUNNER_TEMP/profile.plist")"
+          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print Name' "$RUNNER_TEMP/profile.plist")"
+          cp "$PROFILE_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+          echo "PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
+          echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+
+      - name: Export iOS Xcode project with Godot
+        run: |
+          set -euo pipefail
+          rm -rf "$EXPORT_DIR"
+          mkdir -p "$EXPORT_DIR"
+          "$GODOT_BIN" --headless --verbose --export-release "$IOS_PRESET" "$XCODE_PROJECT"
+
+      - name: Build IPA with Xcode
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p build "$IPA_EXPORT_PATH"
+
+          SCHEME="$(xcodebuild -list -project "$XCODE_PROJECT" | awk '/Schemes:/{getline; gsub(/^[ \t]+|[ \t]+$/, ""); print; exit}')"
+          if [ -z "$SCHEME" ]; then
+            echo "No Xcode scheme found in $XCODE_PROJECT"
+            xcodebuild -list -project "$XCODE_PROJECT"
+            exit 1
+          fi
+          echo "Using Xcode scheme: $SCHEME"
+
+          xcodebuild archive \
+            -project "$XCODE_PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -archivePath "$ARCHIVE_PATH" \
+            -destination "generic/platform=iOS" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Development" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            PRODUCT_BUNDLE_IDENTIFIER="$IOS_BUNDLE_ID"
+
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>development</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>teamID</key>
+            <string>$APPLE_TEAM_ID</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>$IOS_BUNDLE_ID</key>
+              <string>$PROFILE_NAME</string>
+            </dict>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportPath "$IPA_EXPORT_PATH" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
+
+          ls -lah "$IPA_EXPORT_PATH"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dragon-jump-ios-ipa
+          path: build/ipa/*.ipa
+          if-no-files-found: error
