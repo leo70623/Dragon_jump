@@ -102,19 +102,15 @@ func _recalc_touch_dir() -> void:
 func _get_move_direction() -> float:
 	if OS.has_feature("mobile"):
 		var gravity := Input.get_accelerometer()
-		# iOS portrait 模式：向右傾斜 gravity.x 為負，需要取負號
-		var tilt: float = -gravity.x
+		print("accel raw: ", gravity.x, " | y: ", gravity.y, " | z: ", gravity.z)
 
-		# deadzone：過濾手持時的微小晃動
-		var deadzone := 1.5
+		var tilt: float = -gravity.x
+		var deadzone := 0.3
 		if abs(tilt) < deadzone:
 			return 0.0
 
-		# deadzone 之外的有效傾斜範圍（最大約 9.8）
 		var effective := tilt - (deadzone * sign(tilt))
 		var max_effective := 9.8 - deadzone
-
-		# 非線性曲線（平方），小傾斜精細、大傾斜快速
 		var normalized := clampf(effective / max_effective, -1.0, 1.0)
 		return sign(normalized) * pow(abs(normalized), 0.7)
 	return Input.get_axis("ui_left", "ui_right")
