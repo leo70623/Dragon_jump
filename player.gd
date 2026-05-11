@@ -102,13 +102,12 @@ func _recalc_touch_dir() -> void:
 func _get_move_direction() -> float:
 	if OS.has_feature("mobile"):
 		var gravity := Input.get_accelerometer()
-		print("accel raw: ", gravity.x, " | y: ", gravity.y, " | z: ", gravity.z)
-
-		var tilt: float = -gravity.x
-		var deadzone := 0.3
+		# iOS portrait：右傾 gravity.x 為負，左傾為正
+		# 用 gravity.x（不取負號）讓右傾往右走
+		var tilt: float = gravity.x
+		var deadzone := 0.5
 		if abs(tilt) < deadzone:
 			return 0.0
-
 		var effective := tilt - (deadzone * sign(tilt))
 		var max_effective := 9.8 - deadzone
 		var normalized := clampf(effective / max_effective, -1.0, 1.0)
