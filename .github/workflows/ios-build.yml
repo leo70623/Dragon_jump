@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - feature/v0.8-share-githubpages-ios
 
 env:
   IOS_BUNDLE_ID: com.leo.notsouglydragon
