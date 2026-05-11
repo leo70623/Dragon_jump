@@ -102,7 +102,7 @@ func _recalc_touch_dir() -> void:
 func _get_move_direction() -> float:
 	if OS.has_feature("mobile"):
 		var gravity := Input.get_accelerometer()
-		return clampf(gravity.x / 9.8, -1.0, 1.0)
+		return clampf(gravity.x / 4.0, -1.0, 1.0)
 	return Input.get_axis("ui_left", "ui_right")
 
 func _physics_process(delta: float) -> void:
