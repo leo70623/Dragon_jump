@@ -80,7 +80,7 @@ Main (Node2D + main.gd)
 ```
 
 ## 修改記錄
-## 2026-05-11 v0.9 更新內容
+### 2026-05-11 v0.9 更新內容
 - iOS 強制直向（Portrait）顯示
 - App Icon 套用（iOS: assets/ios-appstore-1024.png）
 - 重力感應操控（手機傾斜控制角色，編輯器/Web 保持鍵盤）
