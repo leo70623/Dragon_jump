@@ -97,6 +97,12 @@ func _recalc_touch_dir() -> void:
 	else:
 		_touch_dir = 0.0
 
+func _get_move_direction() -> float:
+	if OS.has_feature("mobile"):
+		var gravity := Input.get_accelerometer()
+		return clampf(-gravity.x / 9.8, -1.0, 1.0)
+	return Input.get_axis("ui_left", "ui_right")
+
 func _physics_process(delta: float) -> void:
 	if _boost_timer > 0.0:
 		_boost_timer -= delta
@@ -106,8 +112,7 @@ func _physics_process(delta: float) -> void:
 			_spawn_afterimage()
 	velocity.y += GRAVITY * delta
 
-	var key_dir := Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-	var dir := clampf(_touch_dir + key_dir, -1.0, 1.0)
+	var dir := _get_move_direction()
 	velocity.x = dir * MOVE_SPEED
 
 	if dir > 0.05:
