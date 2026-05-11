@@ -47,6 +47,8 @@ func play_death_sfx() -> void:
 		_sfx_death.play()
 
 func _input(event: InputEvent) -> void:
+	if OS.has_feature("mobile"):
+		return  # 手機平台不處理觸控輸入，改由重力感應控制
 	if event is InputEventScreenTouch:
 		var half_w := get_viewport_rect().size.x * 0.5
 		if event.pressed:
