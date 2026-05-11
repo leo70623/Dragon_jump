@@ -33,6 +33,16 @@ jobs:
           sudo ln -sf /Applications/Godot.app/Contents/MacOS/Godot /usr/local/bin/godot
           godot --version
 
+      - name: Download Godot export templates
+        run: |
+          TEMPLATE_VERSION="4.4.1.stable"
+          TEMPLATE_DIR="$HOME/Library/Application Support/Godot/export_templates/$TEMPLATE_VERSION"
+          mkdir -p "$TEMPLATE_DIR"
+          wget -q https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz -O /tmp/templates.tpz
+          unzip -q /tmp/templates.tpz -d /tmp/godot_templates
+          cp /tmp/godot_templates/templates/ios.zip "$TEMPLATE_DIR/ios.zip"
+          echo "iOS export template installed."
+
       - name: Export iOS project with Godot
         run: |
           mkdir -p ios-build
