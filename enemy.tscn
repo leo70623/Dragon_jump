@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c3enemyx5yqmb"]
 
 [ext_resource type="Script" path="res://enemy.gd" id="1_enemy"]
-[ext_resource type="Texture2D" path="res://assets/enemies/enemy_idle.png" id="2_tex"]
+[ext_resource type="Texture2D" path="res://assets/platforms/dark_cloud_idle.png" id="2_tex"]
 [ext_resource type="Texture2D" path="res://assets/enemies/enemy_hit.png" id="3_hit"]
 [ext_resource type="Shader" path="res://assets/enemies/enemy_sweep.gdshader" id="4_shader"]
 
@@ -12,14 +12,6 @@ region = Rect2(0, 0, 512, 512)
 [sub_resource type="AtlasTexture" id="AT_1"]
 atlas = ExtResource("2_tex")
 region = Rect2(512, 0, 512, 512)
-
-[sub_resource type="AtlasTexture" id="AT_2"]
-atlas = ExtResource("2_tex")
-region = Rect2(1024, 0, 512, 512)
-
-[sub_resource type="AtlasTexture" id="AT_3"]
-atlas = ExtResource("2_tex")
-region = Rect2(1536, 0, 512, 512)
 
 [sub_resource type="AtlasTexture" id="AT_4"]
 atlas = ExtResource("3_hit")
@@ -41,12 +33,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AT_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AT_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AT_3")
 }],
 "loop": true,
 "name": &"idle",
@@ -70,8 +56,9 @@ animations = [{
 [sub_resource type="ShaderMaterial" id="ShaderMat_1"]
 shader = ExtResource("4_shader")
 
-[sub_resource type="RectangleShape2D" id="RS_1"]
-size = Vector2(20, 20)
+[sub_resource type="CapsuleShape2D" id="CS_1"]
+radius = 18.0
+height = 22.0
 
 [node name="Enemy" type="CharacterBody2D"]
 collision_layer = 2
@@ -79,9 +66,9 @@ collision_mask = 1
 script = ExtResource("1_enemy")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.125, 0.125)
+scale = Vector2(0.15, 0.15)
 material = SubResource("ShaderMat_1")
 sprite_frames = SubResource("SF_1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("RS_1")
+shape = SubResource("CS_1")
