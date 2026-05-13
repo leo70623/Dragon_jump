@@ -58,7 +58,10 @@ var _dev_input: LineEdit = null
 var _status_label: Label = null
 
 func _ready() -> void:
-	var safe_top := DisplayServer.get_display_safe_area().position.y
+	var _vp_scale := get_viewport().get_screen_transform().get_scale().y
+	if _vp_scale <= 0.0:
+		_vp_scale = 1.0
+	var safe_top := DisplayServer.get_display_safe_area().position.y / _vp_scale
 
 	var life_tex: Texture2D = load("res://assets/ui/life_01.png")
 	var icon_scale := Vector2(0.25, 0.25)
