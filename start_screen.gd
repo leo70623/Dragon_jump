@@ -67,7 +67,8 @@ func _ready() -> void:
 	_welcome_label.add_theme_constant_override("shadow_offset_x", 2)
 	_welcome_label.add_theme_constant_override("shadow_offset_y", 2)
 	_welcome_label.custom_minimum_size = Vector2(180, 32)
-	_welcome_label.position = Vector2(vp.x - 188.0, 65.0)
+	var safe_top := DisplayServer.get_display_safe_area().position.y
+	_welcome_label.position = Vector2(vp.x - 188.0, safe_top + 8.0)
 	_welcome_label.pressed.connect(_on_change_name_pressed)
 	$UI.add_child(_welcome_label)
 	_update_welcome_text()

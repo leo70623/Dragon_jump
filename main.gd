@@ -58,13 +58,15 @@ var _dev_input: LineEdit = null
 var _status_label: Label = null
 
 func _ready() -> void:
+	var safe_top := DisplayServer.get_display_safe_area().position.y
+
 	var life_tex: Texture2D = load("res://assets/ui/life_01.png")
 	var icon_scale := Vector2(0.25, 0.25)
 	var tex_size := life_tex.get_size() if life_tex else Vector2(128, 128)
 	var display_size := tex_size * icon_scale
 
 	var x_start: float = 16.0 + display_size.x * 0.5
-	var icon_y: float = 133.0 + display_size.y * 0.5
+	var icon_y: float = safe_top + 50.0 + display_size.y * 0.5
 	var x_step: float = display_size.x + 6.0
 
 	for i in MAX_LIVES:
@@ -76,6 +78,8 @@ func _ready() -> void:
 		hearts.append(spr)
 	_update_hearts_ui()
 
+	score_label.offset_top = safe_top + 8.0
+	score_label.offset_bottom = safe_top + 58.0
 	score_label.text = "Score  0"
 
 	var vp := get_viewport_rect().size
@@ -137,7 +141,7 @@ func _ready() -> void:
 		game_over_screen.visible = true
 
 	_status_label = Label.new()
-	_status_label.position = Vector2(8.0, 107.0)
+	_status_label.position = Vector2(8.0, safe_top + 8.0)
 	_status_label.add_theme_font_size_override("font_size", 20)
 	_ui.add_child(_status_label)
 
