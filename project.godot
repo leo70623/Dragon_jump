@@ -15,8 +15,10 @@ run/main_scene="res://start_screen.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://icon.svg"
 application/boot_splash/bg_color=Color(0, 0, 0, 1)
-application/boot_splash/show_image=false
+application/boot_splash/show_image=true
+application/boot_splash/image="res://assets/splash_black.png"
 application/boot_splash/minimum_display_time=0
+application/boot_splash/fullsize=true
 
 [autoload]
 
