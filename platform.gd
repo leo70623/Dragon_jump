@@ -17,8 +17,7 @@ const _TEX_BROWN_02: Texture2D = preload("res://assets/platforms/brown_cloud_02.
 const _TEX_BROWN_03: Texture2D = preload("res://assets/platforms/brown_cloud_03.png")
 const _TEX_CRUMBLE_01: Texture2D = preload("res://assets/platforms/cloud_crumbling_01.png")
 const _TEX_CRUMBLE_02: Texture2D = preload("res://assets/platforms/cloud_crumbling_02.png")
-const _TEX_DARK_01: Texture2D = preload("res://assets/platforms/dark_cloud_01.png")
-const _TEX_DARK_02: Texture2D = preload("res://assets/platforms/dark_cloud_02.png")
+const _TEX_DARK_IDLE: Texture2D = preload("res://assets/platforms/dark_cloud_idle.png")
 const _TEX_DARK_HIT: Texture2D = preload("res://assets/platforms/dark_cloud_hit.png")
 const _TEX_METAL: Texture2D = preload("res://assets/platforms/metal_cloud.png")
 
@@ -109,8 +108,14 @@ func _setup_sprite_frames() -> void:
 	frames.add_animation("dark")
 	frames.set_animation_speed("dark", 6.0)
 	frames.set_animation_loop("dark", true)
-	frames.add_frame("dark", _TEX_DARK_01)
-	frames.add_frame("dark", _TEX_DARK_02)
+	var atlas_1 := AtlasTexture.new()
+	atlas_1.atlas = _TEX_DARK_IDLE
+	atlas_1.region = Rect2(0, 0, 512, 512)
+	var atlas_2 := AtlasTexture.new()
+	atlas_2.atlas = _TEX_DARK_IDLE
+	atlas_2.region = Rect2(512, 0, 512, 512)
+	frames.add_frame("dark", atlas_1)
+	frames.add_frame("dark", atlas_2)
 
 	frames.add_animation("dark_hit")
 	frames.set_animation_speed("dark_hit", 1.0)
