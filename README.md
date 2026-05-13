@@ -80,6 +80,15 @@ Main (Node2D + main.gd)
 ```
 
 ## 修改記錄
+## 2026-05-14（feature/v1.0-accelerometer-portrait-icon-darkcloud）
+
+- **iOS 強制直向**：export_presets.cfg 加入 Portrait plist，project.godot 設定 window/handheld/orientation=1
+- **App Icon**：iOS 所有 icon 欄位指向 assets/ios-appstore-1024.png
+- **重力感應操控**：手機平台改用 Input.get_accelerometer()，修正方向與靈敏度（gravity.x / 4.0），編輯器/Web fallback 鍵盤
+- **GitHub Actions**：加入 Godot headless export + iOS export template 下載，確保每次 build 使用最新 code
+- **Safe Area 修正**：Score、Hearts、Welcome 使用 DisplayServer.get_display_safe_area() 動態避開 iPhone 動態島
+- **Dark cloud 換新圖**：改用 spritesheet（dark_cloud_idle.png），scale 0.15，待修碰撞死亡觸發問題
+
 ### 2026-05-11 v0.9 更新內容
 - iOS 強制直向（Portrait）顯示
 - App Icon 套用（iOS: assets/ios-appstore-1024.png）
