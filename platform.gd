@@ -82,6 +82,8 @@ func _setup_sprite_frames() -> void:
 	var tex_w: float = _TEX_CLOUD_01.get_width()
 	var tex_h: float = _TEX_CLOUD_01.get_height()
 	_anim.scale = Vector2(CLOUD_W / tex_w, CLOUD_H / tex_h)
+	if platform_type == Type.DAMAGE:
+		_anim.scale = Vector2(0.15, 0.15)
 
 	var frames := SpriteFrames.new()
 
