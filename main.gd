@@ -64,7 +64,7 @@ func _ready() -> void:
 	var display_size := tex_size * icon_scale
 
 	var x_start: float = 16.0 + display_size.x * 0.5
-	var icon_y: float = 74.0 + display_size.y * 0.5
+	var icon_y: float = 133.0 + display_size.y * 0.5
 	var x_step: float = display_size.x + 6.0
 
 	for i in MAX_LIVES:
@@ -137,7 +137,7 @@ func _ready() -> void:
 		game_over_screen.visible = true
 
 	_status_label = Label.new()
-	_status_label.position = Vector2(8.0, 48.0)
+	_status_label.position = Vector2(8.0, 107.0)
 	_status_label.add_theme_font_size_override("font_size", 20)
 	_ui.add_child(_status_label)
 
