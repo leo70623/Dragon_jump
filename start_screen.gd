@@ -93,8 +93,8 @@ func _build_title() -> void:
 	if w1 > vp_w * 0.95:
 		fs1 = int(float(fs1) * vp_w * 0.95 / w1)
 		fs2 = int(float(fs2) * vp_w * 0.95 / w1)
-	_add_line(_LINE1, fs1, 60.0, font)
-	_add_line(_LINE2, fs2, 150.0, font)
+	_add_line(_LINE1, fs1, 80.0, font)
+	_add_line(_LINE2, fs2, 170.0, font)
 
 func _add_line(text: String, font_size: int, base_y: float, font: Font) -> void:
 	var vp_w := get_viewport_rect().size.x
