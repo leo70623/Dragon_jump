@@ -76,14 +76,14 @@ Main (Node2D + main.gd)
     ├── characters/             (Idle.png, Jump.png, jump_up/down/land.png, …)
     ├── backgrounds/            (BG_01.png ～ BG_04.png, BG_start.png)
     ├── platforms/              (cloud_normal_idle.png, cloud_brown_idle.png,
-    │                            cloud_brown_crumbling.png, cloud_brick_idle.png,
-    │                            cloud_dark_idle.png, cloud_dark_hit.png)
+    │                           cloud_brown_crumbling.png, cloud_brick_idle.png,
+    │                           cloud_dark_idle.png, cloud_dark_hit.png)
     ├── enemies/                (enemy_hit.png, enemy_idle.png, game_over_spin.png)
     ├── ui/                     (life_01.png)
     └── audio/
         ├── music/              (bgm_01.mp3, start_music.mp3)
         └── sfx/                (jump.wav, crumble.wav, brick_hit.wav, death.wav,
-                                 enemy_crush.wav, death_shout.mp3, spin.wav)
+                                enemy_crush.wav, death_shout.mp3, spin.wav)
 ```
 
 ## 修改記錄
