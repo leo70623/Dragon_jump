@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://kotmv156ebaf"
-path="res://.godot/imported/cloud_dark_idle.png-c3bb45b58838c2df5fa8eaac82a06940.ctex"
+path="res://.godot/imported/cloud_dark_idle.png-1aa856f87b968c37b8ee6bb869c94792.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/platforms/cloud_dark_idle.png"
-dest_files=["res://.godot/imported/cloud_dark_idle.png-c3bb45b58838c2df5fa8eaac82a06940.ctex"]
+dest_files=["res://.godot/imported/cloud_dark_idle.png-1aa856f87b968c37b8ee6bb869c94792.ctex"]
 
 [params]
 

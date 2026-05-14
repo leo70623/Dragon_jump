@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcolsc8dld7yr"
-path="res://.godot/imported/cloud_dark_hit.png-58417d909183cb0972dfeaf7eee87c92.ctex"
+uid="uid://bba4lxlgmf3h4"
+path="res://.godot/imported/splash_black.png-cf57e5be7bcf7fda5ec78de562cd3c5b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/platforms/cloud_dark_hit.png"
-dest_files=["res://.godot/imported/cloud_dark_hit.png-58417d909183cb0972dfeaf7eee87c92.ctex"]
+source_file="res://assets/splash_black.png"
+dest_files=["res://.godot/imported/splash_black.png-cf57e5be7bcf7fda5ec78de562cd3c5b.ctex"]
 
 [params]
 

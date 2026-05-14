@@ -80,6 +80,15 @@ Main (Node2D + main.gd)
 ```
 
 ## 修改記錄
+
+## 2026-05-15（feature/v1.1-score-combo-cloud-sprites）
+
+- **分數機制重做**：起始分數改為 0，上升 100px = +2 分，踩到 enemy +10 分，踩到 brown cloud +1 分
+- **Combo 系統**：每次落地點比上次更高累加 combo，落地點下降或被擊中重置為 0；combo ≥ 3 時右上角顯示炫彩「COMBO x3!」動畫；combo 加成公式：每 100px 得 2+（combo-2）分
+- **Cloud 圖片更新**：所有平台雲改用 spritesheet（512×256 每幀），包含 cloud_normal_idle、cloud_brown_idle、cloud_brown_crumbling、cloud_brick_idle
+- **Dark cloud 更新**：改用 cloud_dark_idle.png + cloud_dark_hit.png spritesheet，scale 0.125，檔名統一命名規則
+- **檔案命名統一**：dark_cloud_* 重命名為 cloud_dark_*
+
 ## 2026-05-14（feature/v1.0-accelerometer-portrait-icon-darkcloud）
 
 - **iOS 強制直向**：export_presets.cfg 加入 Portrait plist，project.godot 設定 window/handheld/orientation=1
