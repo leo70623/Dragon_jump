@@ -83,7 +83,7 @@ func _setup_sprite_frames() -> void:
 	var tex_h: float = _TEX_CLOUD_01.get_height()
 	_anim.scale = Vector2(CLOUD_W / tex_w, CLOUD_H / tex_h)
 	if platform_type == Type.DAMAGE:
-		_anim.scale = Vector2(0.15, 0.15)
+		_anim.scale = Vector2(0.125, 0.125)
 
 	var frames := SpriteFrames.new()
 
@@ -135,7 +135,7 @@ func _setup_collision_shapes() -> void:
 	_col.shape = body_shape
 
 	var area_shape := RectangleShape2D.new()
-	area_shape.size = Vector2(80.0, 20.0)
+	area_shape.size = Vector2(67.0, 17.0)
 	_area_col.shape = area_shape
 
 func _process(delta: float) -> void:
