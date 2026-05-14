@@ -199,7 +199,7 @@ func _process(delta: float) -> void:
 	var vp_h := get_viewport_rect().size.y
 
 	var bonus := max(0, combo - 2)
-	var new_score := int((start_y - player.position.y) / 100.0) * (2 + bonus)
+	var new_score: int = int((start_y - player.position.y) / 100.0) * (2 + bonus)
 	if new_score > score:
 		score = new_score
 		score_label.text = "Score  " + str(score)
