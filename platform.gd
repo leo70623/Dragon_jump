@@ -9,17 +9,12 @@ const CLOUD_H := 50.0
 const BRICK_W := 110.0
 const BRICK_H := 60.0
 
-const _TEX_CLOUD_01: Texture2D = preload("res://assets/platforms/cloud_01.png")
-const _TEX_CLOUD_02: Texture2D = preload("res://assets/platforms/cloud_02.png")
-const _TEX_CLOUD_03: Texture2D = preload("res://assets/platforms/cloud_03.png")
-const _TEX_BROWN_01: Texture2D = preload("res://assets/platforms/brown_cloud_01.png")
-const _TEX_BROWN_02: Texture2D = preload("res://assets/platforms/brown_cloud_02.png")
-const _TEX_BROWN_03: Texture2D = preload("res://assets/platforms/brown_cloud_03.png")
-const _TEX_CRUMBLE_01: Texture2D = preload("res://assets/platforms/cloud_crumbling_01.png")
-const _TEX_CRUMBLE_02: Texture2D = preload("res://assets/platforms/cloud_crumbling_02.png")
+const _TEX_NORMAL_IDLE: Texture2D = preload("res://assets/platforms/cloud_normal_idle.png")
+const _TEX_BROWN_IDLE: Texture2D = preload("res://assets/platforms/cloud_brown_idle.png")
+const _TEX_BROWN_CRUMBLE: Texture2D = preload("res://assets/platforms/cloud_brown_crumbling.png")
+const _TEX_BRICK_IDLE: Texture2D = preload("res://assets/platforms/cloud_brick_idle.png")
 const _TEX_DARK_IDLE: Texture2D = preload("res://assets/platforms/dark_cloud_idle.png")
 const _TEX_DARK_HIT: Texture2D = preload("res://assets/platforms/dark_cloud_hit.png")
-const _TEX_METAL: Texture2D = preload("res://assets/platforms/metal_cloud.png")
 
 var platform_type: Type = Type.NORMAL
 var speed: float = 0.0
@@ -65,23 +60,15 @@ func _ready() -> void:
 			_area.body_entered.connect(_on_area_body_entered)
 			_anim.play("dark")
 		Type.BRICK:
-			_anim.visible = false
-			_sprite.visible = true
+			_sprite.visible = false
 			_area.monitoring = false
 			_area.collision_mask = 0
 			_col.one_way_collision = false
 			half_w = BRICK_W * 0.5
-			_sprite.texture = _TEX_METAL
-			if _sprite.texture:
-				var tex_size: Vector2 = _sprite.texture.get_size()
-				_sprite.scale = Vector2(BRICK_W / tex_size.x, BRICK_H / tex_size.y)
-			else:
-				push_error("[BRICK] metal_cloud.png failed to load at res://assets/platforms/metal_cloud.png")
+			_anim.play("metal")
 
 func _setup_sprite_frames() -> void:
-	var tex_w: float = _TEX_CLOUD_01.get_width()
-	var tex_h: float = _TEX_CLOUD_01.get_height()
-	_anim.scale = Vector2(CLOUD_W / tex_w, CLOUD_H / tex_h)
+	_anim.scale = Vector2(120.0 / 512.0, 50.0 / 256.0)
 	if platform_type == Type.DAMAGE:
 		_anim.scale = Vector2(0.125, 0.125)
 
@@ -90,22 +77,38 @@ func _setup_sprite_frames() -> void:
 	frames.add_animation("normal")
 	frames.set_animation_speed("normal", 6.0)
 	frames.set_animation_loop("normal", true)
-	frames.add_frame("normal", _TEX_CLOUD_01)
-	frames.add_frame("normal", _TEX_CLOUD_02)
-	frames.add_frame("normal", _TEX_CLOUD_03)
+	for i in 3:
+		var a := AtlasTexture.new()
+		a.atlas = _TEX_NORMAL_IDLE
+		a.region = Rect2(i * 512, 0, 512, 256)
+		frames.add_frame("normal", a)
 
 	frames.add_animation("brown")
 	frames.set_animation_speed("brown", 6.0)
 	frames.set_animation_loop("brown", true)
-	frames.add_frame("brown", _TEX_BROWN_01)
-	frames.add_frame("brown", _TEX_BROWN_02)
-	frames.add_frame("brown", _TEX_BROWN_03)
+	for i in 3:
+		var a := AtlasTexture.new()
+		a.atlas = _TEX_BROWN_IDLE
+		a.region = Rect2(i * 512, 0, 512, 256)
+		frames.add_frame("brown", a)
 
 	frames.add_animation("crumble")
 	frames.set_animation_speed("crumble", 8.0)
 	frames.set_animation_loop("crumble", false)
-	frames.add_frame("crumble", _TEX_CRUMBLE_01)
-	frames.add_frame("crumble", _TEX_CRUMBLE_02)
+	for i in 3:
+		var a := AtlasTexture.new()
+		a.atlas = _TEX_BROWN_CRUMBLE
+		a.region = Rect2(i * 512, 0, 512, 256)
+		frames.add_frame("crumble", a)
+
+	frames.add_animation("metal")
+	frames.set_animation_speed("metal", 6.0)
+	frames.set_animation_loop("metal", true)
+	for i in 3:
+		var a := AtlasTexture.new()
+		a.atlas = _TEX_BRICK_IDLE
+		a.region = Rect2(i * 512, 0, 512, 256)
+		frames.add_frame("metal", a)
 
 	frames.add_animation("dark")
 	frames.set_animation_speed("dark", 6.0)
