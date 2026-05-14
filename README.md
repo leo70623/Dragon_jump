@@ -1,63 +1,63 @@
 # Dragon Jump
+以 Godot 4.6 開發的垂直卷軸跳躍遊戲，風格參考 Doodle Jump。
 
-A Doodle Jump-style vertical scroller built with **Godot 4.6**.
+* 專案名稱：`dragon_test`
+* 渲染器：GL Compatibility
+* 設計解析度：360 x 640（9:16），stretch mode `canvas_items / expand`（手機優化）
+* 物理引擎：Jolt Physics
 
-- Project name: `dragon_test`
-- Renderer: GL Compatibility
-- Design resolution: 360 x 640 (9:16), stretch mode `canvas_items / expand` (mobile)
-- Physics: Jolt Physics
-
-## How to run
-
-```
+## 如何執行
 godot --path /Users/chlienoi-imac/Desktop/dragon_jump
-```
 
-Then press **F5** to run the project or **F6** to run the current scene.
+按 F5 執行專案，或 F6 執行當前場景。
 
-## Scene tree (main.tscn)
-
-```
+## 場景結構（main.tscn）
 Main (Node2D + main.gd)
 ├── Camera2D
 │   └── Background (Sprite2D)
-├── Player        (instance of player.tscn)
+├── Player        (player.tscn 實例)
 ├── BGM           (AudioStreamPlayer)
-├── Platforms     (Node2D — dynamic platform container)
-├── Enemies       (Node2D — dynamic enemy container)
+├── Platforms     (Node2D — 動態平台容器)
+├── Enemies       (Node2D — 動態敵人容器)
 └── UI            (CanvasLayer)
     ├── ScoreLabel
+    ├── ComboLabel
     └── GameOverScreen
         ├── Overlay
         ├── GameOverTitle
         ├── FinalScoreLabel
         ├── HintLabel
         └── CooldownLabel
-```
 
-## Key features
+## 主要功能
 
-- **龍角色跳躍** — 加速度計 (mobile) 或鍵盤左右鍵控制，自動彈跳
-- **平台類型**
-  - 普通 (NORMAL): 白雲，可無限踩踏
-  - 崩解 (CRUMBLE): 棕雲，踩踏後延遲崩落
-  - 黑雲 (DAMAGE): 下沉，觸碰即觸發死亡
-  - 磚塊 (BRICK): 金屬平台，可頂頭碰觸
-- **敵人系統**
-  - 踩踏敵人頭頂 → 彈跳消滅（骨牌連跳）
-  - 側面/底部碰撞 → 扣命死亡
-- **背景圖四張輪換** — 每 200 分漸變切換 (BG_01 ~ BG_04)，0.5 秒淡入淡出
-- **音效系統** — 起跳 / 踩踏 / 死亡 / spin / 崩裂音效，各自獨立 AudioStreamPlayer
-- **生命值系統** — 5 顆愛心，歸零後 30 分鐘自動回復一顆
-- **Firebase Firestore 全球排行榜**
-  - Godot HTTPRequest 直接呼叫 REST API（無 JavaScriptBridge 依賴）
-  - 排行榜 autoload singleton (`Leaderboard`)，於 start_screen 和 game over 均可開啟
-  - 僅在新高分時 PATCH 更新
-- **玩家名稱設定** — 儲存於 `user://player.cfg` (ConfigFile)，首次啟動自動彈出輸入視窗
+* **角色操控** — 加速度計（手機傾斜）或鍵盤左右鍵控制，自動彈跳
+* **分數系統**
+  * 起始 0 分，每上升 100px +2 分
+  * 踩到敵人 +10 分
+  * 踩到棕雲 +1 分
+* **Combo 系統**
+  * 每次落地點比上次更高則累加 combo，否則重置
+  * Combo ≥ 3 時右上角顯示炫彩「COMBO x3!」動畫
+  * Combo 加成：每 100px 得 2+（combo-2）分
+* **平台類型**
+  * 普通（NORMAL）：白雲，可無限踩踏
+  * 崩解（CRUMBLE）：棕雲，踩踏後延遲崩落，踩中 +1 分
+  * 黑雲（DAMAGE）：下沉，觸碰即觸發死亡
+  * 磚塊（BRICK）：磚塊雲，可頂頭碰觸，無法穿越
+* **敵人系統**
+  * 從正上方踩頭 → 彈跳消滅 +10 分
+  * 側面／底部碰撞 → 扣命，combo 重置
+* **背景切換** — 每 200 分漸變切換（BG_01 ～ BG_04），0.5 秒淡入淡出
+* **音效系統** — 跳躍／踩踏／死亡／spin／崩裂音效，各自獨立 AudioStreamPlayer
+* **生命值系統** — 5 顆愛心，歸零後 30 分鐘自動回復一顆
+* **Firebase Firestore 全球排行榜**
+  * 以 Godot HTTPRequest 直接呼叫 REST API（無 JavaScriptBridge 依賴）
+  * 排行榜 autoload singleton（`Leaderboard`），於開始畫面和 Game Over 均可開啟
+  * 僅在新高分時 PATCH 更新
+* **玩家名稱設定** — 儲存於 `user://player.cfg`（ConfigFile），首次啟動自動彈出輸入視窗
 
 ## 資料夾結構
-
-```
 /
 ├── main.gd / main.tscn
 ├── player.gd / player.tscn
@@ -69,15 +69,16 @@ Main (Node2D + main.gd)
 ├── project.godot
 └── assets/
     ├── characters/             (Idle.png, Jump.png, jump_up/down/land.png, …)
-    ├── backgrounds/            (BG_01.png ~ BG_04.png, BG_start.png)
-    ├── platforms/              (cloud_01~03, brown_cloud_01~03, dark_cloud_01~02, …)
-    ├── enemies/                (enemy_01.png, game_over_spin.png)
+    ├── backgrounds/            (BG_01.png ～ BG_04.png, BG_start.png)
+    ├── platforms/              (cloud_normal_idle.png, cloud_brown_idle.png,
+    │                            cloud_brown_crumbling.png, cloud_brick_idle.png,
+    │                            cloud_dark_idle.png, cloud_dark_hit.png)
+    ├── enemies/                (enemy_hit.png, enemy_idle.png, game_over_spin.png)
     ├── ui/                     (life_01.png)
     └── audio/
         ├── music/              (bgm_01.mp3, start_music.mp3)
         └── sfx/                (jump.wav, crumble.wav, brick_hit.wav, death.wav,
                                  enemy_crush.wav, death_shout.mp3, spin.wav)
-```
 
 ## 修改記錄
 
