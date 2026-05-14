@@ -89,8 +89,8 @@ func _ready() -> void:
 	player.position = Vector2(vp.x * 0.5, vp.y - 120.0)
 	camera.position = Vector2(vp.x * 0.5, player.position.y - vp.y * 0.15)
 	start_y = player.position.y
-	score = 100
-	start_y = player.position.y + float(score) * 100.0
+	score = 0
+	start_y = player.position.y
 	score_label.text = "Score  " + str(score)
 
 	if background.texture:
@@ -113,6 +113,7 @@ func _ready() -> void:
 
 	player.landed_on.connect(_on_player_landed_on)
 	player.damaged.connect(_on_player_damaged)
+	player.enemy_crushed.connect(_on_enemy_crushed)
 	_restart_btn.pressed.connect(_on_restart_btn_pressed)
 
 	if _bgm.stream is AudioStreamMP3:
@@ -184,7 +185,7 @@ func _process(delta: float) -> void:
 
 	var vp_h := get_viewport_rect().size.y
 
-	var new_score := int((start_y - player.position.y) / 100.0)
+	var new_score := int((start_y - player.position.y) / 100.0) * 2
 	if new_score > score:
 		score = new_score
 		score_label.text = "Score  " + str(score)
@@ -217,6 +218,8 @@ func _on_player_landed_on(platform: Node) -> void:
 		return
 	if platform.platform_type == Platform.Type.CRUMBLE:
 		platform.start_crumble()
+		score += 1
+		score_label.text = "Score  " + str(score)
 
 func _update_hearts_ui() -> void:
 	for i in MAX_LIVES:
@@ -532,6 +535,10 @@ func _on_dev_ok_pressed() -> void:
 func _on_enemy_stomped() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
 		_sfx_enemy_crush.play()
+
+func _on_enemy_crushed() -> void:
+	score += 10
+	score_label.text = "Score  " + str(score)
 
 func _try_spawn_item(pos: Vector2) -> void:
 	var item := ITEM_SCENE.instantiate()

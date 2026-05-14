@@ -13,6 +13,7 @@ const Platform := preload("res://platform.gd")
 signal landed_on(platform: Node)
 signal ceiling_hit(platform: Node)
 signal damaged
+signal enemy_crushed
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -134,6 +135,7 @@ func _physics_process(delta: float) -> void:
 			if n.y < -0.7:
 				collider.die()
 				velocity.y = JUMP_VELOCITY
+				enemy_crushed.emit()
 			else:
 				collider.hit_player.emit()
 			continue
