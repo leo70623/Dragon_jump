@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcolsc8dld7yr"
-path="res://.godot/imported/dark_cloud_hit.png-36f7eb0798589f06caafab0155e51ab1.ctex"
+uid="uid://kotmv156ebaf"
+path="res://.godot/imported/cloud_dark_idle.png-c3bb45b58838c2df5fa8eaac82a06940.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/platforms/dark_cloud_hit.png"
-dest_files=["res://.godot/imported/dark_cloud_hit.png-36f7eb0798589f06caafab0155e51ab1.ctex"]
+source_file="res://assets/platforms/cloud_dark_idle.png"
+dest_files=["res://.godot/imported/cloud_dark_idle.png-c3bb45b58838c2df5fa8eaac82a06940.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://op99thmbhda8"
-path="res://.godot/imported/cloud_brown_crumbling.png-eb70c636980f6f95ccd6b0d20e6f7420.ctex"
+uid="uid://oqbathmbhda8"
+path="res://.godot/imported/cloud_brown_crumbling.png-9b2d7db14057ec691bd4cfab832e7b72.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/platforms/cloud_brown_crumbling.png"
-dest_files=["res://.godot/imported/cloud_brown_crumbling.png-eb70c636980f6f95ccd6b0d20e6f7420.ctex"]
+dest_files=["res://.godot/imported/cloud_brown_crumbling.png-9b2d7db14057ec691bd4cfab832e7b72.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://a7ti8k1uths9"
-path="res://.godot/imported/cloud_normal_idle.png-6c356a67860b843eecb0e564552934a3.ctex"
+uid="uid://7ti8k1uthta"
+path="res://.godot/imported/cloud_normal_idle.png-243c7f3590238e9b7685e4a5c9809e12.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/platforms/cloud_normal_idle.png"
-dest_files=["res://.godot/imported/cloud_normal_idle.png-6c356a67860b843eecb0e564552934a3.ctex"]
+dest_files=["res://.godot/imported/cloud_normal_idle.png-243c7f3590238e9b7685e4a5c9809e12.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ndf64yggxbyz"
-path="res://.godot/imported/cloud_brown_idle.png-4aa60cc5a92cbd1c69fa2c169a8fec44.ctex"
+uid="uid://ndf64yggxby0"
+path="res://.godot/imported/cloud_brown_idle.png-792257809539c9522fa37e333d134ae9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/platforms/cloud_brown_idle.png"
-dest_files=["res://.godot/imported/cloud_brown_idle.png-4aa60cc5a92cbd1c69fa2c169a8fec44.ctex"]
+dest_files=["res://.godot/imported/cloud_brown_idle.png-792257809539c9522fa37e333d134ae9.ctex"]
 
 [params]
 

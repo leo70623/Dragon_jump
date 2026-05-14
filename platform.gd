@@ -13,8 +13,8 @@ const _TEX_NORMAL_IDLE: Texture2D = preload("res://assets/platforms/cloud_normal
 const _TEX_BROWN_IDLE: Texture2D = preload("res://assets/platforms/cloud_brown_idle.png")
 const _TEX_BROWN_CRUMBLE: Texture2D = preload("res://assets/platforms/cloud_brown_crumbling.png")
 const _TEX_BRICK_IDLE: Texture2D = preload("res://assets/platforms/cloud_brick_idle.png")
-const _TEX_DARK_IDLE: Texture2D = preload("res://assets/platforms/dark_cloud_idle.png")
-const _TEX_DARK_HIT: Texture2D = preload("res://assets/platforms/dark_cloud_hit.png")
+const _TEX_DARK_IDLE: Texture2D = preload("res://assets/platforms/cloud_dark_idle.png")
+const _TEX_DARK_HIT: Texture2D = preload("res://assets/platforms/cloud_dark_hit.png")
 
 var platform_type: Type = Type.NORMAL
 var speed: float = 0.0
