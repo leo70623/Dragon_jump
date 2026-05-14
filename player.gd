@@ -14,6 +14,7 @@ signal landed_on(platform: Node)
 signal ceiling_hit(platform: Node)
 signal damaged
 signal enemy_crushed
+signal landed(landing_y: float)
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -141,6 +142,7 @@ func _physics_process(delta: float) -> void:
 			continue
 		if n.y < -0.5 and not was_on_floor:
 			landed_on.emit(collider)
+			landed.emit(global_position.y)
 			just_landed = true
 			if "platform_type" in collider:
 				match collider.platform_type:

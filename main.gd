@@ -43,6 +43,9 @@ var hearts: Array[Sprite2D] = []
 var next_spawn_y: float = 0.0
 var score: int = 0
 var start_y: float = 0.0
+var combo: int = 0
+var last_landing_y: float = 0.0
+var combo_base_score: int = 2
 var game_over_flag: bool = false
 var _last_two_types: Array[int] = []
 var _y_since_last_white: float = 0.0
@@ -93,6 +96,15 @@ func _ready() -> void:
 	start_y = player.position.y
 	score_label.text = "Score  " + str(score)
 
+	var combo_label := Label.new()
+	combo_label.name = "ComboLabel"
+	combo_label.add_theme_font_size_override("font_size", 32)
+	combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	combo_label.position = Vector2(vp.x - 160, safe_top + 8)
+	combo_label.visible = false
+	combo_label.modulate = Color(1, 0.8, 0, 1)
+	$UI.add_child(combo_label)
+
 	if background.texture:
 		var bg_tex_size := background.texture.get_size()
 		background.scale = Vector2(vp.x / bg_tex_size.x, vp.y / bg_tex_size.y)
@@ -114,6 +126,7 @@ func _ready() -> void:
 	player.landed_on.connect(_on_player_landed_on)
 	player.damaged.connect(_on_player_damaged)
 	player.enemy_crushed.connect(_on_enemy_crushed)
+	player.landed.connect(_on_player_landed)
 	_restart_btn.pressed.connect(_on_restart_btn_pressed)
 
 	if _bgm.stream is AudioStreamMP3:
@@ -185,7 +198,8 @@ func _process(delta: float) -> void:
 
 	var vp_h := get_viewport_rect().size.y
 
-	var new_score := int((start_y - player.position.y) / 100.0) * 2
+	var bonus := max(0, combo - 2)
+	var new_score := int((start_y - player.position.y) / 100.0) * (2 + bonus)
 	if new_score > score:
 		score = new_score
 		score_label.text = "Score  " + str(score)
@@ -480,6 +494,8 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 func _on_player_damaged() -> void:
 	if game_over_flag or _invincible_timer > 0.0:
 		return
+	combo = 0
+	_hide_combo()
 	_show_game_over()
 
 func _setup_dev_ui() -> void:
@@ -539,6 +555,36 @@ func _on_enemy_stomped() -> void:
 func _on_enemy_crushed() -> void:
 	score += 10
 	score_label.text = "Score  " + str(score)
+
+func _on_player_landed(landing_y: float) -> void:
+	if last_landing_y == 0.0:
+		last_landing_y = landing_y
+		return
+	if landing_y < last_landing_y:
+		combo += 1
+		_show_combo()
+	else:
+		combo = 0
+		_hide_combo()
+	last_landing_y = landing_y
+
+func _show_combo() -> void:
+	if combo < 3:
+		_hide_combo()
+		return
+	var lbl := $UI/ComboLabel as Label
+	lbl.text = "COMBO x" + str(combo) + "!"
+	lbl.visible = true
+	var tween := create_tween()
+	tween.tween_property(lbl, "scale", Vector2(1.3, 1.3), 0.1)
+	tween.tween_property(lbl, "scale", Vector2(1.0, 1.0), 0.1)
+	var colors := [Color(1, 0.2, 0.2), Color(1, 0.8, 0), Color(0.2, 1, 0.2), Color(0.2, 0.8, 1), Color(0.8, 0.2, 1)]
+	lbl.modulate = colors[combo % colors.size()]
+
+func _hide_combo() -> void:
+	var lbl := $UI/ComboLabel as Label
+	if lbl:
+		lbl.visible = false
 
 func _try_spawn_item(pos: Vector2) -> void:
 	var item := ITEM_SCENE.instantiate()
