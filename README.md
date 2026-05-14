@@ -12,6 +12,8 @@ godot --path /Users/chlienoi-imac/Desktop/dragon_jump
 按 F5 執行專案，或 F6 執行當前場景。
 
 ## 場景結構（main.tscn）
+
+```
 Main (Node2D + main.gd)
 ├── Camera2D
 │   └── Background (Sprite2D)
@@ -28,6 +30,7 @@ Main (Node2D + main.gd)
         ├── FinalScoreLabel
         ├── HintLabel
         └── CooldownLabel
+```
 
 ## 主要功能
 
@@ -58,6 +61,8 @@ Main (Node2D + main.gd)
 * **玩家名稱設定** — 儲存於 `user://player.cfg`（ConfigFile），首次啟動自動彈出輸入視窗
 
 ## 資料夾結構
+
+```
 /
 ├── main.gd / main.tscn
 ├── player.gd / player.tscn
@@ -79,6 +84,7 @@ Main (Node2D + main.gd)
         ├── music/              (bgm_01.mp3, start_music.mp3)
         └── sfx/                (jump.wav, crumble.wav, brick_hit.wav, death.wav,
                                  enemy_crush.wav, death_shout.mp3, spin.wav)
+```
 
 ## 修改記錄
 
