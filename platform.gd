@@ -120,9 +120,16 @@ func _setup_sprite_frames() -> void:
 	frames.add_frame("dark", atlas_2)
 
 	frames.add_animation("dark_hit")
-	frames.set_animation_speed("dark_hit", 1.0)
+	frames.set_animation_speed("dark_hit", 6.0)
 	frames.set_animation_loop("dark_hit", false)
-	frames.add_frame("dark_hit", _TEX_DARK_HIT)
+	var hit_atlas_1 := AtlasTexture.new()
+	hit_atlas_1.atlas = _TEX_DARK_HIT
+	hit_atlas_1.region = Rect2(0, 0, 512, 512)
+	var hit_atlas_2 := AtlasTexture.new()
+	hit_atlas_2.atlas = _TEX_DARK_HIT
+	hit_atlas_2.region = Rect2(512, 0, 512, 512)
+	frames.add_frame("dark_hit", hit_atlas_1)
+	frames.add_frame("dark_hit", hit_atlas_2)
 
 	_anim.sprite_frames = frames
 
