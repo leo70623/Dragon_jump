@@ -345,7 +345,7 @@ func _on_restart_btn_pressed() -> void:
 
 func _get_spacing() -> float:
 	if score < 200:
-		return randf_range(55.0, 80.0)
+		return randf_range(60.0, 75.0)
 	var level := score / 100
 	var sp_min := minf(SPACING_MIN + level * SPACING_LEVEL_STEP, SPACING_MIN_CAP)
 	var sp_max := minf(SPACING_MAX + level * SPACING_LEVEL_STEP * 1.3, SPACING_MAX_CAP)
@@ -365,11 +365,14 @@ func _create_platform(x: float, y: float, ptype: int) -> Node2D:
 	var p: Node2D = PLATFORM_SCENE.instantiate() as Node2D
 	p.position = Vector2(x, y)
 	p.platform_type = ptype
-	var level := score / 100
-	var move_chance := minf(0.30 + level * 0.15, 0.85)
-	if randf() < move_chance and ptype != Platform.Type.DAMAGE:
-		p.speed = minf(80.0 + level * 25.0, 220.0)
-		p.direction = 1.0 if randf() > 0.5 else -1.0
+	if score < 200:
+		p.speed = 0.0
+	else:
+		var level := score / 100
+		var move_chance := minf(0.30 + level * 0.15, 0.85)
+		if randf() < move_chance and ptype != Platform.Type.DAMAGE:
+			p.speed = minf(80.0 + level * 25.0, 220.0)
+			p.direction = 1.0 if randf() > 0.5 else -1.0
 	if ptype == Platform.Type.DAMAGE:
 		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
 	platforms_node.add_child(p)
@@ -489,13 +492,12 @@ func _pick_constrained_type() -> int:
 		var b_haz := b == Platform.Type.CRUMBLE or b == Platform.Type.DAMAGE
 		if a_haz and b_haz:
 			return Platform.Type.NORMAL if randf() < 0.85 else Platform.Type.BRICK
+	if score < 200:
+		return Platform.Type.NORMAL if randf() < 0.9 else Platform.Type.CRUMBLE
 	if _last_two_types.size() > 0 and _last_two_types.back() == Platform.Type.BRICK:
 		var candidate := _pick_platform_type()
 		return candidate if candidate != Platform.Type.BRICK else Platform.Type.NORMAL
-	var result := _pick_platform_type()
-	if score < 200 and result == Platform.Type.BRICK:
-		return Platform.Type.NORMAL
-	return result
+	return _pick_platform_type()
 
 func _pick_platform_type() -> int:
 	var level := score / 100
