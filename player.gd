@@ -28,6 +28,7 @@ var _touch_dir: float = 0.0
 var _touch_active: Dictionary = {}  # finger index -> bool (true = left half)
 var _boost_timer: float = 0.0
 var _afterimage_timer: float = 0.0
+var _just_landed: bool = false
 
 func _ready() -> void:
 	collision_mask = collision_mask | 2
@@ -127,7 +128,6 @@ func _physics_process(delta: float) -> void:
 	var was_on_floor := is_on_floor()
 	move_and_slide()
 
-	var just_landed := false
 	for i in get_slide_collision_count():
 		var col := get_slide_collision(i)
 		var n := col.get_normal()
@@ -140,10 +140,10 @@ func _physics_process(delta: float) -> void:
 			else:
 				collider.hit_player.emit()
 			continue
-		if n.y < -0.5 and not was_on_floor:
+		if n.y < -0.5 and not was_on_floor and not _just_landed:
 			landed_on.emit(collider)
 			landed.emit(global_position.y)
-			just_landed = true
+			_just_landed = true
 			if "platform_type" in collider:
 				match collider.platform_type:
 					Platform.Type.NORMAL:  _sfx_jump.play()
@@ -154,8 +154,11 @@ func _physics_process(delta: float) -> void:
 			if "platform_type" in collider and collider.platform_type == Platform.Type.BRICK:
 				_sfx_brick.play()
 
-	if just_landed:
+	if _just_landed:
 		_land_timer = LAND_DISPLAY_TIME
+
+	if not is_on_floor():
+		_just_landed = false
 
 	if is_on_floor():
 		velocity.y = JUMP_VELOCITY * (1.4 if _boost_timer > 0.0 else 1.0)
