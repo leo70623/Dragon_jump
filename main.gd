@@ -566,6 +566,13 @@ func _on_enemy_crushed() -> void:
 func _on_player_landed(landing_y: float) -> void:
 	if _skip_combo_check:
 		_skip_combo_check = false
+		combo += 1
+		_show_combo()
+		var bonus: int = max(0, combo - 2)
+		if bonus > 0:
+			score += bonus
+			score_label.text = "Score  " + str(score)
+			_spawn_score_popup("+" + str(bonus), player.global_position, Color(1.0, 0.9, 0.1, 1.0))
 		last_landing_y = landing_y
 		return
 	if last_landing_y == 0.0:
