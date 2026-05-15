@@ -198,8 +198,7 @@ func _process(delta: float) -> void:
 
 	var vp_h := get_viewport_rect().size.y
 
-	var bonus: int = max(0, combo - 2)
-	var new_score: int = int((start_y - player.position.y) / 100.0) * (2 + bonus)
+	var new_score: int = int((start_y - player.position.y) / 100.0) * 2
 	if new_score > score:
 		score = new_score
 		score_label.text = "Score  " + str(score)
@@ -567,6 +566,8 @@ func _on_player_landed(landing_y: float) -> void:
 		_show_combo()
 		var bonus: int = max(0, combo - 2)
 		if bonus > 0:
+			score += bonus
+			score_label.text = "Score  " + str(score)
 			_spawn_score_popup("+" + str(bonus), player.global_position, Color(1.0, 0.9, 0.1, 1.0))
 	else:
 		combo = 0
