@@ -23,7 +23,7 @@ func _physics_process(delta: float) -> void:
 	global_position.y = cloud_ref.global_position.y - cloud_half_h - 32.0  # 32.0 = 512 * 0.125 / 2
 	if speed > 0.0:
 		position.x += speed * direction * delta
-		$AnimatedSprite2D.flip_h = direction < 0.0
+		$AnimatedSprite2D.flip_h = direction > 0.0
 		var cloud_left: float = cloud_ref.position.x - 50.0
 		var cloud_right: float = cloud_ref.position.x + 50.0
 		if position.x > cloud_right:

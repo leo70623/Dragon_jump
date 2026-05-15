@@ -133,7 +133,7 @@ func _physics_process(delta: float) -> void:
 		var n := col.get_normal()
 		var collider := col.get_collider()
 		if collider.is_in_group("enemy"):
-			if n.y < -0.7:
+			if n.y < -0.5:
 				collider.die()
 				velocity.y = JUMP_VELOCITY
 				enemy_crushed.emit()
