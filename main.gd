@@ -60,6 +60,7 @@ var _bg_paths: Array[String] = ["res://assets/backgrounds/BG_01.png", "res://ass
 var _dev_panel: Control = null
 var _dev_input: LineEdit = null
 var _status_label: Label = null
+var _last_was_double: bool = false
 
 func _ready() -> void:
 	var _vp_scale := get_viewport().get_screen_transform().get_scale().y
@@ -358,6 +359,63 @@ func _no_overlap(x: float, y: float) -> bool:
 			return false
 	return true
 
+func _create_platform(x: float, y: float, ptype: int) -> Node2D:
+	var p: Node2D = PLATFORM_SCENE.instantiate() as Node2D
+	p.position = Vector2(x, y)
+	p.platform_type = ptype
+	var level := score / 100
+	var move_chance := minf(0.30 + level * 0.15, 0.85)
+	if randf() < move_chance and ptype != Platform.Type.DAMAGE:
+		p.speed = minf(80.0 + level * 25.0, 220.0)
+		p.direction = 1.0 if randf() > 0.5 else -1.0
+	if ptype == Platform.Type.DAMAGE:
+		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
+	platforms_node.add_child(p)
+	_try_spawn_enemy(p, ptype)
+	return p
+
+func _get_double_params() -> Dictionary:
+	if score < 100:
+		return {"chance": 0.0, "y_min": 0.0, "y_max": 0.0}
+	elif score < 300:
+		return {"chance": 0.15, "y_min": 10.0, "y_max": 15.0}
+	elif score < 500:
+		return {"chance": 0.25, "y_min": 8.0, "y_max": 18.0}
+	else:
+		return {"chance": 0.35, "y_min": 5.0, "y_max": 20.0}
+
+func _try_spawn_second(y: float, first_x: float, first_type: int) -> void:
+	var params := _get_double_params()
+	var chance: float = params["chance"]
+	if chance == 0.0:
+		return
+	if _last_was_double:
+		_last_was_double = false
+		return
+	if randf() > chance:
+		return
+	var vp_w := get_viewport_rect().size.x
+	var second_x: float
+	if first_x < vp_w / 2.0:
+		second_x = randf_range(220.0, 295.0)
+	else:
+		second_x = randf_range(65.0, 140.0)
+	var y_min: float = params["y_min"]
+	var y_max: float = params["y_max"]
+	var y_offset := randf_range(y_min, y_max)
+	if randf() < 0.5:
+		y_offset = -y_offset
+	var second_y := y + y_offset
+	var second_type: int
+	if first_type == Platform.Type.DAMAGE:
+		second_type = Platform.Type.NORMAL
+	else:
+		second_type = _pick_platform_type()
+		if second_type == Platform.Type.DAMAGE:
+			second_type = Platform.Type.NORMAL
+	_create_platform(second_x, second_y, second_type)
+	_last_was_double = true
+
 func _spawn_platform(y: float) -> void:
 	var vp_w := get_viewport_rect().size.x
 	var ptype := _pick_constrained_type()
@@ -366,25 +424,14 @@ func _spawn_platform(y: float) -> void:
 			if "platform_type" in child and absf((child as Node2D).position.y - y) < 80.0:
 				ptype = Platform.Type.NORMAL
 				break
-	var p := PLATFORM_SCENE.instantiate()
 
 	var spawn_x: float = randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
 	for _try in 5:
 		if _no_overlap(spawn_x, y):
 			break
 		spawn_x = randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
-	p.position = Vector2(spawn_x, y)
-	p.platform_type = ptype
 
-	var level := score / 100
-	var move_chance := minf(0.30 + level * 0.15, 0.85)
-	if randf() < move_chance and ptype != Platform.Type.DAMAGE:
-		p.speed = minf(80.0 + level * 25.0, 220.0)
-		p.direction = 1.0 if randf() > 0.5 else -1.0
-
-	if ptype == Platform.Type.DAMAGE:
-		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
-	platforms_node.add_child(p)
+	var p := _create_platform(spawn_x, y, ptype)
 
 	if score >= 100 and ptype == Platform.Type.NORMAL:
 		_item_counter += 1
@@ -392,20 +439,14 @@ func _spawn_platform(y: float) -> void:
 			_item_counter = 0
 			_try_spawn_item(Vector2(p.position.x, camera.position.y - randf_range(50.0, 200.0)))
 
-	_try_spawn_enemy(p, ptype)
-
 	var has_companion: bool = false
 	if ptype == Platform.Type.DAMAGE:
-		var px: float = (p as Node2D).position.x
+		var px: float = p.position.x
 		var comp_x: float = px + 130.0 if px + 130.0 <= vp_w - PLATFORM_MARGIN \
 				else maxf(PLATFORM_MARGIN, px - 130.0)
 		if not _no_overlap(comp_x, y):
 			comp_x = px - 130.0 if px - 130.0 >= PLATFORM_MARGIN else px + 130.0
-		var pw := PLATFORM_SCENE.instantiate()
-		pw.position = Vector2(comp_x, y)
-		pw.platform_type = Platform.Type.NORMAL
-		platforms_node.add_child(pw)
-		_try_spawn_enemy(pw, Platform.Type.NORMAL)
+		_create_platform(comp_x, y, Platform.Type.NORMAL)
 		has_companion = true
 
 	if ptype == Platform.Type.BRICK:
@@ -415,10 +456,7 @@ func _spawn_platform(y: float) -> void:
 			if _no_overlap(comp_x, comp_y):
 				break
 			comp_x = randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
-		var pw := PLATFORM_SCENE.instantiate()
-		pw.position = Vector2(comp_x, comp_y)
-		pw.platform_type = Platform.Type.NORMAL
-		platforms_node.add_child(pw)
+		_create_platform(comp_x, comp_y, Platform.Type.NORMAL)
 		has_companion = true
 
 	var spacing := maxf(0.0, _last_spawn_y - y)
@@ -430,6 +468,8 @@ func _spawn_platform(y: float) -> void:
 		_y_since_last_white = 0.0
 	else:
 		_y_since_last_white += spacing
+
+	_try_spawn_second(y, spawn_x, ptype)
 
 func _pick_constrained_type() -> int:
 	if _y_since_last_white >= JUMP_HEIGHT * 0.6:
