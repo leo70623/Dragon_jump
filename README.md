@@ -90,6 +90,19 @@ Main (Node2D + main.gd)
 
 ## 2026-05-15（feature/v1.1-score-combo-cloud-sprites）
 
+- **分數系統重做**：起始 0 分，上升 100px = +2 分，踩敵人 +10 分，踩棕雲 +1 分
+- **Combo 系統**：落地點比上次更高累加 combo，否則重置；combo ≥ 3 右上角顯示炫彩動畫；加成公式每 100px 得 2+（combo-2）分；踩 crumble/敵人不中斷 combo
+- **浮動加分數字**：combo bonus（黃色）、踩敵人/crumble（淺藍）從角色位置飄上去，含描邊+彈跳動畫
+- **Cloud 圖片全面更新**：spritesheet 格式（512×256 每幀），包含 cloud_normal_idle、cloud_brown_idle、cloud_brown_crumbling、cloud_brick_idle
+- **Dark cloud 更新**：cloud_dark_idle + cloud_dark_hit spritesheet，scale 0.125
+- **Combo 字型**：DynaPuff，右上角顯示，水平位置修正
+- **背景切換修正**：所有加分路徑都呼叫 _check_bg_switch()
+- **Enemy 修正**：踩踏判定放寬（n.y < -0.5），走路方向修正，brick cloud 高度校正
+- **加速度計靈敏度**：調整為 gravity.x / 2.5
+- **Safe Area**：Score、Hearts、Welcome 動態避開 iPhone 動態島
+
+## 2026-05-15（feature/v1.1-score-combo-cloud-sprites）
+
 - **分數機制重做**：起始分數改為 0，上升 100px = +2 分，踩到 enemy +10 分，踩到 brown cloud +1 分
 - **Combo 系統**：每次落地點比上次更高累加 combo，落地點下降或被擊中重置為 0；combo ≥ 3 時右上角顯示炫彩「COMBO x3!」動畫；combo 加成公式：每 100px 得 2+（combo-2）分
 - **Cloud 圖片更新**：所有平台雲改用 spritesheet（512×256 每幀），包含 cloud_normal_idle、cloud_brown_idle、cloud_brown_crumbling、cloud_brick_idle
