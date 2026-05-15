@@ -344,6 +344,8 @@ func _on_restart_btn_pressed() -> void:
 		get_tree().reload_current_scene()
 
 func _get_spacing() -> float:
+	if score < 200:
+		return randf_range(55.0, 80.0)
 	var level := score / 100
 	var sp_min := minf(SPACING_MIN + level * SPACING_LEVEL_STEP, SPACING_MIN_CAP)
 	var sp_max := minf(SPACING_MAX + level * SPACING_LEVEL_STEP * 1.3, SPACING_MAX_CAP)
@@ -490,7 +492,10 @@ func _pick_constrained_type() -> int:
 	if _last_two_types.size() > 0 and _last_two_types.back() == Platform.Type.BRICK:
 		var candidate := _pick_platform_type()
 		return candidate if candidate != Platform.Type.BRICK else Platform.Type.NORMAL
-	return _pick_platform_type()
+	var result := _pick_platform_type()
+	if score < 200 and result == Platform.Type.BRICK:
+		return Platform.Type.NORMAL
+	return result
 
 func _pick_platform_type() -> int:
 	var level := score / 100
