@@ -234,6 +234,7 @@ func _on_player_landed_on(platform: Node) -> void:
 		platform.start_crumble()
 		score += 1
 		score_label.text = "Score  " + str(score)
+		_spawn_score_popup("+1", player.global_position + Vector2(0, 30), Color(0.4, 0.85, 1.0, 1.0))
 
 func _update_hearts_ui() -> void:
 	for i in MAX_LIVES:
@@ -555,6 +556,7 @@ func _on_enemy_stomped() -> void:
 func _on_enemy_crushed() -> void:
 	score += 10
 	score_label.text = "Score  " + str(score)
+	_spawn_score_popup("+10", player.global_position, Color(0.4, 0.85, 1.0, 1.0))
 
 func _on_player_landed(landing_y: float) -> void:
 	if last_landing_y == 0.0:
@@ -563,6 +565,9 @@ func _on_player_landed(landing_y: float) -> void:
 	if landing_y < last_landing_y:
 		combo += 1
 		_show_combo()
+		var bonus: int = max(0, combo - 2)
+		if bonus > 0:
+			_spawn_score_popup("+" + str(bonus), player.global_position, Color(1.0, 0.9, 0.1, 1.0))
 	else:
 		combo = 0
 		_hide_combo()
@@ -608,6 +613,22 @@ func _check_bg_switch() -> void:
 	if level != _current_bg_level and not _bg_transitioning:
 		_current_bg_level = level
 		_transition_background(level)
+
+func _spawn_score_popup(text: String, world_pos: Vector2, color: Color) -> void:
+	var vp := get_viewport_rect().size
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.add_theme_font_size_override("font_size", 24)
+	lbl.modulate = color
+	lbl.z_index = 10
+	var ui_pos := world_pos - camera.position + Vector2(vp.x * 0.5, vp.y * 0.5)
+	lbl.position = ui_pos
+	$UI.add_child(lbl)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(lbl, "position", ui_pos + Vector2(0, -60), 0.8)
+	tween.tween_property(lbl, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(lbl.queue_free).set_delay(0.8)
 
 func _transition_background(level: int) -> void:
 	_bg_transitioning = true
