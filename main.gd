@@ -238,6 +238,7 @@ func _on_player_landed_on(platform: Node) -> void:
 		score += 1
 		score_label.text = "Score  " + str(score)
 		_spawn_score_popup("+1", player.global_position + Vector2(0, 30), Color(0.4, 0.85, 1.0, 1.0))
+		last_landing_y = player.global_position.y
 
 func _update_hearts_ui() -> void:
 	for i in MAX_LIVES:
@@ -560,6 +561,7 @@ func _on_enemy_crushed() -> void:
 	score += 10
 	score_label.text = "Score  " + str(score)
 	_spawn_score_popup("+10", player.global_position, Color(0.4, 0.85, 1.0, 1.0))
+	last_landing_y = player.global_position.y
 
 func _on_player_landed(landing_y: float) -> void:
 	if last_landing_y == 0.0:
@@ -583,7 +585,7 @@ func _show_combo() -> void:
 		_hide_combo()
 		return
 	var lbl := $UI/ComboLabel as Label
-	lbl.text = "COMBO " + str(combo) + "!"
+	lbl.text = "COMBO " + str(combo)
 	lbl.visible = true
 	var tween := create_tween()
 	tween.tween_property(lbl, "scale", Vector2(1.3, 1.3), 0.1)
