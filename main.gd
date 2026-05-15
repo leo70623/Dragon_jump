@@ -562,6 +562,7 @@ func _on_enemy_crushed() -> void:
 	score += 10
 	score_label.text = "Score  " + str(score)
 	_spawn_score_popup("+10", player.global_position, Color(0.4, 0.85, 1.0, 1.0))
+	_invincible_timer = 0.3
 
 func _on_player_landed(landing_y: float) -> void:
 	if _skip_combo_check:
@@ -578,7 +579,7 @@ func _on_player_landed(landing_y: float) -> void:
 	if last_landing_y == 0.0:
 		last_landing_y = landing_y
 		return
-	if landing_y < last_landing_y:
+	if landing_y < last_landing_y - 10.0:
 		combo += 1
 		_show_combo()
 		var bonus: int = max(0, combo - 2)
