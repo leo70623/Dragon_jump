@@ -237,6 +237,7 @@ func _on_player_landed_on(platform: Node) -> void:
 	if platform.platform_type == Platform.Type.CRUMBLE:
 		platform.start_crumble()
 		score += 1
+		_check_bg_switch()
 		score_label.text = "Score  " + str(score)
 		_spawn_score_popup("+1", player.global_position + Vector2(0, 30), Color(0.4, 0.85, 1.0, 1.0))
 		_skip_combo_check = true
@@ -549,6 +550,7 @@ func _on_dev_ok_pressed() -> void:
 	var new_score := _dev_input.text.to_int()
 	if new_score >= 0:
 		score = new_score
+		_check_bg_switch()
 		start_y = player.position.y + float(score) * 100.0
 		score_label.text = "Score  " + str(score)
 	if _dev_panel:
@@ -560,6 +562,7 @@ func _on_enemy_stomped() -> void:
 
 func _on_enemy_crushed() -> void:
 	score += 10
+	_check_bg_switch()
 	score_label.text = "Score  " + str(score)
 	_spawn_score_popup("+10", player.global_position, Color(0.4, 0.85, 1.0, 1.0))
 	_invincible_timer = 0.3
@@ -572,6 +575,7 @@ func _on_player_landed(landing_y: float) -> void:
 		var bonus: int = max(0, combo - 2)
 		if bonus > 0:
 			score += bonus
+			_check_bg_switch()
 			score_label.text = "Score  " + str(score)
 			_spawn_score_popup("+" + str(bonus), player.global_position, Color(1.0, 0.9, 0.1, 1.0))
 		last_landing_y = landing_y
@@ -585,6 +589,7 @@ func _on_player_landed(landing_y: float) -> void:
 		var bonus: int = max(0, combo - 2)
 		if bonus > 0:
 			score += bonus
+			_check_bg_switch()
 			score_label.text = "Score  " + str(score)
 			_spawn_score_popup("+" + str(bonus), player.global_position, Color(1.0, 0.9, 0.1, 1.0))
 	else:
