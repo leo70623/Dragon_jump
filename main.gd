@@ -643,10 +643,17 @@ func _spawn_score_popup(text: String, world_pos: Vector2, color: Color) -> void:
 	var ui_pos := world_pos - camera.position + Vector2(vp.x * 0.5, vp.y * 0.5)
 	lbl.position = ui_pos
 	$UI.add_child(lbl)
+	lbl.add_theme_constant_override("outline_size", 6)
+	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	lbl.add_theme_constant_override("shadow_offset_x", 2)
+	lbl.add_theme_constant_override("shadow_offset_y", 2)
+	lbl.scale = Vector2(1.4, 1.4)
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(lbl, "position", ui_pos + Vector2(0, -60), 0.8)
-	tween.tween_property(lbl, "modulate:a", 0.0, 0.8)
+	tween.tween_property(lbl, "scale", Vector2(1.0, 1.0), 0.15).set_ease(Tween.EASE_OUT)
+	tween.tween_property(lbl, "position", lbl.position + Vector2(0, -60), 0.8)
+	tween.tween_property(lbl, "modulate:a", 0.0, 0.5).set_delay(0.3)
 	tween.tween_callback(lbl.queue_free).set_delay(0.8)
 
 func _transition_background(level: int) -> void:
