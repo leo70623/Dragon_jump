@@ -19,7 +19,7 @@ func _physics_process(delta: float) -> void:
 	if _dead or not is_instance_valid(cloud_ref):
 		return
 	var ptype: int = cloud_ref.get("platform_type") if cloud_ref.get("platform_type") != null else 0
-	var cloud_half_h: float = 30.0 if ptype == 3 else 4.0
+	var cloud_half_h: float = 25.0 if ptype == 3 else 4.0
 	global_position.y = cloud_ref.global_position.y - cloud_half_h - 32.0  # 32.0 = 512 * 0.125 / 2
 	if speed > 0.0:
 		position.x += speed * direction * delta
