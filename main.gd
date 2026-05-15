@@ -407,13 +407,19 @@ func _try_spawn_second(y: float, first_x: float, first_type: int) -> void:
 		y_offset = -y_offset
 	var second_y := y + y_offset
 	var second_type: int
-	if first_type == Platform.Type.DAMAGE:
-		second_type = Platform.Type.NORMAL
+	var second_p: Node2D
+	if score < 200:
+		second_type = Platform.Type.NORMAL if randf() < 0.9 else Platform.Type.CRUMBLE
+		second_p = _create_platform(second_x, second_y, second_type)
+		second_p.speed = 0.0
 	else:
-		second_type = _pick_platform_type()
-		if second_type == Platform.Type.DAMAGE:
+		if first_type == Platform.Type.DAMAGE:
 			second_type = Platform.Type.NORMAL
-	_create_platform(second_x, second_y, second_type)
+		else:
+			second_type = _pick_platform_type()
+			if second_type == Platform.Type.DAMAGE or second_type == Platform.Type.BRICK:
+				second_type = Platform.Type.NORMAL
+		_create_platform(second_x, second_y, second_type)
 	_last_was_double = true
 
 func _spawn_platform(y: float) -> void:
