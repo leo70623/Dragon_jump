@@ -88,6 +88,11 @@ Main (Node2D + main.gd)
 
 ## 修改記錄
 
+## v1.2 難度調整
+- 新增 200 分前新手保護區（白雲 90%、棕雲 10%、平台靜止、間距 60–75px）
+- 新增錯位雙平台機制（_try_spawn_second），依分數分段控制機率與類型
+- 建立難度對應表（docs/difficulty_table.md）
+
 ## 2026-05-15（feature/v1.1-score-combo-cloud-sprites）
 
 - **分數系統重做**：起始 0 分，上升 100px = +2 分，踩敵人 +10 分，踩棕雲 +1 分
