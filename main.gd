@@ -644,7 +644,12 @@ func _spawn_score_popup(text: String, world_pos: Vector2, color: Color) -> void:
 	lbl.position = ui_pos
 	$UI.add_child(lbl)
 	lbl.add_theme_constant_override("outline_size", 6)
-	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	var outline_color: Color
+	if color.r > 0.8 and color.g > 0.7:
+		outline_color = Color(0.6, 0.3, 0.0, 0.8)
+	else:
+		outline_color = Color(0.0, 0.2, 0.5, 0.8)
+	lbl.add_theme_color_override("font_outline_color", outline_color)
 	lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
 	lbl.add_theme_constant_override("shadow_offset_x", 2)
 	lbl.add_theme_constant_override("shadow_offset_y", 2)
