@@ -45,6 +45,7 @@ var score: int = 0
 var start_y: float = 0.0
 var combo: int = 0
 var last_landing_y: float = 0.0
+var _skip_combo_check: bool = false
 var combo_base_score: int = 2
 var game_over_flag: bool = false
 var _last_two_types: Array[int] = []
@@ -238,7 +239,7 @@ func _on_player_landed_on(platform: Node) -> void:
 		score += 1
 		score_label.text = "Score  " + str(score)
 		_spawn_score_popup("+1", player.global_position + Vector2(0, 30), Color(0.4, 0.85, 1.0, 1.0))
-		last_landing_y = player.global_position.y
+		_skip_combo_check = true
 
 func _update_hearts_ui() -> void:
 	for i in MAX_LIVES:
@@ -561,9 +562,13 @@ func _on_enemy_crushed() -> void:
 	score += 10
 	score_label.text = "Score  " + str(score)
 	_spawn_score_popup("+10", player.global_position, Color(0.4, 0.85, 1.0, 1.0))
-	last_landing_y = player.global_position.y
+	_skip_combo_check = true
 
 func _on_player_landed(landing_y: float) -> void:
+	if _skip_combo_check:
+		_skip_combo_check = false
+		last_landing_y = landing_y
+		return
 	if last_landing_y == 0.0:
 		last_landing_y = landing_y
 		return
