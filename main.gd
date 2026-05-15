@@ -98,9 +98,13 @@ func _ready() -> void:
 
 	var combo_label := Label.new()
 	combo_label.name = "ComboLabel"
+	var dynafont = load("res://assets/ui/DynaPuff-Regular.ttf")
+	if dynafont:
+		combo_label.add_theme_font_override("font", dynafont)
 	combo_label.add_theme_font_size_override("font_size", 32)
 	combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	combo_label.position = Vector2(vp.x - 160, safe_top + 8)
+	combo_label.custom_minimum_size = Vector2(190, 0)
+	combo_label.position = Vector2(vp.x - 200, safe_top + 8)
 	combo_label.visible = false
 	combo_label.modulate = Color(1, 0.8, 0, 1)
 	$UI.add_child(combo_label)
@@ -579,7 +583,7 @@ func _show_combo() -> void:
 		_hide_combo()
 		return
 	var lbl := $UI/ComboLabel as Label
-	lbl.text = "COMBO x" + str(combo) + "!"
+	lbl.text = "COMBO " + str(combo) + "!"
 	lbl.visible = true
 	var tween := create_tween()
 	tween.tween_property(lbl, "scale", Vector2(1.3, 1.3), 0.1)
