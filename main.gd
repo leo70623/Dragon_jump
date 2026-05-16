@@ -481,6 +481,20 @@ func _play_fullscreen_score_animation() -> void:
 			tw_pulse.set_loops()
 			tw_pulse.tween_property(game_over_title, "scale", Vector2(1.05, 1.05), 0.5)
 			tw_pulse.tween_property(game_over_title, "scale", Vector2(1.0, 1.0), 0.5)
+			var rainbow_colors: Array[Color] = [
+				Color("#F5C743"),
+				Color("#FF6B6B"),
+				Color("#FF6BFF"),
+				Color("#6B9FFF"),
+				Color("#6BFF6B"),
+				Color("#F5C743"),
+			]
+			var tw_color := create_tween()
+			tw_color.set_loops()
+			for i in range(rainbow_colors.size() - 1):
+				tw_color.tween_method(func(c: Color):
+					game_over_title.add_theme_color_override("font_color", c)
+				, rainbow_colors[i], rainbow_colors[i + 1], 0.3)
 		)
 	)
 
