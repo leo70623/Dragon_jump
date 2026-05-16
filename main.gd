@@ -497,7 +497,7 @@ func _fire_next_firework() -> void:
 	var peak_x := start_x + randf_range(-vp.x * 0.15, vp.x * 0.15)
 	var peak_y := randf_range(vp.y * 0.15, vp.y * 0.45)
 	var colors := [Color("#F5C743"), Color("#FF6B6B"), Color("#6BFF6B"), Color("#6B9FFF"), Color("#FF6BFF")]
-	var color := colors[randi() % colors.size()]
+	var color: Color = colors[randi() % colors.size()]
 	_launch_one_firework(Vector2(start_x, start_y), Vector2(peak_x, peak_y), color)
 	var next_delay := randf_range(0.3, 0.5)
 	get_tree().create_timer(next_delay).timeout.connect(func():
