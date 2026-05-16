@@ -65,6 +65,7 @@ var _status_label: Label = null
 var _last_was_double: bool = false
 var _score_result_handled: bool = false
 var _pending_is_new_record: int = -1  # -1=未知, 0=keep it up, 1=new record
+var _fireworks_active: bool = false
 
 func _ready() -> void:
 	var _vp_scale := get_viewport().get_screen_transform().get_scale().y
@@ -278,6 +279,7 @@ func _show_game_over() -> void:
 	game_over_flag = true
 	_score_result_handled = false
 	_pending_is_new_record = -1
+	_fireworks_active = false
 	_invincible_timer = 0.0
 	player.modulate.a = 1.0
 	player.set_physics_process(false)
@@ -395,6 +397,7 @@ func _spawn_death_spin() -> void:
 
 func _on_restart_btn_pressed() -> void:
 	if game_over_flag and s_lives > 0:
+		_fireworks_active = false
 		get_tree().reload_current_scene()
 
 func _on_score_result(is_new_record: bool) -> void:
@@ -417,7 +420,6 @@ func _try_show_result_title() -> void:
 		game_over_title.visible = false
 		final_score_label.modulate.a = 0.0
 		_play_fullscreen_score_animation()
-		_spawn_fireworks()
 	else:
 		game_over_title.text = "Keep it up!"
 		game_over_title.visible = true
@@ -446,6 +448,7 @@ func _play_fullscreen_score_animation() -> void:
 	big_label.text = "0"
 	game_over_screen.add_child(big_label)
 
+	_start_fireworks_loop()
 	var target := score
 	var tw_count := create_tween()
 	tw_count.tween_method(func(v: float):
@@ -474,7 +477,6 @@ func _play_fullscreen_score_animation() -> void:
 			game_over_title.add_theme_font_size_override("font_size", 36)
 			game_over_title.visible = true
 			_play_record_sfx()
-			_spawn_stars()
 			var tw_pulse := create_tween()
 			tw_pulse.set_loops()
 			tw_pulse.tween_property(game_over_title, "scale", Vector2(1.05, 1.05), 0.5)
@@ -482,31 +484,41 @@ func _play_fullscreen_score_animation() -> void:
 		)
 	)
 
-func _spawn_fireworks() -> void:
-	var launch_positions := [60.0, 140.0, 220.0, 300.0]
+func _start_fireworks_loop() -> void:
+	_fireworks_active = true
+	_fire_next_firework()
+
+func _fire_next_firework() -> void:
+	if not _fireworks_active:
+		return
+	var vp := get_viewport_rect().size
+	var start_x := randf_range(vp.x * 0.1, vp.x * 0.9)
+	var start_y := randf_range(vp.y * 0.75, vp.y * 0.95)
+	var peak_x := start_x + randf_range(-vp.x * 0.15, vp.x * 0.15)
+	var peak_y := randf_range(vp.y * 0.15, vp.y * 0.45)
 	var colors := [Color("#F5C743"), Color("#FF6B6B"), Color("#6BFF6B"), Color("#6B9FFF"), Color("#FF6BFF")]
+	var color := colors[randi() % colors.size()]
+	_launch_one_firework(Vector2(start_x, start_y), Vector2(peak_x, peak_y), color)
+	var next_delay := randf_range(0.3, 0.5)
+	get_tree().create_timer(next_delay).timeout.connect(func():
+		_fire_next_firework()
+	)
 
-	for i in range(4):
-		var delay := i * 0.3
-		get_tree().create_timer(delay).timeout.connect(func():
-			_launch_one_firework(launch_positions[i], colors[i % colors.size()])
-		)
-
-func _launch_one_firework(start_x: float, color: Color) -> void:
+func _launch_one_firework(start: Vector2, peak: Vector2, color: Color) -> void:
 	var rocket := Sprite2D.new()
 	rocket.texture = preload("res://assets/characters/jump_up.png")
-	rocket.scale = Vector2(0.4, 0.4)
-	rocket.position = Vector2(start_x, 700.0)
+	var rand_scale := randf_range(0.25, 0.6)
+	rocket.scale = Vector2(rand_scale, rand_scale)
+	rocket.position = start
 	game_over_screen.add_child(rocket)
 
-	var peak_y := randf_range(100.0, 250.0)
 	var tw := create_tween()
-	tw.tween_property(rocket, "position", Vector2(start_x + randf_range(-30, 30), peak_y), 0.6)
+	tw.tween_property(rocket, "position", peak, 0.6)
 	tw.parallel().tween_property(rocket, "rotation_degrees", 360.0, 0.6)
 
 	tw.tween_callback(func():
 		rocket.queue_free()
-		_explode_firework(Vector2(start_x, peak_y), color)
+		_explode_firework(peak, color)
 	)
 
 func _explode_firework(pos: Vector2, color: Color) -> void:
@@ -528,7 +540,8 @@ func _explode_firework(pos: Vector2, color: Color) -> void:
 		else:
 			var spr := Sprite2D.new()
 			spr.texture = preload("res://assets/characters/jump_land.png")
-			spr.scale = Vector2(0.2, 0.2)
+			var spr_scale := randf_range(0.15, 0.35)
+			spr.scale = Vector2(spr_scale, spr_scale)
 			spr.position = pos
 			game_over_screen.add_child(spr)
 			particle = spr
