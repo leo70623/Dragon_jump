@@ -426,13 +426,13 @@ func _play_fullscreen_score_animation() -> void:
 	big_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	big_label.clip_contents = false
-	big_label.text = "Score: 0"
+	big_label.text = "0"
 	game_over_screen.add_child(big_label)
 
 	var target := score
 	var tw_count := create_tween()
 	tw_count.tween_method(func(v: float):
-		big_label.text = "Score: " + str(int(v))
+		big_label.text = str(int(v))
 	, 0.0, float(target), 2.0)
 
 	tw_count.tween_callback(func():
