@@ -346,10 +346,12 @@ func _on_restart_btn_pressed() -> void:
 func _get_spacing() -> float:
 	if score < 200:
 		return randf_range(60.0, 75.0)
-	var level := score / 100
-	var sp_min := minf(SPACING_MIN + level * SPACING_LEVEL_STEP, SPACING_MIN_CAP)
-	var sp_max := minf(SPACING_MAX + level * SPACING_LEVEL_STEP * 1.3, SPACING_MAX_CAP)
-	return minf(randf_range(sp_min, sp_max), JUMP_HEIGHT * 0.8)
+	elif score < 600:
+		return randf_range(80.0, 100.0)
+	elif score < 1000:
+		return randf_range(100.0, 120.0)
+	else:
+		return randf_range(120.0, 140.0)
 
 func _no_overlap(x: float, y: float) -> bool:
 	for child in platforms_node.get_children():
@@ -365,14 +367,19 @@ func _create_platform(x: float, y: float, ptype: int) -> Node2D:
 	var p: Node2D = PLATFORM_SCENE.instantiate() as Node2D
 	p.position = Vector2(x, y)
 	p.platform_type = ptype
+	var move_chance: float
+	var move_speed: float
 	if score < 200:
-		p.speed = 0.0
+		move_chance = 0.0; move_speed = 0.0
+	elif score < 600:
+		move_chance = 0.20; move_speed = 100.0
+	elif score < 1000:
+		move_chance = 0.30; move_speed = 120.0
 	else:
-		var level := score / 100
-		var move_chance := minf(0.30 + level * 0.15, 0.85)
-		if randf() < move_chance and ptype != Platform.Type.DAMAGE:
-			p.speed = minf(80.0 + level * 25.0, 220.0)
-			p.direction = 1.0 if randf() > 0.5 else -1.0
+		move_chance = 0.40; move_speed = 140.0
+	if randf() < move_chance and ptype != Platform.Type.DAMAGE:
+		p.speed = move_speed
+		p.direction = 1.0 if randf() > 0.5 else -1.0
 	if ptype == Platform.Type.DAMAGE:
 		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
 	platforms_node.add_child(p)
@@ -500,31 +507,36 @@ func _pick_constrained_type() -> int:
 	return _pick_platform_type()
 
 func _pick_platform_type() -> int:
-	var level := score / 100
-	var normal_prob := maxf(0.60 - level * 0.07, 0.28)
-	var crumble_prob := minf(0.20 + level * 0.03, 0.32)
-	var damage_prob: float = 0.0
-	if score >= 50:
-		damage_prob = minf(0.10 + int((score - 50) / 100) * 0.05, 0.40)
+	var n: float
+	var c: float
+	var d: float
+	if score < 200:
+		n = 0.90; c = 0.10; d = 0.0
+	elif score < 600:
+		n = 0.70; c = 0.15; d = 0.05
+	elif score < 1000:
+		n = 0.55; c = 0.25; d = 0.10
+	else:
+		n = 0.45; c = 0.25; d = 0.15
 	var r := randf()
-	if r < normal_prob:
+	if r < n:
 		return Platform.Type.NORMAL
-	elif r < normal_prob + crumble_prob:
+	elif r < n + c:
 		return Platform.Type.CRUMBLE
-	elif r < normal_prob + crumble_prob + damage_prob:
+	elif r < n + c + d:
 		return Platform.Type.DAMAGE
 	else:
 		return Platform.Type.BRICK
 
 func _get_enemy_threshold() -> int:
-	if score < 100:
+	if score < 200:
 		return 9999
-	elif score < 200:
-		return 5
-	elif score < 400:
-		return 4
+	elif score < 600:
+		return 10
+	elif score < 1000:
+		return 8
 	else:
-		return 3
+		return 6
 
 func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	if ptype != Platform.Type.NORMAL and ptype != Platform.Type.BRICK:
@@ -538,8 +550,8 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	if _enemies_node.get_child_count() >= MAX_ENEMIES:
 		return
 	_eligible_since_last_enemy = 0
-	var moving := score >= 300
-	var spd := 100.0 if score >= 400 else 60.0
+	var moving := score >= 600
+	var spd := 70.0 if score >= 1000 else 50.0
 	var e := ENEMY_SCENE.instantiate()
 	e.cloud_ref = p
 	e.cloud_ref_half_h = Platform.BRICK_H * 0.5 if ptype == Platform.Type.BRICK else Platform.CLOUD_H * 0.5
@@ -686,7 +698,15 @@ func _on_item_collected(type: int) -> void:
 			player.apply_boost()
 
 func _check_bg_switch() -> void:
-	var level := mini(score / 200, 3)
+	var level: int
+	if score < 200:
+		level = 0
+	elif score < 600:
+		level = 1
+	elif score < 1000:
+		level = 2
+	else:
+		level = 3
 	if level != _current_bg_level and not _bg_transitioning:
 		_current_bg_level = level
 		_transition_background(level)
