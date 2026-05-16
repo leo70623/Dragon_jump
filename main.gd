@@ -286,10 +286,11 @@ func _show_game_over() -> void:
 		s_regen_elapsed = 0.0
 		_update_hearts_ui()
 	final_score_label.text = "Score: 0"
+	var target_score := score
 	var tw_score := create_tween()
-	tw_score.tween_method(func(v: int):
-		final_score_label.text = "Score: " + str(v)
-	, 0, score, minf(float(score) / 200.0, 2.0))
+	tw_score.tween_method(func(v: float):
+		final_score_label.text = "Score: " + str(int(v))
+	, 0.0, float(target_score), minf(float(target_score) / 200.0, 2.0))
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
 	Leaderboard.score_result.connect(_on_score_result, CONNECT_ONE_SHOT)
@@ -394,8 +395,11 @@ func _try_show_result_title() -> void:
 		return
 	var is_new_record := _pending_is_new_record == 1
 	game_over_title.text = "★ New Record! ★" if is_new_record else "Keep it up!"
+	game_over_title.autowrap_mode = TextServer.AUTOWRAP_OFF
+	game_over_title.clip_contents = false
+	game_over_title.custom_minimum_size.x = 360.0
 	game_over_title.visible = true
-	game_over_title.add_theme_font_size_override("font_size", 52)
+	game_over_title.add_theme_font_size_override("font_size", 36)
 	if is_new_record:
 		var tw_pulse := create_tween()
 		tw_pulse.set_loops()
