@@ -369,12 +369,15 @@ func _spawn_death_spin() -> void:
 		game_over_title.text = ""
 		game_over_title.visible = false
 		game_over_screen.visible = true
-		final_score_label.text = "Score: 0"
-		var target := score
-		var tw_s := create_tween()
-		tw_s.tween_method(func(v: float):
-			final_score_label.text = "Score: " + str(int(v))
-		, 0.0, float(target), minf(float(target) / 200.0, 2.0))
+		if _pending_is_new_record == 1:
+			final_score_label.text = "Score: 0"
+			var target := score
+			var tw_s := create_tween()
+			tw_s.tween_method(func(v: float):
+				final_score_label.text = "Score: " + str(int(v))
+			, 0.0, float(target), minf(float(target) / 200.0, 2.0))
+		else:
+			final_score_label.text = "Score: " + str(score)
 		_try_show_result_title()
 	)
 
