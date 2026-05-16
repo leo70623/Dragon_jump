@@ -533,10 +533,10 @@ func _explode_firework(pos: Vector2, color: Color) -> void:
 			game_over_screen.add_child(spr)
 			particle = spr
 
-		var target := pos + directions[i] * randf_range(60.0, 100.0)
+		var end_pos: Vector2 = pos + directions[i] * randf_range(60.0, 100.0)
 		var tw := create_tween()
 		tw.set_parallel(true)
-		tw.tween_property(particle, "position", target, 0.5)
+		tw.tween_property(particle, "position", end_pos, 0.5)
 		tw.tween_property(particle, "modulate:a", 0.0, 0.5)
 		tw.chain().tween_callback(func(): particle.queue_free())
 
