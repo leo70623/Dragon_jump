@@ -459,7 +459,10 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 				var fields = data["fields"]
 				if fields.has("score") and fields["score"].has("integerValue"):
 					var existing: int = int(str(fields["score"]["integerValue"]))
-					print("[DEBUG] existing score: ", existing, " new score: ", _submit_score_value)
+					print("[DEBUG] existing raw: ", fields["score"]["integerValue"])
+					print("[DEBUG] existing parsed: ", existing)
+					print("[DEBUG] submit value: ", _submit_score_value)
+					print("[DEBUG] comparison: ", _submit_score_value > existing)
 					if _submit_score_value > existing:
 						score_result.emit(true)
 						_do_patch_score()
