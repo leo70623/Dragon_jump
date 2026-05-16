@@ -31,6 +31,7 @@ var _lb_panel: PanelContainer = null
 # Score to submit (set before check/patch flow)
 var _submit_score_value: int = 0
 var _my_rank: int = 0
+var _player_best_score: int = 0
 var _player_country: String = ""
 var _player_date: String = ""
 var _http_rank: HTTPRequest
@@ -373,7 +374,7 @@ func _update_my_rank_row() -> void:
 		child.queue_free()
 	if _my_rank <= 0:
 		return
-	_add_lb_entry_to(row, _my_rank, player_name, _player_country, _submit_score_value, _player_date)
+	_add_lb_entry_to(row, _my_rank, player_name, _player_country, _player_best_score, _player_date)
 
 func _add_lb_entry_to(container: HBoxContainer, rank: int, name_val: String, country_val: String, score_val: int, date_val: String) -> void:
 	var rank_lbl := Label.new()
@@ -392,7 +393,8 @@ func _add_lb_entry_to(container: HBoxContainer, rank: int, name_val: String, cou
 
 	var name_lbl := Label.new()
 	name_lbl.text = name_val
-	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_lbl.custom_minimum_size = Vector2(120, 0)
+	name_lbl.size_flags_horizontal = Control.SIZE_FILL
 	name_lbl.add_theme_font_size_override("font_size", 15)
 	name_lbl.add_theme_color_override("font_color", Color(0.36, 0.78, 0.96, 1.0))
 	container.add_child(name_lbl)
@@ -545,6 +547,7 @@ func _do_check_score() -> void:
 func _on_check_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	if response_code == 404:
 		# No existing doc — submit directly
+		_player_best_score = _submit_score_value
 		score_result.emit(true)
 		_do_patch_score()
 		return
@@ -557,12 +560,15 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 				if fields.has("score") and fields["score"].has("integerValue"):
 					var existing: int = int(str(fields["score"]["integerValue"]))
 					if _submit_score_value > existing:
+						_player_best_score = _submit_score_value
 						score_result.emit(true)
 						_do_patch_score()
 					else:
+						_player_best_score = existing
 						score_result.emit(false)
 					return
 		# Parse failed — submit anyway
+		_player_best_score = _submit_score_value
 		score_result.emit(true)
 		_do_patch_score()
 	else:
