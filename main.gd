@@ -422,7 +422,8 @@ func _play_fullscreen_score_animation() -> void:
 	var big_label := Label.new()
 	big_label.add_theme_font_size_override("font_size", 72)
 	big_label.add_theme_color_override("font_color", Color("#F5C743"))
-	big_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	big_label.size = Vector2(360, 160)
+	big_label.position = Vector2(0, 240)
 	big_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	big_label.clip_contents = false
@@ -436,11 +437,12 @@ func _play_fullscreen_score_animation() -> void:
 	, 0.0, float(target), 2.0)
 
 	tw_count.tween_callback(func():
-		var target_pos := final_score_label.global_position - game_over_screen.global_position
+		var target_pos := Vector2(80, 302)
+		var target_scale := Vector2(0.3, 0.3)
 		var tw_fly := create_tween()
 		tw_fly.set_parallel(true)
 		tw_fly.tween_property(big_label, "position", target_pos, 0.5)
-		tw_fly.tween_property(big_label, "scale", Vector2(0.4, 0.4), 0.5)
+		tw_fly.tween_property(big_label, "scale", target_scale, 0.5)
 		tw_fly.tween_property(big_label, "modulate:a", 0.0, 0.5)
 		tw_fly.tween_property(overlay, "modulate:a", 0.0, 0.5)
 		tw_fly.chain().tween_callback(func():
