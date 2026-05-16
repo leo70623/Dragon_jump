@@ -593,6 +593,15 @@ func _spawn_platform(y: float) -> void:
 			break
 		spawn_x = randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
 
+	if score < 200:
+		var zone := randi() % 3
+		if zone == 0:
+			spawn_x = randf_range(PLATFORM_MARGIN, 130.0)
+		elif zone == 1:
+			spawn_x = randf_range(115.0, 245.0)
+		else:
+			spawn_x = randf_range(230.0, vp_w - PLATFORM_MARGIN)
+
 	if ptype == Platform.Type.BRICK and _last_spawn_x > 0.0:
 		var mid := vp_w / 2.0
 		if _last_spawn_x < mid:
