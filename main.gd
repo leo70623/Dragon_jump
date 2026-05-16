@@ -328,6 +328,8 @@ func _show_game_over() -> void:
 func _spawn_death_spin() -> void:
 	var tex: Texture2D = load("res://assets/enemies/game_over_spin.png")
 	if not tex:
+		game_over_title.text = ""
+		game_over_title.visible = false
 		game_over_screen.visible = true
 		return
 	if _sfx_spin and _sfx_spin.stream:
@@ -359,6 +361,8 @@ func _spawn_death_spin() -> void:
 		if is_instance_valid(spin):
 			spin.rotation = 0.0
 			spin.modulate.a = 0.4
+		game_over_title.text = ""
+		game_over_title.visible = false
 		game_over_screen.visible = true
 	)
 
@@ -378,6 +382,8 @@ func _on_score_result(is_new_record: bool) -> void:
 		label.text = "★ New Record! ★"
 		label.add_theme_color_override("font_color", Color("#F5C743"))
 		game_over_screen.add_child(label)
+		game_over_title.text = "GAME OVER"
+		game_over_title.visible = true
 		game_over_title.add_theme_font_size_override("font_size", 52)
 		var tw_pulse := create_tween()
 		tw_pulse.set_loops()
@@ -389,6 +395,8 @@ func _on_score_result(is_new_record: bool) -> void:
 		label.text = "Keep it up!"
 		label.add_theme_color_override("font_color", Color("#CCCCCC"))
 		game_over_screen.add_child(label)
+		game_over_title.text = "GAME OVER"
+		game_over_title.visible = true
 		game_over_title.add_theme_font_size_override("font_size", 52)
 		var tw_swing := create_tween()
 		tw_swing.set_loops()
