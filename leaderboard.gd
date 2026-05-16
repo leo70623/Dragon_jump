@@ -25,10 +25,13 @@ var _name_dialog: Control = null
 var _name_input: LineEdit = null
 var _lb_overlay: Control = null
 var _lb_vbox: VBoxContainer = null
+var _lb_vbox_outer: VBoxContainer = null
 var _lb_panel: PanelContainer = null
 
 # Score to submit (set before check/patch flow)
 var _submit_score_value: int = 0
+var _my_rank: int = 0
+var _http_rank: HTTPRequest
 
 # Holds JavaScriptObject reference so GC doesn't collect it
 var _js_keyboard_cb = null
@@ -60,6 +63,11 @@ func _ready() -> void:
 	_http_patch.name = "HttpPatch"
 	add_child(_http_patch)
 	_http_patch.request_completed.connect(_on_patch_completed)
+
+	_http_rank = HTTPRequest.new()
+	_http_rank.name = "HttpRank"
+	add_child(_http_rank)
+	_http_rank.request_completed.connect(_on_rank_completed)
 
 	# CanvasLayer so UI renders above all game CanvasLayers (layer 1)
 	_canvas = CanvasLayer.new()
@@ -207,6 +215,7 @@ func _build_leaderboard_screen() -> void:
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 8)
 	_lb_panel.add_child(vbox)
+	_lb_vbox_outer = vbox
 
 	# Title
 	var title := Label.new()
@@ -231,6 +240,16 @@ func _build_leaderboard_screen() -> void:
 	share_btn.add_theme_font_size_override("font_size", 18)
 	share_btn.pressed.connect(func(): share_score(_submit_score_value))
 	vbox.add_child(share_btn)
+
+	var rank_separator := HSeparator.new()
+	_lb_vbox_outer.add_child(rank_separator)
+
+	var my_rank_label := Label.new()
+	my_rank_label.name = "MyRankLabel"
+	my_rank_label.add_theme_font_size_override("font_size", 14)
+	my_rank_label.add_theme_color_override("font_color", Color("#5DC7F5"))
+	my_rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lb_vbox_outer.add_child(my_rank_label)
 
 	# Close button
 	var close_btn := Button.new()
@@ -267,6 +286,7 @@ func show_leaderboard() -> void:
 	loading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lb_vbox.add_child(loading)
 	_do_fetch_leaderboard()
+	_do_fetch_my_rank()
 
 func submit_score(score: int) -> void:
 	if player_name == "":
@@ -310,6 +330,49 @@ func _on_lb_close() -> void:
 		_lb_overlay.visible = false
 
 # ─────────────────────────────────────────────
+func _do_fetch_my_rank() -> void:
+	if player_name == "" or _submit_score_value <= 0:
+		return
+	var url := FIRESTORE_BASE + ":runQuery?key=" + API_KEY
+	var headers := PackedStringArray(["Content-Type: application/json"])
+	var body := JSON.stringify({
+		"structuredQuery": {
+			"from": [{"collectionId": "leaderboard"}],
+			"where": {
+				"fieldFilter": {
+					"field": {"fieldPath": "score"},
+					"op": "GREATER_THAN",
+					"value": {"integerValue": str(_submit_score_value)}
+				}
+			},
+			"select": {"fields": [{"fieldPath": "score"}]}
+		}
+	})
+	_http_rank.request(url, headers, HTTPClient.METHOD_POST, body)
+
+func _on_rank_completed(_result: int, _code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	var json := JSON.new()
+	if json.parse(body.get_string_from_utf8()) != OK:
+		return
+	var data = json.get_data()
+	if not data is Array:
+		return
+	var count := 0
+	for item in data:
+		if item.has("document"):
+			count += 1
+	_my_rank = count + 1
+	_update_my_rank_label()
+
+func _update_my_rank_label() -> void:
+	var lbl := _lb_panel.find_child("MyRankLabel", true, false)
+	if lbl == null:
+		return
+	if _my_rank > 0:
+		lbl.text = "Your rank: #%d" % _my_rank
+	else:
+		lbl.text = ""
+
 # Firebase: Fetch leaderboard (POST runQuery)
 # ─────────────────────────────────────────────
 func _do_fetch_leaderboard() -> void:
