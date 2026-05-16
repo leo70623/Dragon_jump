@@ -288,6 +288,7 @@ func _show_game_over() -> void:
 	, 0, score, minf(float(score) / 200.0, 2.0))
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
+	print("[DEBUG] connecting score_result signal")
 	Leaderboard.score_result.connect(_on_score_result, CONNECT_ONE_SHOT)
 	var fallback := get_tree().create_timer(3.0)
 	fallback.timeout.connect(func():
@@ -376,6 +377,7 @@ func _on_restart_btn_pressed() -> void:
 		get_tree().reload_current_scene()
 
 func _on_score_result(is_new_record: bool) -> void:
+	print("[DEBUG] _on_score_result called, is_new_record=", is_new_record)
 	if is_new_record:
 		game_over_title.text = "GAME OVER"
 		game_over_title.visible = true

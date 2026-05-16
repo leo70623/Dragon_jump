@@ -448,6 +448,7 @@ func _do_check_score() -> void:
 func _on_check_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	if response_code == 404:
 		# No existing doc — submit directly
+		print("[DEBUG] score_result emitting: true (404 new user)")
 		score_result.emit(true)
 		_do_patch_score()
 		return
@@ -460,16 +461,20 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 				if fields.has("score") and fields["score"].has("integerValue"):
 					var existing: int = int(str(fields["score"]["integerValue"]))
 					if _submit_score_value > existing:
+						print("[DEBUG] score_result emitting: true (new high score %d > %d)" % [_submit_score_value, existing])
 						score_result.emit(true)
 						_do_patch_score()
 					else:
+						print("[DEBUG] score_result emitting: false (score %d <= existing %d)" % [_submit_score_value, existing])
 						score_result.emit(false)
 					return
 		# Parse failed — submit anyway
+		print("[DEBUG] score_result emitting: true (parse failed, treating as new)")
 		score_result.emit(true)
 		_do_patch_score()
 	else:
 		push_warning("[Leaderboard] Check score error code: %d — skipping submit." % response_code)
+		print("[DEBUG] score_result emitting: false (error code %d)" % response_code)
 		score_result.emit(false)
 
 # ─────────────────────────────────────────────
