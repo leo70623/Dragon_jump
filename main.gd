@@ -29,6 +29,7 @@ static var s_regen_elapsed: float = 0.0
 @onready var _ui: CanvasLayer = $UI
 @onready var game_over_screen: Control = $UI/GameOverScreen
 @onready var final_score_label: Label = $UI/GameOverScreen/FinalScoreLabel
+@onready var game_over_title: Label = $UI/GameOverScreen/GameOverTitle
 @onready var hint_label: Label = $UI/GameOverScreen/HintLabel
 @onready var cooldown_label: Label = $UI/GameOverScreen/CooldownLabel
 @onready var _restart_btn: Button = $UI/GameOverScreen/RestartButton
@@ -280,7 +281,11 @@ func _show_game_over() -> void:
 		s_lives -= 1
 		s_regen_elapsed = 0.0
 		_update_hearts_ui()
-	final_score_label.text = "Score: " + str(score)
+	final_score_label.text = "Score: 0"
+	var tw_score := create_tween()
+	tw_score.tween_method(func(v: int):
+		final_score_label.text = "Score: " + str(v)
+	, 0, score, minf(float(score) / 200.0, 2.0))
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
 	Leaderboard.score_result.connect(_on_score_result, CONNECT_ONE_SHOT)
@@ -290,6 +295,14 @@ func _show_game_over() -> void:
 	lb_btn.size = Vector2(120, 38)
 	lb_btn.position = Vector2(20.0, 465.0)
 	lb_btn.pressed.connect(func(): Leaderboard.show_leaderboard())
+	var lb_style := StyleBoxFlat.new()
+	lb_style.bg_color = Color("#1D9E75")
+	lb_style.corner_radius_top_left = 12
+	lb_style.corner_radius_top_right = 12
+	lb_style.corner_radius_bottom_left = 12
+	lb_style.corner_radius_bottom_right = 12
+	lb_btn.add_theme_stylebox_override("normal", lb_style)
+	lb_btn.add_theme_color_override("font_color", Color("#FFFFFF"))
 	game_over_screen.add_child(lb_btn)
 
 	var share_btn := Button.new()
@@ -298,6 +311,14 @@ func _show_game_over() -> void:
 	share_btn.size = Vector2(120, 38)
 	share_btn.position = Vector2(220.0, 465.0)
 	share_btn.pressed.connect(func(): Leaderboard.share_score(score))
+	var share_style := StyleBoxFlat.new()
+	share_style.bg_color = Color("#378ADD")
+	share_style.corner_radius_top_left = 12
+	share_style.corner_radius_top_right = 12
+	share_style.corner_radius_bottom_left = 12
+	share_style.corner_radius_bottom_right = 12
+	share_btn.add_theme_stylebox_override("normal", share_style)
+	share_btn.add_theme_color_override("font_color", Color("#FFFFFF"))
 	game_over_screen.add_child(share_btn)
 	if _sfx_death_shout and _sfx_death_shout.stream:
 		_sfx_death_shout.play()
@@ -357,12 +378,22 @@ func _on_score_result(is_new_record: bool) -> void:
 		label.text = "★ New Record! ★"
 		label.add_theme_color_override("font_color", Color("#F5C743"))
 		game_over_screen.add_child(label)
+		game_over_title.add_theme_font_size_override("font_size", 52)
+		var tw_pulse := create_tween()
+		tw_pulse.set_loops()
+		tw_pulse.tween_property(game_over_title, "scale", Vector2(1.05, 1.05), 0.5)
+		tw_pulse.tween_property(game_over_title, "scale", Vector2(1.0, 1.0), 0.5)
 		_play_record_sfx()
 		_spawn_stars()
 	else:
 		label.text = "Keep it up!"
 		label.add_theme_color_override("font_color", Color("#CCCCCC"))
 		game_over_screen.add_child(label)
+		game_over_title.add_theme_font_size_override("font_size", 52)
+		var tw_swing := create_tween()
+		tw_swing.set_loops()
+		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(6.0), 0.4)
+		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(-6.0), 0.4)
 		var tw := create_tween()
 		tw.tween_property(label, "position:y", label.position.y - 20, 0.5)
 
