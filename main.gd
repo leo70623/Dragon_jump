@@ -516,6 +516,9 @@ func _play_fullscreen_score_animation() -> void:
 
 func _start_fireworks_loop() -> void:
 	_fireworks_active = true
+	_sfx_fireworks_loop.volume_db = 6.0
+	print("[DEBUG] fireworks volume: ", _sfx_fireworks_loop.volume_db)
+	print("[DEBUG] fireworks bus: ", _sfx_fireworks_loop.bus)
 	if _sfx_fireworks_loop and _sfx_fireworks_loop.stream:
 		_sfx_fireworks_loop.play()
 	_fire_next_firework()
