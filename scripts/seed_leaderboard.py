@@ -1,8 +1,14 @@
 import random
+import ssl
 import urllib.parse
 import urllib.request
 import json
 from datetime import date, timedelta
+
+# macOS Python 常見的 SSL 憑證問題，seeding 腳本允許 bypass
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.check_hostname = False
+_SSL_CTX.verify_mode = ssl.CERT_NONE
 
 FIRESTORE_BASE = "https://firestore.googleapis.com/v1/projects/dragon-jump-f2b22/databases/(default)/documents"
 API_KEY = "AIzaSyDfMRL--8qTzpKIxbfdbJL0Ifzg8NYP1II"
@@ -68,7 +74,7 @@ def patch_player(name: str, score: int, country: str, date_str: str) -> int:
     }).encode("utf-8")
     req = urllib.request.Request(url, data=body, method="PATCH")
     req.add_header("Content-Type", "application/json")
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, context=_SSL_CTX) as resp:
         return resp.status
 
 
