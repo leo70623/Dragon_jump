@@ -56,7 +56,7 @@ func _ready() -> void:
 	lb_btn.position = Vector2(vp.x * 0.5 - 90.0, vp.y - 80.0)
 
 	var lb_style := StyleBoxFlat.new()
-	lb_style.bg_color = Color(0.22, 0.54, 0.87, 0.65)
+	lb_style.bg_color = Color(0.22, 0.54, 0.87, 0.85)
 	lb_style.corner_radius_top_left = 12
 	lb_style.corner_radius_top_right = 12
 	lb_style.corner_radius_bottom_left = 12
