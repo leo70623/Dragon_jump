@@ -169,7 +169,10 @@ func _ready() -> void:
 	add_child(_sfx_record_whoop)
 
 	_sfx_fireworks_loop = AudioStreamPlayer.new()
-	_sfx_fireworks_loop.stream = load("res://assets/audio/sfx/fireworks_loop.wav")
+	var fireworks_stream := load("res://assets/audio/sfx/fireworks_loop.wav") as AudioStreamWAV
+	if fireworks_stream:
+		fireworks_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		_sfx_fireworks_loop.stream = fireworks_stream
 	_sfx_fireworks_loop.volume_db = -6.0
 	add_child(_sfx_fireworks_loop)
 
