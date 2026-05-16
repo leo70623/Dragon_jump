@@ -169,12 +169,13 @@ func _ready() -> void:
 	add_child(_sfx_record_whoop)
 
 	_sfx_fireworks_loop = AudioStreamPlayer.new()
-	var fireworks_stream := load("res://assets/audio/sfx/fireworks_loop.wav") as AudioStreamWAV
-	if fireworks_stream:
-		fireworks_stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-		_sfx_fireworks_loop.stream = fireworks_stream
+	_sfx_fireworks_loop.stream = load("res://assets/audio/sfx/fireworks_loop.wav")
 	_sfx_fireworks_loop.volume_db = 0.0
 	add_child(_sfx_fireworks_loop)
+	_sfx_fireworks_loop.finished.connect(func():
+		if _fireworks_active:
+			_sfx_fireworks_loop.play()
+	)
 
 	if s_lives == 0:
 		game_over_flag = true
