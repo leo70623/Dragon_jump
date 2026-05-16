@@ -82,6 +82,26 @@
 - record_whoop.wav：新紀錄嗚呼音效
 - fireworks_loop.wav：煙火背景循環音
 
+## 素材資源
+
+### 音效素材
+- **Kenney** — kenney.nl/assets，CC0 完全免費，無版權限制，適合遊戲商用
+- **Mixkit** — mixkit.co/free-sound-effects，免費下載無浮水印，允許遊戲商用
+- **ElevenLabs Sound Effects** — elevenlabs.io/sound-effects，AI 生成音效，免費方案每月有額度，生成後可商用，輸入文字描述生成
+
+### 音效格式規範
+- 格式：WAV，取樣率 44100Hz（Godot 4 相容），避免 48000Hz
+- 若音效為 48000Hz 請用 ffmpeg 轉換：
+  ffmpeg -i input.wav -ar 44100 output.wav
+
+## 部署
+
+### iOS ipa 安裝
+- ipa 預設下載路徑：~/Downloads/
+- 安裝指令：ios-deploy --bundle ~/Downloads/檔名.ipa --no-wifi
+- 需要裝置已加入 Apple Developer Provisioning Profile
+- Apple Developer Program 需有效（$99/年）
+
 ## 版本紀錄
 
 ### 2026-05-16（feature/v1.2-difficulty-tuning）
