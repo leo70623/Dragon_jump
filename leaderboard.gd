@@ -31,6 +31,8 @@ var _lb_panel: PanelContainer = null
 # Score to submit (set before check/patch flow)
 var _submit_score_value: int = 0
 var _my_rank: int = 0
+var _player_country: String = ""
+var _player_date: String = ""
 var _http_rank: HTTPRequest
 
 # Holds JavaScriptObject reference so GC doesn't collect it
@@ -244,12 +246,10 @@ func _build_leaderboard_screen() -> void:
 	var rank_separator := HSeparator.new()
 	_lb_vbox_outer.add_child(rank_separator)
 
-	var my_rank_label := Label.new()
-	my_rank_label.name = "MyRankLabel"
-	my_rank_label.add_theme_font_size_override("font_size", 14)
-	my_rank_label.add_theme_color_override("font_color", Color("#5DC7F5"))
-	my_rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_lb_vbox_outer.add_child(my_rank_label)
+	var my_rank_row := HBoxContainer.new()
+	my_rank_row.name = "MyRankRow"
+	my_rank_row.add_theme_constant_override("separation", 8)
+	_lb_vbox_outer.add_child(my_rank_row)
 
 	# Close button
 	var close_btn := Button.new()
@@ -362,16 +362,62 @@ func _on_rank_completed(_result: int, _code: int, _headers: PackedStringArray, b
 		if item.has("document"):
 			count += 1
 	_my_rank = count + 1
-	_update_my_rank_label()
+	_update_my_rank_row()
 
-func _update_my_rank_label() -> void:
-	var lbl := _lb_panel.find_child("MyRankLabel", true, false)
-	if lbl == null:
+func _update_my_rank_row() -> void:
+	var row = _lb_panel.find_child("MyRankRow", true, false)
+	if row == null:
 		return
-	if _my_rank > 0:
-		lbl.text = "Your rank: #%d" % _my_rank
+	for child in row.get_children():
+		child.queue_free()
+	if _my_rank <= 0:
+		return
+	_add_lb_entry_to(row, _my_rank, player_name, _player_country, _submit_score_value, _player_date)
+
+func _add_lb_entry_to(container: HBoxContainer, rank: int, name_val: String, country_val: String, score_val: int, date_val: String) -> void:
+	var rank_lbl := Label.new()
+	if rank == 1:
+		rank_lbl.text = "1"
+	elif rank == 2:
+		rank_lbl.text = "2"
+	elif rank == 3:
+		rank_lbl.text = "3"
 	else:
-		lbl.text = ""
+		rank_lbl.text = str(rank)
+	rank_lbl.custom_minimum_size = Vector2(30, 0)
+	rank_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rank_lbl.add_theme_font_size_override("font_size", 15)
+	container.add_child(rank_lbl)
+
+	var name_lbl := Label.new()
+	name_lbl.text = name_val
+	name_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_lbl.add_theme_font_size_override("font_size", 15)
+	name_lbl.add_theme_color_override("font_color", Color(0.36, 0.78, 0.96, 1.0))
+	container.add_child(name_lbl)
+
+	var flag_lbl := Label.new()
+	flag_lbl.text = _flag_emoji(country_val)
+	flag_lbl.custom_minimum_size = Vector2(28, 0)
+	flag_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	flag_lbl.add_theme_font_size_override("font_size", 15)
+	container.add_child(flag_lbl)
+
+	var score_lbl := Label.new()
+	score_lbl.text = str(score_val)
+	score_lbl.custom_minimum_size = Vector2(50, 0)
+	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	score_lbl.add_theme_font_size_override("font_size", 15)
+	score_lbl.add_theme_color_override("font_color", Color(0.96, 0.78, 0.26, 1.0))
+	container.add_child(score_lbl)
+
+	var date_lbl := Label.new()
+	date_lbl.text = date_val.substr(0, 10) if date_val.length() >= 10 else date_val
+	date_lbl.custom_minimum_size = Vector2(70, 0)
+	date_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	date_lbl.add_theme_font_size_override("font_size", 12)
+	date_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1.0))
+	container.add_child(date_lbl)
 
 # Firebase: Fetch leaderboard (POST runQuery)
 # ─────────────────────────────────────────────
@@ -527,6 +573,8 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 # ─────────────────────────────────────────────
 func _do_patch_score() -> void:
 	var today := Time.get_datetime_string_from_system().substr(0, 10)
+	_player_country = player_country
+	_player_date = today
 	var url := FIRESTORE_BASE + "/leaderboard/" + player_name.uri_encode() \
 		+ "?key=" + API_KEY \
 		+ "&updateMask.fieldPaths=name&updateMask.fieldPaths=score&updateMask.fieldPaths=country&updateMask.fieldPaths=date"
