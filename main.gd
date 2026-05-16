@@ -453,7 +453,7 @@ func _spawn_platform(y: float) -> void:
 
 	if score >= 100 and ptype == Platform.Type.NORMAL:
 		_item_counter += 1
-		if _item_counter >= ITEM_SPAWN_INTERVAL:
+		if _item_counter >= _get_item_interval():
 			_item_counter = 0
 			_try_spawn_item(Vector2(p.position.x, camera.position.y - randf_range(50.0, 200.0)))
 
@@ -679,6 +679,16 @@ func _hide_combo() -> void:
 	var lbl := $UI/ComboLabel as Label
 	if lbl:
 		lbl.visible = false
+
+func _get_item_interval() -> int:
+	if score < 200:
+		return 15
+	elif score < 600:
+		return 10
+	elif score < 1000:
+		return 8
+	else:
+		return 6
 
 func _try_spawn_item(pos: Vector2) -> void:
 	var item := ITEM_SCENE.instantiate()
