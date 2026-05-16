@@ -61,6 +61,11 @@ func _ready() -> void:
 	lb_style.corner_radius_top_right = 12
 	lb_style.corner_radius_bottom_left = 12
 	lb_style.corner_radius_bottom_right = 12
+	lb_style.border_width_left = 2
+	lb_style.border_width_right = 2
+	lb_style.border_width_top = 2
+	lb_style.border_width_bottom = 2
+	lb_style.border_color = Color(1.0, 1.0, 1.0, 0.9)
 	lb_btn.add_theme_stylebox_override("normal", lb_style)
 	lb_btn.add_theme_color_override("font_color", Color("#FFFFFF"))
 
