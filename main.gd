@@ -286,11 +286,6 @@ func _show_game_over() -> void:
 		s_regen_elapsed = 0.0
 		_update_hearts_ui()
 	final_score_label.text = "Score: 0"
-	var target_score := score
-	var tw_score := create_tween()
-	tw_score.tween_method(func(v: float):
-		final_score_label.text = "Score: " + str(int(v))
-	, 0.0, float(target_score), minf(float(target_score) / 200.0, 2.0))
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
 	Leaderboard.score_result.connect(_on_score_result, CONNECT_ONE_SHOT)
@@ -374,6 +369,12 @@ func _spawn_death_spin() -> void:
 		game_over_title.text = ""
 		game_over_title.visible = false
 		game_over_screen.visible = true
+		final_score_label.text = "Score: 0"
+		var target := score
+		var tw_s := create_tween()
+		tw_s.tween_method(func(v: float):
+			final_score_label.text = "Score: " + str(int(v))
+		, 0.0, float(target), minf(float(target) / 200.0, 2.0))
 		_try_show_result_title()
 	)
 
