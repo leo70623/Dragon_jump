@@ -175,6 +175,7 @@ func _ready() -> void:
 		_sfx_fireworks_loop.stream = fireworks_stream
 	_sfx_fireworks_loop.volume_db = -6.0
 	add_child(_sfx_fireworks_loop)
+	print("[DEBUG] fireworks stream: ", _sfx_fireworks_loop.stream)
 
 	if s_lives == 0:
 		game_over_flag = true
@@ -516,9 +517,11 @@ func _play_fullscreen_score_animation() -> void:
 
 func _start_fireworks_loop() -> void:
 	_fireworks_active = true
+	print("[DEBUG] about to play fireworks, stream: ", _sfx_fireworks_loop.stream)
+	print("[DEBUG] fireworks node valid: ", is_instance_valid(_sfx_fireworks_loop))
 	if _sfx_fireworks_loop and _sfx_fireworks_loop.stream:
 		_sfx_fireworks_loop.play()
-	print("[DEBUG] fireworks sfx playing: ", _sfx_fireworks_loop.is_playing())
+	print("[DEBUG] fireworks is_playing: ", _sfx_fireworks_loop.is_playing())
 	_fire_next_firework()
 
 func _fire_next_firework() -> void:
