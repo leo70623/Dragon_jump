@@ -63,6 +63,7 @@ var _dev_panel: Control = null
 var _dev_input: LineEdit = null
 var _status_label: Label = null
 var _last_was_double: bool = false
+var _score_result_handled: bool = false
 
 func _ready() -> void:
 	var _vp_scale := get_viewport().get_screen_transform().get_scale().y
@@ -274,6 +275,7 @@ func _show_game_over() -> void:
 	if game_over_flag:
 		return
 	game_over_flag = true
+	_score_result_handled = false
 	_invincible_timer = 0.0
 	player.modulate.a = 1.0
 	player.set_physics_process(false)
@@ -376,6 +378,9 @@ func _on_restart_btn_pressed() -> void:
 		get_tree().reload_current_scene()
 
 func _on_score_result(is_new_record: bool) -> void:
+	if _score_result_handled:
+		return
+	_score_result_handled = true
 	game_over_title.text = "★ New Record! ★" if is_new_record else "Keep it up!"
 	game_over_title.visible = true
 	game_over_title.add_theme_font_size_override("font_size", 52)

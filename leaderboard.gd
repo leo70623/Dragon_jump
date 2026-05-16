@@ -278,38 +278,25 @@ func submit_score(score: int) -> void:
 # Name dialog callbacks
 # ─────────────────────────────────────────────
 func _on_name_ok() -> void:
-	print("[DEBUG] _on_name_ok() called")
 	var raw: String = _name_input.text
-	print("[DEBUG] _name_input.text = '%s'" % raw)
 	if OS.get_name() == "Web":
 		var elem = JavaScriptBridge.eval("document.getElementById('_gkb')")
 		if elem != null:
 			var val = JavaScriptBridge.eval("document.getElementById('_gkb').value")
-			print("[DEBUG] JS _gkb value = '%s' (type: %s)" % [val, typeof(val)])
 			if val is String:
 				raw = val
-				print("[DEBUG] Using JS value: '%s'" % raw)
 	var name := raw.strip_edges().substr(0, 20)
-	print("[DEBUG] Final name after strip/substr = '%s'" % name)
 	if name == "":
-		print("[DEBUG] Name is empty, returning")
 		return
 	player_name = name
-	print("[DEBUG] player_name set to '%s'" % player_name)
 	_save_config()
-	print("[DEBUG] Config saved, removing focus from _name_input")
 	if is_instance_valid(_name_input):
 		_name_input.release_focus()
-	print("[DEBUG] Focus released, calling _close_mobile_keyboard()")
 	_close_mobile_keyboard()
-	print("[DEBUG] _close_mobile_keyboard() done, hiding dialog")
 	_name_dialog.visible = false
-	print("[DEBUG] Dialog hidden")
 	if _pending_lb:
-		print("[DEBUG] _pending_lb is true, showing leaderboard")
 		_pending_lb = false
 		show_leaderboard()
-	print("[DEBUG] _on_name_ok() complete")
 
 func _on_name_cancel() -> void:
 	_close_mobile_keyboard()
@@ -459,10 +446,6 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 				var fields = data["fields"]
 				if fields.has("score") and fields["score"].has("integerValue"):
 					var existing: int = int(str(fields["score"]["integerValue"]))
-					print("[DEBUG] existing raw: ", fields["score"]["integerValue"])
-					print("[DEBUG] existing parsed: ", existing)
-					print("[DEBUG] submit value: ", _submit_score_value)
-					print("[DEBUG] comparison: ", _submit_score_value > existing)
 					if _submit_score_value > existing:
 						score_result.emit(true)
 						_do_patch_score()
@@ -499,17 +482,13 @@ func _on_patch_completed(_result: int, response_code: int, _headers: PackedStrin
 # Mobile keyboard helpers (Web only)
 # ─────────────────────────────────────────────
 func _open_mobile_keyboard() -> void:
-	print("[DEBUG] _open_mobile_keyboard() called")
 	if OS.get_name() != "Web":
-		print("[DEBUG] Not Web, returning")
 		return
 
 	_js_keyboard_cb = JavaScriptBridge.create_callback(func(_args: Array):
-		print("[DEBUG] JS callback triggered with args: %s" % _args)
 		if is_instance_valid(_name_input):
 			var val = JavaScriptBridge.eval("document.getElementById('_gkb')?.value??''")
 			if val is String:
-				print("[DEBUG] JS callback: setting _name_input.text to '%s'" % val)
 				_name_input.text = val
 				_name_input.caret_column = _name_input.text.length()
 	)
@@ -532,12 +511,9 @@ func _open_mobile_keyboard() -> void:
 	js += "e.addEventListener('blur',function(){console.log('[JS] blur event fired'); window._godotKbCb([e.value]);});"
 	js += "})();"
 	JavaScriptBridge.eval(js)
-	print("[DEBUG] _open_mobile_keyboard() complete")
 
 func _close_mobile_keyboard() -> void:
-	print("[DEBUG] _close_mobile_keyboard() called")
 	if OS.get_name() != "Web":
-		print("[DEBUG] Not Web, returning")
 		return
 	var js := "var e=document.getElementById('_gkb');"
 	js += "if(e){"
@@ -551,7 +527,6 @@ func _close_mobile_keyboard() -> void:
 	js += "else{console.log('[JS] _gkb not found');}"
 	JavaScriptBridge.eval(js)
 	_js_keyboard_cb = null
-	print("[DEBUG] _close_mobile_keyboard() complete")
 
 # ─────────────────────────────────────────────
 # Share
