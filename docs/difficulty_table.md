@@ -34,3 +34,7 @@
 - [ ] Splash screen 純黑問題
 - [ ] Android export preset
 - [ ] App icon 實機確認
+- [ ] 排行榜自己排名欄位對齊問題
+- [ ] Leaderboard 顯示筆數考慮增加至 50 筆
+- [ ] Apple Developer Program 續費後更新 Provisioning Profile（三隻新裝置 UDID 已備妥）
+- [ ] Godot 版本 ios-build.yml 更新至 4.6
