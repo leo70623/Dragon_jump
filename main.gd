@@ -378,6 +378,10 @@ func _on_restart_btn_pressed() -> void:
 
 func _on_score_result(is_new_record: bool) -> void:
 	print("[DEBUG] _on_score_result called, is_new_record=", is_new_record)
+	print("[DEBUG] game_over_title node: ", game_over_title)
+	print("[DEBUG] game_over_title text before: ", game_over_title.text)
+	game_over_title.text = "★ New Record! ★" if is_new_record else "Keep it up!"
+	print("[DEBUG] game_over_title text after: ", game_over_title.text)
 	if is_new_record:
 		game_over_title.text = "GAME OVER"
 		game_over_title.visible = true
