@@ -290,10 +290,10 @@ func _show_game_over() -> void:
 	Leaderboard.submit_score(score)
 	Leaderboard.score_result.connect(_on_score_result, CONNECT_ONE_SHOT)
 	var lb_btn := Button.new()
-	lb_btn.text = "Leaderboard"
-	lb_btn.add_theme_font_size_override("font_size", 18)
-	lb_btn.size = Vector2(120, 38)
-	lb_btn.position = Vector2(20.0, 465.0)
+	lb_btn.text = "🏆 Leaderboard"
+	lb_btn.add_theme_font_size_override("font_size", 16)
+	lb_btn.size = Vector2(150, 44)
+	lb_btn.position = Vector2(24.0, 460.0)
 	lb_btn.pressed.connect(func(): Leaderboard.show_leaderboard())
 	var lb_style := StyleBoxFlat.new()
 	lb_style.bg_color = Color("#1D9E75")
@@ -306,10 +306,10 @@ func _show_game_over() -> void:
 	game_over_screen.add_child(lb_btn)
 
 	var share_btn := Button.new()
-	share_btn.text = "Share"
-	share_btn.add_theme_font_size_override("font_size", 18)
-	share_btn.size = Vector2(120, 38)
-	share_btn.position = Vector2(220.0, 465.0)
+	share_btn.text = "📤 Share"
+	share_btn.add_theme_font_size_override("font_size", 16)
+	share_btn.size = Vector2(150, 44)
+	share_btn.position = Vector2(186.0, 460.0)
 	share_btn.pressed.connect(func(): Leaderboard.share_score(score))
 	var share_style := StyleBoxFlat.new()
 	share_style.bg_color = Color("#378ADD")
@@ -371,17 +371,7 @@ func _on_restart_btn_pressed() -> void:
 		get_tree().reload_current_scene()
 
 func _on_score_result(is_new_record: bool) -> void:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 28)
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.anchors_preset = Control.PRESET_CENTER
-	label.offset_top = 30
-	label.size = Vector2(320, 48)
-	label.position = Vector2(0, final_score_label.position.y + 48)
 	if is_new_record:
-		label.text = "★ New Record! ★"
-		label.add_theme_color_override("font_color", Color("#F5C743"))
-		game_over_screen.add_child(label)
 		game_over_title.text = "GAME OVER"
 		game_over_title.visible = true
 		game_over_title.add_theme_font_size_override("font_size", 52)
@@ -392,9 +382,6 @@ func _on_score_result(is_new_record: bool) -> void:
 		_play_record_sfx()
 		_spawn_stars()
 	else:
-		label.text = "Keep it up!"
-		label.add_theme_color_override("font_color", Color("#CCCCCC"))
-		game_over_screen.add_child(label)
 		game_over_title.text = "GAME OVER"
 		game_over_title.visible = true
 		game_over_title.add_theme_font_size_override("font_size", 52)
@@ -402,8 +389,6 @@ func _on_score_result(is_new_record: bool) -> void:
 		tw_swing.set_loops()
 		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(6.0), 0.4)
 		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(-6.0), 0.4)
-		var tw := create_tween()
-		tw.tween_property(label, "position:y", label.position.y - 20, 0.5)
 
 func _play_record_sfx() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
