@@ -283,6 +283,7 @@ func _show_game_over() -> void:
 	final_score_label.text = "Score: " + str(score)
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
+	Leaderboard.score_result.connect(_on_score_result, CONNECT_ONE_SHOT)
 	var lb_btn := Button.new()
 	lb_btn.text = "Leaderboard"
 	lb_btn.add_theme_font_size_override("font_size", 18)
@@ -343,6 +344,48 @@ func _spawn_death_spin() -> void:
 func _on_restart_btn_pressed() -> void:
 	if game_over_flag and s_lives > 0:
 		get_tree().reload_current_scene()
+
+func _on_score_result(is_new_record: bool) -> void:
+	var label := Label.new()
+	label.add_theme_font_size_override("font_size", 28)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.anchors_preset = Control.PRESET_CENTER
+	label.offset_top = 30
+	label.size = Vector2(320, 48)
+	label.position = Vector2(0, final_score_label.position.y + 48)
+	if is_new_record:
+		label.text = "★ New Record! ★"
+		label.add_theme_color_override("font_color", Color("#F5C743"))
+		game_over_screen.add_child(label)
+		_play_record_sfx()
+		_spawn_stars()
+	else:
+		label.text = "Keep it up!"
+		label.add_theme_color_override("font_color", Color("#CCCCCC"))
+		game_over_screen.add_child(label)
+		var tw := create_tween()
+		tw.tween_property(label, "position:y", label.position.y - 20, 0.5)
+
+func _play_record_sfx() -> void:
+	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
+		_sfx_enemy_crush.play()
+
+func _spawn_stars() -> void:
+	var center := Vector2(180, 300)
+	var directions := [
+		Vector2(-1, -1), Vector2(0, -1), Vector2(1, -1),
+		Vector2(-1, 1),  Vector2(0, 1),  Vector2(1, 1)
+	]
+	for dir in directions:
+		var star := Label.new()
+		star.text = "★"
+		star.add_theme_font_size_override("font_size", 24)
+		star.add_theme_color_override("font_color", Color("#F5C743"))
+		star.position = center
+		game_over_screen.add_child(star)
+		var tw := create_tween()
+		tw.tween_property(star, "position", center + dir * 80, 0.6)
+		tw.parallel().tween_property(star, "modulate:a", 0.0, 0.6)
 
 func _get_spacing() -> float:
 	if score < 200:

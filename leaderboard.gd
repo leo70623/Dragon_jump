@@ -10,6 +10,8 @@ var player_country: String = "XX"
 
 var _pending_lb: bool = false
 
+signal score_result(is_new_record: bool)
+
 # HTTP nodes
 var _http_fetch: HTTPRequest
 var _http_check: HTTPRequest
@@ -446,6 +448,7 @@ func _do_check_score() -> void:
 func _on_check_completed(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 	if response_code == 404:
 		# No existing doc — submit directly
+		score_result.emit(true)
 		_do_patch_score()
 		return
 	if response_code == 200:
@@ -457,9 +460,13 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 				if fields.has("score") and fields["score"].has("integerValue"):
 					var existing: int = int(str(fields["score"]["integerValue"]))
 					if _submit_score_value > existing:
+						score_result.emit(true)
 						_do_patch_score()
+					else:
+						score_result.emit(false)
 					return
 		# Parse failed — submit anyway
+		score_result.emit(true)
 		_do_patch_score()
 	else:
 		push_warning("[Leaderboard] Check score error code: %d — skipping submit." % response_code)
