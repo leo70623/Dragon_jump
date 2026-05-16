@@ -422,13 +422,10 @@ func _play_fullscreen_score_animation() -> void:
 	var big_label := Label.new()
 	big_label.add_theme_font_size_override("font_size", 72)
 	big_label.add_theme_color_override("font_color", Color("#F5C743"))
+	big_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	big_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	big_label.set_anchors_preset(Control.PRESET_CENTER)
-	big_label.size = Vector2(360, 120)
-	big_label.position = Vector2(0, 260)
 	big_label.clip_contents = false
-	big_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_label.text = "Score: 0"
 	game_over_screen.add_child(big_label)
 
