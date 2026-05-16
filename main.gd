@@ -40,6 +40,8 @@ static var s_regen_elapsed: float = 0.0
 var _sfx_spin: AudioStreamPlayer
 var _sfx_death_shout: AudioStreamPlayer
 var _sfx_enemy_crush: AudioStreamPlayer
+var _sfx_record_whoop: AudioStreamPlayer
+var _sfx_fireworks_loop: AudioStreamPlayer
 var hearts: Array[Sprite2D] = []
 var next_spawn_y: float = 0.0
 var score: int = 0
@@ -161,6 +163,15 @@ func _ready() -> void:
 	if crush_stream:
 		_sfx_enemy_crush.stream = crush_stream
 	add_child(_sfx_enemy_crush)
+
+	_sfx_record_whoop = AudioStreamPlayer.new()
+	_sfx_record_whoop.stream = load("res://assets/audio/sfx/record_whoop.wav")
+	add_child(_sfx_record_whoop)
+
+	_sfx_fireworks_loop = AudioStreamPlayer.new()
+	_sfx_fireworks_loop.stream = load("res://assets/audio/sfx/fireworks_loop.wav")
+	_sfx_fireworks_loop.volume_db = -6.0
+	add_child(_sfx_fireworks_loop)
 
 	if s_lives == 0:
 		game_over_flag = true
@@ -398,6 +409,8 @@ func _spawn_death_spin() -> void:
 func _on_restart_btn_pressed() -> void:
 	if game_over_flag and s_lives > 0:
 		_fireworks_active = false
+		if _sfx_fireworks_loop and _sfx_fireworks_loop.is_playing():
+			_sfx_fireworks_loop.stop()
 		get_tree().reload_current_scene()
 
 func _on_score_result(is_new_record: bool) -> void:
@@ -500,6 +513,8 @@ func _play_fullscreen_score_animation() -> void:
 
 func _start_fireworks_loop() -> void:
 	_fireworks_active = true
+	if _sfx_fireworks_loop and _sfx_fireworks_loop.stream:
+		_sfx_fireworks_loop.play()
 	_fire_next_firework()
 
 func _fire_next_firework() -> void:
@@ -568,8 +583,8 @@ func _explode_firework(pos: Vector2, color: Color) -> void:
 		tw.chain().tween_callback(func(): particle.queue_free())
 
 func _play_record_sfx() -> void:
-	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
-		_sfx_enemy_crush.play()
+	if _sfx_record_whoop and _sfx_record_whoop.stream:
+		_sfx_record_whoop.play()
 
 func _spawn_stars() -> void:
 	var center := Vector2(180, 300)
