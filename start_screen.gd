@@ -52,11 +52,11 @@ func _ready() -> void:
 	var lb_btn := Button.new()
 	lb_btn.text = "🏆 Leaderboard"
 	lb_btn.add_theme_font_size_override("font_size", 16)
-	lb_btn.custom_minimum_size = Vector2(150, 44)
-	lb_btn.position = Vector2(vp.x * 0.5 - 75.0, vp.y - 80.0)
+	lb_btn.custom_minimum_size = Vector2(180, 48)
+	lb_btn.position = Vector2(vp.x * 0.5 - 90.0, vp.y - 80.0)
 
 	var lb_style := StyleBoxFlat.new()
-	lb_style.bg_color = Color(0.11, 0.62, 0.46, 0.75)
+	lb_style.bg_color = Color(0.0, 0.0, 0.0, 0.65)
 	lb_style.corner_radius_top_left = 12
 	lb_style.corner_radius_top_right = 12
 	lb_style.corner_radius_bottom_left = 12
