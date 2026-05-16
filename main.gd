@@ -51,6 +51,7 @@ var game_over_flag: bool = false
 var _last_two_types: Array[int] = []
 var _y_since_last_white: float = 0.0
 var _last_spawn_y: float = 0.0
+var _last_spawn_x: float = 0.0
 var _eligible_since_last_enemy: int = 0
 var _item_counter: int = 0
 var _invincible_timer: float = 0.0
@@ -449,6 +450,13 @@ func _spawn_platform(y: float) -> void:
 			break
 		spawn_x = randf_range(PLATFORM_MARGIN, vp_w - PLATFORM_MARGIN)
 
+	if ptype == Platform.Type.BRICK and _last_spawn_x > 0.0:
+		var mid := vp_w / 2.0
+		if _last_spawn_x < mid:
+			spawn_x = randf_range(mid + 20.0, vp_w - PLATFORM_MARGIN)
+		else:
+			spawn_x = randf_range(PLATFORM_MARGIN, mid - 20.0)
+
 	var p := _create_platform(spawn_x, y, ptype)
 
 	if score >= 100 and ptype == Platform.Type.NORMAL:
@@ -479,6 +487,7 @@ func _spawn_platform(y: float) -> void:
 
 	var spacing := maxf(0.0, _last_spawn_y - y)
 	_last_spawn_y = y
+	_last_spawn_x = spawn_x
 	_last_two_types.append(ptype)
 	if _last_two_types.size() > 2:
 		_last_two_types.pop_front()
