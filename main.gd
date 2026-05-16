@@ -395,25 +395,75 @@ func _try_show_result_title() -> void:
 	if not game_over_screen.visible:
 		return
 	var is_new_record := _pending_is_new_record == 1
-	game_over_title.text = "★ New Record! ★" if is_new_record else "Keep it up!"
 	game_over_title.autowrap_mode = TextServer.AUTOWRAP_OFF
 	game_over_title.clip_contents = false
 	game_over_title.custom_minimum_size.x = 360.0
-	game_over_title.visible = true
-	game_over_title.add_theme_font_size_override("font_size", 36)
 	if is_new_record:
-		var tw_pulse := create_tween()
-		tw_pulse.set_loops()
-		tw_pulse.tween_property(game_over_title, "scale", Vector2(1.05, 1.05), 0.5)
-		tw_pulse.tween_property(game_over_title, "scale", Vector2(1.0, 1.0), 0.5)
-		_play_record_sfx()
-		_spawn_stars()
+		game_over_title.visible = false
+		final_score_label.modulate.a = 0.0
+		_play_fullscreen_score_animation()
 	else:
+		game_over_title.text = "Keep it up!"
+		game_over_title.visible = true
+		game_over_title.add_theme_font_size_override("font_size", 36)
 		var tw_swing := create_tween()
 		tw_swing.set_loops()
 		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(6.0), 0.3)
 		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(-6.0), 0.3)
 		tw_swing.tween_property(game_over_title, "rotation", 0.0, 0.15)
+
+func _play_fullscreen_score_animation() -> void:
+	var overlay := ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.85)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	game_over_screen.add_child(overlay)
+
+	var big_label := Label.new()
+	big_label.add_theme_font_size_override("font_size", 72)
+	big_label.add_theme_color_override("font_color", Color("#F5C743"))
+	big_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	big_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	big_label.set_anchors_preset(Control.PRESET_CENTER)
+	big_label.size = Vector2(360, 100)
+	big_label.position = Vector2(0, -50)
+	big_label.text = "Score: 0"
+	game_over_screen.add_child(big_label)
+
+	var target := score
+	var tw_count := create_tween()
+	tw_count.tween_method(func(v: float):
+		big_label.text = "Score: " + str(int(v))
+	, 0.0, float(target), 2.0)
+
+	tw_count.tween_callback(func():
+		var target_pos := final_score_label.global_position - game_over_screen.global_position
+		var tw_fly := create_tween()
+		tw_fly.set_parallel(true)
+		tw_fly.tween_property(big_label, "position", target_pos, 0.5)
+		tw_fly.tween_property(big_label, "scale", Vector2(0.4, 0.4), 0.5)
+		tw_fly.tween_property(big_label, "modulate:a", 0.0, 0.5)
+		tw_fly.tween_property(overlay, "modulate:a", 0.0, 0.5)
+		tw_fly.chain().tween_callback(func():
+			big_label.queue_free()
+			overlay.queue_free()
+			game_over_title.modulate.a = 0.0
+			final_score_label.modulate.a = 0.0
+			var tw_fadein := create_tween()
+			tw_fadein.set_parallel(true)
+			tw_fadein.tween_property(game_over_title, "modulate:a", 1.0, 0.4)
+			tw_fadein.tween_property(final_score_label, "modulate:a", 1.0, 0.4)
+			game_over_title.text = "★ New Record! ★"
+			game_over_title.add_theme_font_size_override("font_size", 36)
+			game_over_title.visible = true
+			_play_record_sfx()
+			_spawn_stars()
+			var tw_pulse := create_tween()
+			tw_pulse.set_loops()
+			tw_pulse.tween_property(game_over_title, "scale", Vector2(1.05, 1.05), 0.5)
+			tw_pulse.tween_property(game_over_title, "scale", Vector2(1.0, 1.0), 0.5)
+		)
+	)
 
 func _play_record_sfx() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
