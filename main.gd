@@ -425,8 +425,10 @@ func _play_fullscreen_score_animation() -> void:
 	big_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	big_label.set_anchors_preset(Control.PRESET_CENTER)
-	big_label.size = Vector2(360, 100)
-	big_label.position = Vector2(0, -50)
+	big_label.size = Vector2(360, 120)
+	big_label.position = Vector2(0, 260)
+	big_label.clip_contents = false
+	big_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	big_label.text = "Score: 0"
 	game_over_screen.add_child(big_label)
 
