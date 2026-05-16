@@ -437,7 +437,7 @@ func _play_fullscreen_score_animation() -> void:
 	, 0.0, float(target), 2.0)
 
 	tw_count.tween_callback(func():
-		var target_pos := Vector2(80, 302)
+		var target_pos := Vector2(180, 310)
 		var target_scale := Vector2(0.3, 0.3)
 		var tw_fly := create_tween()
 		tw_fly.set_parallel(true)
