@@ -518,6 +518,7 @@ func _start_fireworks_loop() -> void:
 	_fireworks_active = true
 	if _sfx_fireworks_loop and _sfx_fireworks_loop.stream:
 		_sfx_fireworks_loop.play()
+	print("[DEBUG] fireworks sfx playing: ", _sfx_fireworks_loop.is_playing())
 	_fire_next_firework()
 
 func _fire_next_firework() -> void:
