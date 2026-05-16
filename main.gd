@@ -417,6 +417,7 @@ func _try_show_result_title() -> void:
 		game_over_title.visible = false
 		final_score_label.modulate.a = 0.0
 		_play_fullscreen_score_animation()
+		_spawn_fireworks()
 	else:
 		game_over_title.text = "Keep it up!"
 		game_over_title.visible = true
@@ -480,6 +481,64 @@ func _play_fullscreen_score_animation() -> void:
 			tw_pulse.tween_property(game_over_title, "scale", Vector2(1.0, 1.0), 0.5)
 		)
 	)
+
+func _spawn_fireworks() -> void:
+	var launch_positions := [60.0, 140.0, 220.0, 300.0]
+	var colors := [Color("#F5C743"), Color("#FF6B6B"), Color("#6BFF6B"), Color("#6B9FFF"), Color("#FF6BFF")]
+
+	for i in range(4):
+		var delay := i * 0.3
+		get_tree().create_timer(delay).timeout.connect(func():
+			_launch_one_firework(launch_positions[i], colors[i % colors.size()])
+		)
+
+func _launch_one_firework(start_x: float, color: Color) -> void:
+	var rocket := Sprite2D.new()
+	rocket.texture = preload("res://assets/characters/jump_up.png")
+	rocket.scale = Vector2(0.4, 0.4)
+	rocket.position = Vector2(start_x, 700.0)
+	game_over_screen.add_child(rocket)
+
+	var peak_y := randf_range(100.0, 250.0)
+	var tw := create_tween()
+	tw.tween_property(rocket, "position", Vector2(start_x + randf_range(-30, 30), peak_y), 0.6)
+	tw.parallel().tween_property(rocket, "rotation_degrees", 360.0, 0.6)
+
+	tw.tween_callback(func():
+		rocket.queue_free()
+		_explode_firework(Vector2(start_x, peak_y), color)
+	)
+
+func _explode_firework(pos: Vector2, color: Color) -> void:
+	var directions: Array = []
+	for i in range(8):
+		var angle := i * (TAU / 8.0)
+		directions.append(Vector2(cos(angle), sin(angle)))
+
+	for i in range(8):
+		var particle: Node
+		if i % 2 == 0:
+			var lbl := Label.new()
+			lbl.text = "★"
+			lbl.add_theme_font_size_override("font_size", 20)
+			lbl.add_theme_color_override("font_color", color)
+			lbl.position = pos
+			game_over_screen.add_child(lbl)
+			particle = lbl
+		else:
+			var spr := Sprite2D.new()
+			spr.texture = preload("res://assets/characters/jump_land.png")
+			spr.scale = Vector2(0.2, 0.2)
+			spr.position = pos
+			game_over_screen.add_child(spr)
+			particle = spr
+
+		var target := pos + directions[i] * randf_range(60.0, 100.0)
+		var tw := create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(particle, "position", target, 0.5)
+		tw.tween_property(particle, "modulate:a", 0.0, 0.5)
+		tw.chain().tween_callback(func(): particle.queue_free())
 
 func _play_record_sfx() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
