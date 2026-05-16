@@ -289,6 +289,11 @@ func _show_game_over() -> void:
 	_update_cooldown_label()
 	Leaderboard.submit_score(score)
 	Leaderboard.score_result.connect(_on_score_result, CONNECT_ONE_SHOT)
+	var fallback := get_tree().create_timer(3.0)
+	fallback.timeout.connect(func():
+		if game_over_title.text == "":
+			_on_score_result(false)
+	)
 	var lb_btn := Button.new()
 	lb_btn.text = "🏆 Leaderboard"
 	lb_btn.add_theme_font_size_override("font_size", 16)

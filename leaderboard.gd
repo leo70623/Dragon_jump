@@ -470,6 +470,7 @@ func _on_check_completed(_result: int, response_code: int, _headers: PackedStrin
 		_do_patch_score()
 	else:
 		push_warning("[Leaderboard] Check score error code: %d — skipping submit." % response_code)
+		score_result.emit(false)
 
 # ─────────────────────────────────────────────
 # Firebase: Patch/update score (PATCH)
