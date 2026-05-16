@@ -50,10 +50,20 @@ func _ready() -> void:
 		_music.play()
 
 	var lb_btn := Button.new()
-	lb_btn.text = "排行榜"
-	lb_btn.add_theme_font_size_override("font_size", 18)
-	lb_btn.custom_minimum_size = Vector2(110, 36)
-	lb_btn.position = Vector2(vp.x * 0.5 - 55.0, vp.y - 72.0)
+	lb_btn.text = "🏆 Leaderboard"
+	lb_btn.add_theme_font_size_override("font_size", 16)
+	lb_btn.custom_minimum_size = Vector2(150, 44)
+	lb_btn.position = Vector2(vp.x * 0.5 - 75.0, vp.y - 80.0)
+
+	var lb_style := StyleBoxFlat.new()
+	lb_style.bg_color = Color("#1D9E75")
+	lb_style.corner_radius_top_left = 12
+	lb_style.corner_radius_top_right = 12
+	lb_style.corner_radius_bottom_left = 12
+	lb_style.corner_radius_bottom_right = 12
+	lb_btn.add_theme_stylebox_override("normal", lb_style)
+	lb_btn.add_theme_color_override("font_color", Color("#FFFFFF"))
+
 	lb_btn.pressed.connect(_on_leaderboard_pressed)
 	$UI.add_child(lb_btn)
 
