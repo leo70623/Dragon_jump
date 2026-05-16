@@ -295,10 +295,16 @@ func _show_game_over() -> void:
 			_on_score_result(false)
 	)
 	var lb_btn := Button.new()
-	lb_btn.text = "🏆 Leaderboard"
+	lb_btn.text = "Leaderboard"
 	lb_btn.add_theme_font_size_override("font_size", 16)
-	lb_btn.size = Vector2(150, 44)
-	lb_btn.position = Vector2(24.0, 460.0)
+	lb_btn.anchor_left = 0.0
+	lb_btn.anchor_right = 0.0
+	lb_btn.anchor_top = 1.0
+	lb_btn.anchor_bottom = 1.0
+	lb_btn.offset_left = 24.0
+	lb_btn.offset_right = 174.0
+	lb_btn.offset_top = -90.0
+	lb_btn.offset_bottom = -46.0
 	lb_btn.pressed.connect(func(): Leaderboard.show_leaderboard())
 	var lb_style := StyleBoxFlat.new()
 	lb_style.bg_color = Color("#1D9E75")
@@ -311,10 +317,16 @@ func _show_game_over() -> void:
 	game_over_screen.add_child(lb_btn)
 
 	var share_btn := Button.new()
-	share_btn.text = "📤 Share"
+	share_btn.text = "Share"
 	share_btn.add_theme_font_size_override("font_size", 16)
-	share_btn.size = Vector2(150, 44)
-	share_btn.position = Vector2(186.0, 460.0)
+	share_btn.anchor_left = 1.0
+	share_btn.anchor_right = 1.0
+	share_btn.anchor_top = 1.0
+	share_btn.anchor_bottom = 1.0
+	share_btn.offset_left = -174.0
+	share_btn.offset_right = -24.0
+	share_btn.offset_top = -90.0
+	share_btn.offset_bottom = -46.0
 	share_btn.pressed.connect(func(): Leaderboard.share_score(score))
 	var share_style := StyleBoxFlat.new()
 	share_style.bg_color = Color("#378ADD")
