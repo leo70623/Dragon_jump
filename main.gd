@@ -64,6 +64,7 @@ var _dev_input: LineEdit = null
 var _status_label: Label = null
 var _last_was_double: bool = false
 var _score_result_handled: bool = false
+var _pending_is_new_record: int = -1  # -1=未知, 0=keep it up, 1=new record
 
 func _ready() -> void:
 	var _vp_scale := get_viewport().get_screen_transform().get_scale().y
@@ -276,6 +277,7 @@ func _show_game_over() -> void:
 		return
 	game_over_flag = true
 	_score_result_handled = false
+	_pending_is_new_record = -1
 	_invincible_timer = 0.0
 	player.modulate.a = 1.0
 	player.set_physics_process(false)
@@ -371,6 +373,7 @@ func _spawn_death_spin() -> void:
 		game_over_title.text = ""
 		game_over_title.visible = false
 		game_over_screen.visible = true
+		_try_show_result_title()
 	)
 
 func _on_restart_btn_pressed() -> void:
@@ -381,6 +384,15 @@ func _on_score_result(is_new_record: bool) -> void:
 	if _score_result_handled:
 		return
 	_score_result_handled = true
+	_pending_is_new_record = 1 if is_new_record else 0
+	_try_show_result_title()
+
+func _try_show_result_title() -> void:
+	if _pending_is_new_record == -1:
+		return
+	if not game_over_screen.visible:
+		return
+	var is_new_record := _pending_is_new_record == 1
 	game_over_title.text = "★ New Record! ★" if is_new_record else "Keep it up!"
 	game_over_title.visible = true
 	game_over_title.add_theme_font_size_override("font_size", 52)
@@ -394,8 +406,9 @@ func _on_score_result(is_new_record: bool) -> void:
 	else:
 		var tw_swing := create_tween()
 		tw_swing.set_loops()
-		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(6.0), 0.4)
-		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(-6.0), 0.4)
+		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(6.0), 0.3)
+		tw_swing.tween_property(game_over_title, "rotation", deg_to_rad(-6.0), 0.3)
+		tw_swing.tween_property(game_over_title, "rotation", 0.0, 0.15)
 
 func _play_record_sfx() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
