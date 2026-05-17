@@ -1,6 +1,7 @@
 extends StaticBody2D
 
 signal hit_player
+signal stomped
 
 enum Type { NORMAL, CRUMBLE, DAMAGE, BRICK }
 
@@ -178,8 +179,12 @@ func _on_area_body_entered(body: Node2D) -> void:
 	if _damage_hit or body is not CharacterBody2D:
 		return
 	_damage_hit = true
-	_anim.play("dark_hit")
-	hit_player.emit()
+	if body.global_position.y < global_position.y:
+		stomped.emit()
+		flash_and_free()
+	else:
+		_anim.play("dark_hit")
+		hit_player.emit()
 
 func flash_and_free() -> void:
 	_damage_hit = true

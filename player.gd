@@ -67,6 +67,9 @@ func _input(event: InputEvent) -> void:
 func _take_damage() -> void:
 	damaged.emit()
 
+func bounce() -> void:
+	velocity.y = JUMP_VELOCITY
+
 func apply_boost(duration: float = 5.0) -> void:
 	_boost_timer = duration
 	_afterimage_timer = 0.0

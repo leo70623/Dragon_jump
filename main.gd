@@ -649,6 +649,7 @@ func _create_platform(x: float, y: float, ptype: int) -> Node2D:
 		p.direction = 1.0 if randf() > 0.5 else -1.0
 	if ptype == Platform.Type.DAMAGE:
 		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
+		p.stomped.connect(_on_damage_cloud_stomped)
 	platforms_node.add_child(p)
 	_try_spawn_enemy(p, ptype)
 	return p
@@ -904,6 +905,13 @@ func _on_dev_ok_pressed() -> void:
 		score_label.text = "Score  " + str(score)
 	if _dev_panel:
 		_dev_panel.visible = false
+
+func _on_damage_cloud_stomped() -> void:
+	if game_over_flag:
+		return
+	player.bounce()
+	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
+		_sfx_enemy_crush.play()
 
 func _on_enemy_stomped() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
