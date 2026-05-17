@@ -1036,16 +1036,29 @@ func _spawn_score_popup(text: String, world_pos: Vector2, color: Color) -> void:
 func _transition_background(level: int) -> void:
 	_bg_transitioning = true
 	var vp := get_viewport_rect().size
-	var tw := create_tween()
-	tw.tween_property(background, "modulate:a", 0.0, 0.25)
-	tw.tween_callback(func():
-		var tex: Texture2D = load(_bg_paths[level])
-		if tex:
-			background.texture = tex
-			var bg_tex_size := tex.get_size()
-			background.scale = Vector2(vp.x / bg_tex_size.x, vp.y / bg_tex_size.y)
-	)
-	tw.tween_property(background, "modulate:a", 1.0, 0.25)
-	tw.tween_callback(func():
+	var tex: Texture2D = load(_bg_paths[level])
+	if not tex:
 		_bg_transitioning = false
-	)
+		return
+	var bg_tex_size := tex.get_size()
+	var new_scale := Vector2(vp.x / bg_tex_size.x, vp.y / bg_tex_size.y)
+	var orig_pos := background.position
+
+	var bg2 := Sprite2D.new()
+	bg2.centered = background.centered
+	bg2.texture = tex
+	bg2.scale = new_scale
+	bg2.position = Vector2(orig_pos.x, orig_pos.y + vp.y)
+	background.get_parent().add_child(bg2)
+
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(background, "position:y", orig_pos.y - vp.y, 0.4)
+	tw.tween_property(bg2, "position:y", orig_pos.y, 0.4)
+	tw.tween_callback(func():
+		background.texture = tex
+		background.scale = new_scale
+		background.position = orig_pos
+		bg2.queue_free()
+		_bg_transitioning = false
+	).set_delay(0.4)
