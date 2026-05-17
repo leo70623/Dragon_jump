@@ -1052,6 +1052,8 @@ func _spawn_score_popup(text: String, world_pos: Vector2, color: Color) -> void:
 
 func _transition_background(level: int) -> void:
 	_bg_transitioning = true
+	if _sfx_record_whoop and _sfx_record_whoop.stream:
+		_sfx_record_whoop.play()
 	var vp := get_viewport_rect().size
 	var tex: Texture2D = load(_bg_paths[level])
 	if not tex:
