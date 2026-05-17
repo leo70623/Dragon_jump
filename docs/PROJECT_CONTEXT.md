@@ -137,3 +137,14 @@
 - 難度、UI 等設計決策先用表格或視覺化確認，再給 Claude Code 實作
 - 給 Claude Code 的指令盡量一次整合多個修改，減少來回次數
 - 版本紀錄格式統一為：### 日期（feature/branch名稱）+ - **類別**：說明，README 和 PROJECT_CONTEXT 保持一致
+
+## 重要工作方式
+1. 程式碼相關的操作（讀檔、修改、執行）一律透過 Claude Code 執行，不需要用戶貼程式碼
+2. 給 Claude Code 的指令用單一 code block 包住，用戶直接複製貼上
+3. Claude Code 回傳的結果用戶會貼回對話，根據結果繼續分析
+4. 實作前先確認需求和預期結果，不急著下指令
+5. 遇到不清楚的地方先提問，一次只問一個問題
+6. 設計決策先用表格或視覺化確認再給 Claude Code 實作
+7. 每個新功能版本建立新 branch（feature/v版本號-功能名稱），同一版本內持續 commit 到同一 branch
+
+流程：需求 → 確認理解 → Claude Code 指令（code block）→ 用戶執行後貼結果 → 分析 → 繼續
