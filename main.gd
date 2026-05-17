@@ -1048,12 +1048,12 @@ func _transition_background(level: int) -> void:
 	bg2.centered = background.centered
 	bg2.texture = tex
 	bg2.scale = new_scale
-	bg2.position = Vector2(orig_pos.x, orig_pos.y + vp.y)
+	bg2.position = Vector2(orig_pos.x, orig_pos.y - vp.y)
 	background.get_parent().add_child(bg2)
 
 	var tw := create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(background, "position:y", orig_pos.y - vp.y, 0.4)
+	tw.tween_property(background, "position:y", orig_pos.y + vp.y, 0.4)
 	tw.tween_property(bg2, "position:y", orig_pos.y, 0.4)
 	tw.tween_callback(func():
 		background.texture = tex
