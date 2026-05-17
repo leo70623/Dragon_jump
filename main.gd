@@ -644,7 +644,7 @@ func _create_platform(x: float, y: float, ptype: int) -> Node2D:
 		move_chance = 0.30; move_speed = 120.0
 	else:
 		move_chance = 0.40; move_speed = 140.0
-	if randf() < move_chance and ptype != Platform.Type.DAMAGE:
+	if randf() < move_chance and (ptype != Platform.Type.DAMAGE or score >= 600):
 		p.speed = move_speed
 		p.direction = 1.0 if randf() > 0.5 else -1.0
 	if ptype == Platform.Type.DAMAGE:
@@ -727,6 +727,13 @@ func _spawn_platform(y: float) -> void:
 			spawn_x = randf_range(230.0, vp_w - PLATFORM_MARGIN)
 
 	if ptype == Platform.Type.BRICK and _last_spawn_x > 0.0:
+		var mid := vp_w / 2.0
+		if _last_spawn_x < mid:
+			spawn_x = randf_range(mid + 20.0, vp_w - PLATFORM_MARGIN)
+		else:
+			spawn_x = randf_range(PLATFORM_MARGIN, mid - 20.0)
+
+	if ptype == Platform.Type.DAMAGE and score < 600 and _last_spawn_x > 0.0:
 		var mid := vp_w / 2.0
 		if _last_spawn_x < mid:
 			spawn_x = randf_range(mid + 20.0, vp_w - PLATFORM_MARGIN)
