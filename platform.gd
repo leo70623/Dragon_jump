@@ -27,6 +27,7 @@ var _crumbling: bool = false
 var _crumble_timer: float = 0.0
 var _base_x: float = 0.0
 
+var is_static: bool = false
 var _damage_hit: bool = false
 var _vp_w: float = 0.0
 
@@ -151,6 +152,8 @@ func _setup_collision_shapes() -> void:
 
 func _process(delta: float) -> void:
 	if platform_type == Type.DAMAGE:
+		if is_static:
+			return
 		if not _damage_hit:
 			position.y += 150.0 * delta
 		return

@@ -650,6 +650,8 @@ func _create_platform(x: float, y: float, ptype: int) -> Node2D:
 	if ptype == Platform.Type.DAMAGE:
 		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
 		p.stomped.connect(_on_damage_cloud_stomped)
+		if score < 600:
+			p.is_static = true
 	platforms_node.add_child(p)
 	_try_spawn_enemy(p, ptype)
 	return p
