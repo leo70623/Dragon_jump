@@ -789,8 +789,8 @@ func _pick_constrained_type() -> int:
 	if _last_two_types.size() == 2:
 		var a := _last_two_types[0]
 		var b := _last_two_types[1]
-		var a_haz := a == Platform.Type.CRUMBLE or a == Platform.Type.DAMAGE
-		var b_haz := b == Platform.Type.CRUMBLE or b == Platform.Type.DAMAGE
+		var a_haz := a == Platform.Type.DAMAGE
+		var b_haz := b == Platform.Type.DAMAGE
 		if a_haz and b_haz:
 			return Platform.Type.NORMAL if randf() < 0.85 else Platform.Type.BRICK
 	if score < 200:
