@@ -45,6 +45,21 @@ func _ready() -> void:
 	_sfx_crumble = _make_sfx("res://assets/audio/sfx/crumble.wav")
 	_sfx_brick   = _make_sfx("res://assets/audio/sfx/brick_hit.wav")
 	_sfx_death   = _make_sfx("res://assets/audio/sfx/death.wav")
+	_pump_sprite = AnimatedSprite2D.new()
+	var frames := SpriteFrames.new()
+	frames.add_animation("pump")
+	frames.set_animation_loop("pump", false)
+	for i in 3:
+		var a := AtlasTexture.new()
+		a.atlas = _TEX_PUMP
+		a.region = Rect2(i * 512, 0, 512, 512)
+		frames.add_frame("pump", a)
+	_pump_sprite.sprite_frames = frames
+	_pump_sprite.scale = Vector2(0.25, 0.25)
+	_pump_sprite.position = Vector2.ZERO
+	_pump_sprite.z_index = 1
+	_pump_sprite.visible = false
+	add_child(_pump_sprite)
 
 func _make_sfx(path: String) -> AudioStreamPlayer:
 	var asp := AudioStreamPlayer.new()
@@ -63,19 +78,6 @@ func apply_pump() -> void:
 	_pump_timer = 0.0
 	velocity = Vector2.ZERO
 	sprite.visible = false
-	if not _pump_sprite:
-		_pump_sprite = AnimatedSprite2D.new()
-		var frames := SpriteFrames.new()
-		frames.add_animation("pump")
-		frames.set_animation_loop("pump", false)
-		for i in 3:
-			var a := AtlasTexture.new()
-			a.atlas = _TEX_PUMP
-			a.region = Rect2(i * 512, 0, 512, 512)
-			frames.add_frame("pump", a)
-		_pump_sprite.sprite_frames = frames
-		_pump_sprite.scale = Vector2(0.25, 0.25)
-		add_child(_pump_sprite)
 	_pump_sprite.visible = true
 	_pump_sprite.frame = 0
 	_pump_sprite.stop()
@@ -84,8 +86,7 @@ func _end_pump() -> void:
 	_pump_active = false
 	_pump_timer = 0.0
 	velocity.y = 0.0
-	if is_instance_valid(_pump_sprite):
-		_pump_sprite.visible = false
+	_pump_sprite.visible = false
 	sprite.visible = true
 	sprite.scale = Vector2(0.5, 0.5)
 

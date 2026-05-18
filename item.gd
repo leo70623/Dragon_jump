@@ -14,6 +14,8 @@ func _ready() -> void:
 	$PowerSprite.visible = item_type == Type.EXTRA_LIFE
 	$BoostSprite.visible = item_type == Type.BOOST
 	$PumpSprite.visible = item_type == Type.PUMP
+	if item_type == Type.PUMP:
+		$PumpSprite.play("idle")
 
 func _on_body_entered(body: Node) -> void:
 	if _already_collected:
