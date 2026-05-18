@@ -4,7 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://c7limva72s2t2" path="res://assets/characters/jump_up.png" id="2_jump_up"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_001"]
-height = 20.0
+radius = 24.0
+height = 48.0
 
 [node name="Player" type="CharacterBody2D" unique_id=694335561]
 script = ExtResource("1_player")

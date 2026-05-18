@@ -12,7 +12,7 @@ const JUMP_HEIGHT := 178.0
 const MAX_LIVES := 5
 const REGEN_INTERVAL := 1800.0  # 30 minutes
 const ENEMY_SCENE := preload("res://enemy.tscn")
-const MAX_ENEMIES := 5
+const MAX_ENEMIES := 8
 const INVINCIBLE_DURATION := 5.0
 const ITEM_SCENE := preload("res://item.tscn")
 const ITEM_SPAWN_INTERVAL := 6
@@ -240,9 +240,9 @@ func _process(delta: float) -> void:
 	var new_score: int = int((start_y - player.position.y) / 100.0) * 2
 	if new_score > score:
 		score = new_score
-		score_label.text = "Score  " + str(score)
 		print("[SCORE DEBUG] score=", score, " camera_y=", camera.position.y, " player_y=", player.position.y, " start_y=", start_y, " pump_active=", player._pump_active)
 		_check_bg_switch()
+	score_label.text = "Score  " + str(score)
 
 	var target_y := player.position.y - vp_h * 0.15
 	if target_y < camera.position.y:
