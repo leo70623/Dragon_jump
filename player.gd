@@ -57,7 +57,7 @@ func _ready() -> void:
 		a.region = Rect2(i * 512, 0, 512, 512)
 		frames.add_frame("pump", a)
 	_pump_sprite.sprite_frames = frames
-	_pump_sprite.scale = _original_sprite_scale
+	_pump_sprite.scale = Vector2(0.25, 0.25)
 	_pump_sprite.position = Vector2.ZERO
 	_pump_sprite.z_index = 10
 	_pump_sprite.visible = false
@@ -176,18 +176,18 @@ func _physics_process(delta: float) -> void:
 			velocity.y = lerpf(0.0, PUMP_MAX_VEL, _pump_timer / PUMP_RISE_END)
 			if is_instance_valid(_pump_sprite):
 				_pump_sprite.frame = 0
-				_pump_sprite.scale = _original_sprite_scale * lerpf(1.0, 2.0, _pump_timer / PUMP_RISE_END)
+				_pump_sprite.scale = Vector2.ONE * lerpf(0.25, 0.5, _pump_timer / PUMP_RISE_END)
 		elif _pump_timer < PUMP_MAX_END:
 			velocity.y = PUMP_MAX_VEL
 			if is_instance_valid(_pump_sprite):
 				_pump_sprite.frame = 1
-				_pump_sprite.scale = _original_sprite_scale * 2.0
+				_pump_sprite.scale = Vector2(0.5, 0.5)
 		else:
 			var t := (_pump_timer - PUMP_MAX_END) / (PUMP_DURATION - PUMP_MAX_END)
 			velocity.y = lerpf(PUMP_MAX_VEL, 0.0, t)
 			if is_instance_valid(_pump_sprite):
 				_pump_sprite.frame = 2
-				_pump_sprite.scale = _original_sprite_scale * lerpf(2.0, 1.0, t)
+				_pump_sprite.scale = Vector2.ONE * lerpf(0.5, 0.25, t)
 
 		var dir := _get_move_direction()
 		velocity.x = move_toward(velocity.x, dir * MOVE_SPEED, PUMP_ACCEL * delta)
