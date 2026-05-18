@@ -5,8 +5,8 @@ const GRAVITY := 1800.0
 const MOVE_SPEED := 300.0
 const LAND_DISPLAY_TIME := 0.1
 const PUMP_DURATION := 7.0
-const PUMP_RISE_END := 1.5
-const PUMP_MAX_END := 5.5
+const PUMP_RISE_END := 1.0
+const PUMP_MAX_END := 5.0
 const PUMP_MAX_VEL := -550.0
 const PUMP_ACCEL := 600.0
 
