@@ -1047,6 +1047,10 @@ func _check_bg_switch() -> void:
 	else:
 		level = 3
 	if level != _current_bg_level and not _bg_transitioning:
+		if level >= 2 and _current_bg_level < 2:
+			for p in platforms_node.get_children():
+				if "platform_type" in p and p.platform_type == Platform.Type.DAMAGE:
+					p.is_static = false
 		_current_bg_level = level
 		_transition_background(level)
 

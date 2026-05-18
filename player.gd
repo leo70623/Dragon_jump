@@ -53,6 +53,9 @@ func _ready() -> void:
 	_original_sprite_scale = sprite.scale
 	_original_shape_radius = (_col_shape.shape as CapsuleShape2D).radius
 	_original_shape_height = (_col_shape.shape as CapsuleShape2D).height
+	var sprite_display := sprite.texture.get_size() * sprite.scale if sprite.texture else Vector2.ZERO
+	print("[COLLISION DEBUG] shape radius=", _original_shape_radius, " height=", _original_shape_height)
+	print("[COLLISION DEBUG] sprite display size=", sprite_display, " sprite scale=", sprite.scale)
 	_sfx_jump          = _make_sfx("res://assets/audio/sfx/jump.wav")
 	_sfx_crumble       = _make_sfx("res://assets/audio/sfx/crumble.wav")
 	_sfx_brick         = _make_sfx("res://assets/audio/sfx/brick_hit.wav")
