@@ -1002,13 +1002,7 @@ func _get_item_interval() -> int:
 
 func _try_spawn_item(pos: Vector2) -> void:
 	var item := ITEM_SCENE.instantiate()
-	var r := randf()
-	if r < 0.333:
-		item.item_type = 0
-	elif r < 0.667:
-		item.item_type = 1
-	else:
-		item.item_type = 2
+	item.item_type = 2  # TEST: 100% PUMP
 	item.position = pos
 	_items_node.add_child(item)
 	item.collected.connect(_on_item_collected)
