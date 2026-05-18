@@ -88,6 +88,16 @@ Main (Node2D + main.gd)
 
 ## 修改記錄
 
+## 2026-05-18（feature/v1.5-pump-item）
+
+- **打氣機道具**：新增 PUMP 道具（item_pump.png），三種道具等機率出現
+- **膨脹飄浮**：吃到後角色自動上升 7 秒，充氣 1 秒→最膨 5 秒→消氣 1 秒，速度最高 550px/s
+- **膨脹動畫**：dragon_pump_sheet.png 三幀 spritesheet，scale 從 0.25 漸變至 0.5
+- **碰撞消滅**：膨脹狀態碰到敵人或黑雲消滅對方，顯示 effect_puff 白煙動畫
+- **穿越磚塊**：膨脹期間忽略 Brick 碰撞層
+- **音效**：充氣（sfx_pump_inflate.wav）、消氣（sfx_pump_deflate.wav）、消滅（enemy_crush.wav）
+- **待修**：膨脹狀態分數 UI 不即時更新、碰撞範圍待觀察
+
 ## 2026-05-17（feature/v1.3-difficulty-redesign）
 
 - **難度四段重設計**：0–199 新手保護 / 200–599 入門挑戰 / 600–999 中級壓力 / 1000+ 高手模式
