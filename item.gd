@@ -1,6 +1,6 @@
 extends Area2D
 
-enum Type { EXTRA_LIFE = 0, BOOST = 1 }
+enum Type { EXTRA_LIFE = 0, BOOST = 1, PUMP = 2 }
 
 var item_type: Type = Type.BOOST
 var _already_collected: bool = false
@@ -13,6 +13,7 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	$PowerSprite.visible = item_type == Type.EXTRA_LIFE
 	$BoostSprite.visible = item_type == Type.BOOST
+	$PumpSprite.visible = item_type == Type.PUMP
 
 func _on_body_entered(body: Node) -> void:
 	if _already_collected:

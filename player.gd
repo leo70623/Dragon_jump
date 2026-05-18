@@ -4,10 +4,16 @@ const JUMP_VELOCITY := -800.0
 const GRAVITY := 1800.0
 const MOVE_SPEED := 300.0
 const LAND_DISPLAY_TIME := 0.1
+const PUMP_DURATION := 5.0
+const PUMP_RISE_END := 1.5
+const PUMP_MAX_END := 3.5
+const PUMP_MAX_VEL := -400.0
+const PUMP_ACCEL := 600.0
 
 const _TEX_UP: Texture2D = preload("res://assets/characters/jump_up.png")
 const _TEX_DOWN: Texture2D = preload("res://assets/characters/jump_down.png")
 const _TEX_LAND: Texture2D = preload("res://assets/characters/jump_land.png")
+const _TEX_PUMP: Texture2D = preload("res://assets/characters/dragon_pump_sheet.png")
 const Platform := preload("res://platform.gd")
 
 signal landed_on(platform: Node)
@@ -29,6 +35,9 @@ var _touch_active: Dictionary = {}  # finger index -> bool (true = left half)
 var _boost_timer: float = 0.0
 var _afterimage_timer: float = 0.0
 var _just_landed: bool = false
+var _pump_active: bool = false
+var _pump_timer: float = 0.0
+var _pump_sprite: AnimatedSprite2D = null
 
 func _ready() -> void:
 	collision_mask = collision_mask | 2
@@ -48,6 +57,37 @@ func _make_sfx(path: String) -> AudioStreamPlayer:
 func play_death_sfx() -> void:
 	if _sfx_death and _sfx_death.stream:
 		_sfx_death.play()
+
+func apply_pump() -> void:
+	_pump_active = true
+	_pump_timer = 0.0
+	velocity = Vector2.ZERO
+	sprite.visible = false
+	if not _pump_sprite:
+		_pump_sprite = AnimatedSprite2D.new()
+		var frames := SpriteFrames.new()
+		frames.add_animation("pump")
+		frames.set_animation_loop("pump", false)
+		for i in 3:
+			var a := AtlasTexture.new()
+			a.atlas = _TEX_PUMP
+			a.region = Rect2(i * 512, 0, 512, 512)
+			frames.add_frame("pump", a)
+		_pump_sprite.sprite_frames = frames
+		_pump_sprite.scale = Vector2(0.25, 0.25)
+		add_child(_pump_sprite)
+	_pump_sprite.visible = true
+	_pump_sprite.frame = 0
+	_pump_sprite.stop()
+
+func _end_pump() -> void:
+	_pump_active = false
+	_pump_timer = 0.0
+	velocity.y = 0.0
+	if is_instance_valid(_pump_sprite):
+		_pump_sprite.visible = false
+	sprite.visible = true
+	sprite.scale = Vector2(0.5, 0.5)
 
 func _input(event: InputEvent) -> void:
 	if OS.has_feature("mobile"):
@@ -118,6 +158,54 @@ func _physics_process(delta: float) -> void:
 		if _afterimage_timer <= 0.0:
 			_afterimage_timer = 0.08
 			_spawn_afterimage()
+
+	if _pump_active:
+		_pump_timer += delta
+
+		if _pump_timer < PUMP_RISE_END:
+			velocity.y = lerpf(0.0, PUMP_MAX_VEL, _pump_timer / PUMP_RISE_END)
+			if is_instance_valid(_pump_sprite):
+				_pump_sprite.frame = 0
+				_pump_sprite.scale = Vector2.ONE * lerpf(0.25, 0.5, _pump_timer / PUMP_RISE_END)
+		elif _pump_timer < PUMP_MAX_END:
+			velocity.y = PUMP_MAX_VEL
+			if is_instance_valid(_pump_sprite):
+				_pump_sprite.frame = 1
+				_pump_sprite.scale = Vector2(0.5, 0.5)
+		else:
+			var t := (_pump_timer - PUMP_MAX_END) / (PUMP_DURATION - PUMP_MAX_END)
+			velocity.y = lerpf(PUMP_MAX_VEL, 0.0, t)
+			if is_instance_valid(_pump_sprite):
+				_pump_sprite.frame = 2
+				_pump_sprite.scale = Vector2.ONE * lerpf(0.5, 0.25, t)
+
+		var dir := _get_move_direction()
+		velocity.x = move_toward(velocity.x, dir * MOVE_SPEED, PUMP_ACCEL * delta)
+		if is_instance_valid(_pump_sprite):
+			if dir > 0.05:
+				_pump_sprite.flip_h = false
+			elif dir < -0.05:
+				_pump_sprite.flip_h = true
+
+		move_and_slide()
+
+		for i in get_slide_collision_count():
+			var col := get_slide_collision(i)
+			var collider := col.get_collider()
+			if collider.is_in_group("enemy"):
+				collider.die()
+				enemy_crushed.emit()
+
+		var w := get_viewport_rect().size.x
+		if position.x < -22.0:
+			position.x = w + 22.0
+		elif position.x > w + 22.0:
+			position.x = -22.0
+
+		if _pump_timer >= PUMP_DURATION:
+			_end_pump()
+		return
+
 	velocity.y += GRAVITY * delta
 
 	var dir := _get_move_direction()

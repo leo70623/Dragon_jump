@@ -220,6 +220,10 @@ func _process(delta: float) -> void:
 		if _status != "":
 			_status += "  "
 		_status += "跳高 %ds" % ceili(player._boost_timer)
+	if player._pump_active:
+		if _status != "":
+			_status += "  "
+		_status += "膨脹 %ds" % ceili(player.PUMP_DURATION - player._pump_timer)
 	_status_label.text = _status
 
 	var vp_h := get_viewport_rect().size.y
@@ -281,6 +285,10 @@ func _update_cooldown_label() -> void:
 
 func _on_damage_cloud_hit_player(platform: Node2D) -> void:
 	if game_over_flag:
+		return
+	if player._pump_active:
+		if is_instance_valid(platform):
+			platform.flash_and_free()
 		return
 	if _invincible_timer > 0.0:
 		if is_instance_valid(platform):
@@ -858,7 +866,7 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	e.hit_player.connect(_on_player_damaged)
 
 func _on_player_damaged() -> void:
-	if game_over_flag or _invincible_timer > 0.0:
+	if game_over_flag or _invincible_timer > 0.0 or player._pump_active:
 		return
 	combo = 0
 	_hide_combo()
@@ -918,7 +926,8 @@ func _on_dev_ok_pressed() -> void:
 func _on_damage_cloud_stomped() -> void:
 	if game_over_flag:
 		return
-	player.bounce()
+	if not player._pump_active:
+		player.bounce()
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
 		_sfx_enemy_crush.play()
 
@@ -993,7 +1002,13 @@ func _get_item_interval() -> int:
 
 func _try_spawn_item(pos: Vector2) -> void:
 	var item := ITEM_SCENE.instantiate()
-	item.item_type = 0 if randf() < 0.15 else 1
+	var r := randf()
+	if r < 0.333:
+		item.item_type = 0
+	elif r < 0.667:
+		item.item_type = 1
+	else:
+		item.item_type = 2
 	item.position = pos
 	_items_node.add_child(item)
 	item.collected.connect(_on_item_collected)
@@ -1007,6 +1022,8 @@ func _on_item_collected(type: int) -> void:
 				_update_hearts_ui()
 		1:  # BOOST
 			player.apply_boost()
+		2:  # PUMP
+			player.apply_pump()
 
 func _check_bg_switch() -> void:
 	var level: int

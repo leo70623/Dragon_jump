@@ -4,11 +4,15 @@
 [ext_resource type="Texture2D" path="res://assets/ui/item_power_idle.png" id="2_tex"]
 [ext_resource type="Shader" path="res://assets/ui/item_power.gdshader" id="3_shader"]
 [ext_resource type="Texture2D" path="res://assets/ui/item_shoes_idle.png" id="4_tex"]
+[ext_resource type="Texture2D" path="res://assets/ui/item_pump.png" id="5_tex"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMat_1"]
 shader = ExtResource("3_shader")
 
 [sub_resource type="ShaderMaterial" id="ShaderMat_2"]
+shader = ExtResource("3_shader")
+
+[sub_resource type="ShaderMaterial" id="ShaderMat_3"]
 shader = ExtResource("3_shader")
 
 [sub_resource type="CircleShape2D" id="CS_1"]
@@ -28,6 +32,14 @@ visible = false
 scale = Vector2(0.115, 0.115)
 texture = ExtResource("4_tex")
 material = SubResource("ShaderMat_2")
+
+[node name="PumpSprite" type="Sprite2D" parent="."]
+visible = false
+scale = Vector2(0.115, 0.115)
+texture = ExtResource("5_tex")
+region_enabled = true
+region_rect = Rect2(0, 0, 512, 512)
+material = SubResource("ShaderMat_3")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CS_1")
