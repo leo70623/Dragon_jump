@@ -57,7 +57,7 @@ func _ready() -> void:
 	_pump_sprite.sprite_frames = frames
 	_pump_sprite.scale = Vector2(0.25, 0.25)
 	_pump_sprite.position = Vector2.ZERO
-	_pump_sprite.z_index = 1
+	_pump_sprite.z_index = 10
 	_pump_sprite.visible = false
 	add_child(_pump_sprite)
 
@@ -85,6 +85,8 @@ func apply_pump() -> void:
 	print("[PUMP DEBUG] _pump_sprite in tree: ", _pump_sprite.is_inside_tree() if is_instance_valid(_pump_sprite) else "N/A")
 	print("[PUMP DEBUG] _pump_sprite visible=", _pump_sprite.visible, " pos=", _pump_sprite.position, " scale=", _pump_sprite.scale, " z_index=", _pump_sprite.z_index)
 	print("[PUMP DEBUG] sprite visible=", sprite.visible, " pos=", sprite.position, " scale=", sprite.scale)
+	var sf := _pump_sprite.sprite_frames
+	print("[PUMP DEBUG] sprite_frames valid: ", is_instance_valid(sf), " has pump: ", sf.has_animation("pump") if is_instance_valid(sf) else "N/A", " frame_count: ", sf.get_frame_count("pump") if (is_instance_valid(sf) and sf.has_animation("pump")) else "N/A")
 
 func _end_pump() -> void:
 	_pump_active = false
@@ -92,7 +94,7 @@ func _end_pump() -> void:
 	velocity.y = 0.0
 	_pump_sprite.visible = false
 	sprite.visible = true
-	sprite.scale = Vector2(0.5, 0.5)
+	sprite.scale = Vector2(0.25, 0.25)
 
 func _input(event: InputEvent) -> void:
 	if OS.has_feature("mobile"):
