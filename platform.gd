@@ -68,6 +68,8 @@ func _ready() -> void:
 			_col.one_way_collision = false
 			half_w = BRICK_W * 0.5
 			_anim.play("metal")
+			set_collision_layer_value(1, false)
+			set_collision_layer_value(4, true)
 
 func _setup_sprite_frames() -> void:
 	_anim.scale = Vector2(120.0 / 512.0, 50.0 / 256.0)

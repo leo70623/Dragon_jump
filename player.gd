@@ -4,10 +4,10 @@ const JUMP_VELOCITY := -800.0
 const GRAVITY := 1800.0
 const MOVE_SPEED := 300.0
 const LAND_DISPLAY_TIME := 0.1
-const PUMP_DURATION := 5.0
+const PUMP_DURATION := 7.0
 const PUMP_RISE_END := 1.5
-const PUMP_MAX_END := 3.5
-const PUMP_MAX_VEL := -400.0
+const PUMP_MAX_END := 5.5
+const PUMP_MAX_VEL := -550.0
 const PUMP_ACCEL := 600.0
 
 const _TEX_UP: Texture2D = preload("res://assets/characters/jump_up.png")
@@ -42,6 +42,7 @@ var _original_sprite_scale: Vector2
 
 func _ready() -> void:
 	collision_mask = collision_mask | 2
+	set_collision_mask_value(4, true)
 	_original_sprite_scale = sprite.scale
 	_sfx_jump    = _make_sfx("res://assets/audio/sfx/jump.wav")
 	_sfx_crumble = _make_sfx("res://assets/audio/sfx/crumble.wav")
@@ -79,6 +80,7 @@ func apply_pump() -> void:
 	_pump_active = true
 	_pump_timer = 0.0
 	velocity = Vector2.ZERO
+	set_collision_mask_value(4, false)
 	sprite.visible = false
 	_pump_sprite.visible = true
 	_pump_sprite.play("pump")
@@ -95,6 +97,7 @@ func _end_pump() -> void:
 	_pump_active = false
 	_pump_timer = 0.0
 	velocity.y = 0.0
+	set_collision_mask_value(4, true)
 	_pump_sprite.visible = false
 	sprite.visible = true
 	sprite.scale = _original_sprite_scale
