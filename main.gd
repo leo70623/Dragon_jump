@@ -289,6 +289,9 @@ func _on_damage_cloud_hit_player(platform: Node2D) -> void:
 	if player._pump_active:
 		if is_instance_valid(platform):
 			platform.flash_and_free()
+			effect_puff(platform.global_position)
+		if _sfx_enemy_crush and _sfx_enemy_crush.stream:
+			_sfx_enemy_crush.play()
 		return
 	if _invincible_timer > 0.0:
 		if is_instance_valid(platform):
@@ -842,8 +845,6 @@ func _get_enemy_threshold() -> int:
 
 func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 	if ptype != Platform.Type.NORMAL and ptype != Platform.Type.BRICK:
-		return
-	if p.speed != 0.0:
 		return
 	_eligible_since_last_enemy += 1
 	var threshold := 2 if DEV_ENEMY_TEST else _get_enemy_threshold()

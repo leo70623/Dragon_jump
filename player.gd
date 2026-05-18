@@ -44,11 +44,15 @@ var _pump_timer: float = 0.0
 var _pump_deflate_played: bool = false
 var _pump_sprite: AnimatedSprite2D = null
 var _original_sprite_scale: Vector2
+var _original_shape_radius: float
+var _original_shape_height: float
 
 func _ready() -> void:
 	collision_mask = collision_mask | 2
 	set_collision_mask_value(4, true)
 	_original_sprite_scale = sprite.scale
+	_original_shape_radius = (_col_shape.shape as CapsuleShape2D).radius
+	_original_shape_height = (_col_shape.shape as CapsuleShape2D).height
 	_sfx_jump          = _make_sfx("res://assets/audio/sfx/jump.wav")
 	_sfx_crumble       = _make_sfx("res://assets/audio/sfx/crumble.wav")
 	_sfx_brick         = _make_sfx("res://assets/audio/sfx/brick_hit.wav")
@@ -112,7 +116,8 @@ func _end_pump() -> void:
 	_pump_sprite.visible = false
 	sprite.visible = true
 	sprite.scale = _original_sprite_scale
-	_col_shape.scale = Vector2(1.0, 1.0)
+	(_col_shape.shape as CapsuleShape2D).radius = _original_shape_radius
+	(_col_shape.shape as CapsuleShape2D).height = _original_shape_height
 
 func _input(event: InputEvent) -> void:
 	if OS.has_feature("mobile"):
@@ -209,7 +214,9 @@ func _physics_process(delta: float) -> void:
 				_pump_sprite.scale = Vector2.ONE * lerpf(0.5, 0.25, t)
 
 		if is_instance_valid(_pump_sprite):
-			_col_shape.scale = _pump_sprite.scale * 4.0
+			var ratio := _pump_sprite.scale.x / 0.25
+			(_col_shape.shape as CapsuleShape2D).radius = _original_shape_radius * ratio
+			(_col_shape.shape as CapsuleShape2D).height = _original_shape_height * ratio
 
 		var dir := _get_move_direction()
 		velocity.x = move_toward(velocity.x, dir * MOVE_SPEED, PUMP_ACCEL * delta)
