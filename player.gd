@@ -23,6 +23,7 @@ signal enemy_crushed
 signal landed(landing_y: float)
 
 @onready var sprite: Sprite2D = $Sprite2D
+@onready var _col_shape: CollisionShape2D = $CollisionShape2D
 
 var _land_timer: float = 0.0
 var _sfx_jump: AudioStreamPlayer
@@ -111,6 +112,7 @@ func _end_pump() -> void:
 	_pump_sprite.visible = false
 	sprite.visible = true
 	sprite.scale = _original_sprite_scale
+	_col_shape.scale = Vector2(1.0, 1.0)
 
 func _input(event: InputEvent) -> void:
 	if OS.has_feature("mobile"):
@@ -205,6 +207,9 @@ func _physics_process(delta: float) -> void:
 			if is_instance_valid(_pump_sprite):
 				_pump_sprite.frame = 2
 				_pump_sprite.scale = Vector2.ONE * lerpf(0.5, 0.25, t)
+
+		if is_instance_valid(_pump_sprite):
+			_col_shape.scale = _pump_sprite.scale * 4.0
 
 		var dir := _get_move_direction()
 		velocity.x = move_toward(velocity.x, dir * MOVE_SPEED, PUMP_ACCEL * delta)

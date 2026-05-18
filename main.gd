@@ -657,7 +657,7 @@ func _create_platform(x: float, y: float, ptype: int) -> Node2D:
 		p.direction = 1.0 if randf() > 0.5 else -1.0
 	if ptype == Platform.Type.DAMAGE:
 		p.hit_player.connect(_on_damage_cloud_hit_player.bind(p))
-		p.stomped.connect(_on_damage_cloud_stomped)
+		p.stomped.connect(_on_damage_cloud_stomped.bind(p))
 		if score < 600:
 			p.is_static = true
 	platforms_node.add_child(p)
@@ -923,19 +923,35 @@ func _on_dev_ok_pressed() -> void:
 	if _dev_panel:
 		_dev_panel.visible = false
 
-func _on_damage_cloud_stomped() -> void:
+func effect_puff(pos: Vector2) -> void:
+	var spr := Sprite2D.new()
+	spr.texture = load("res://assets/effects/effect_puff.png")
+	spr.scale = Vector2(0.0, 0.0)
+	spr.z_index = 20
+	add_child(spr)
+	spr.global_position = pos
+	var tw := spr.create_tween()
+	tw.tween_property(spr, "scale", Vector2(0.36, 0.36), 0.15)
+	tw.tween_property(spr, "scale", Vector2(0.3, 0.3), 0.1)
+	tw.tween_property(spr, "modulate:a", 0.0, 0.25)
+	tw.tween_callback(spr.queue_free)
+
+func _on_damage_cloud_stomped(platform: Node2D = null) -> void:
 	if game_over_flag:
 		return
 	if not player._pump_active:
 		player.bounce()
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
 		_sfx_enemy_crush.play()
+	if is_instance_valid(platform):
+		effect_puff(platform.global_position)
 
 func _on_enemy_stomped() -> void:
 	if _sfx_enemy_crush and _sfx_enemy_crush.stream:
 		_sfx_enemy_crush.play()
 
 func _on_enemy_crushed() -> void:
+	effect_puff(player.global_position)
 	score += 10
 	_check_bg_switch()
 	score_label.text = "Score  " + str(score)
