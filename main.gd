@@ -232,6 +232,7 @@ func _process(delta: float) -> void:
 	if new_score > score:
 		score = new_score
 		score_label.text = "Score  " + str(score)
+		print("[SCORE DEBUG] score=", score, " camera_y=", camera.position.y, " player_y=", player.position.y, " start_y=", start_y, " pump_active=", player._pump_active)
 		_check_bg_switch()
 
 	var target_y := player.position.y - vp_h * 0.15
@@ -848,6 +849,7 @@ func _try_spawn_enemy(p: Node2D, ptype: int) -> void:
 		return
 	_eligible_since_last_enemy += 1
 	var threshold := 2 if DEV_ENEMY_TEST else _get_enemy_threshold()
+	print("[ENEMY DEBUG] ptype=", ptype, " speed=", p.speed, " eligible=", _eligible_since_last_enemy, " threshold=", threshold, " child_count=", _enemies_node.get_child_count())
 	if _eligible_since_last_enemy < threshold:
 		return
 	if _enemies_node.get_child_count() >= MAX_ENEMIES:

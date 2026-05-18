@@ -40,6 +40,7 @@ var _boost_timer: float = 0.0
 var _afterimage_timer: float = 0.0
 var _just_landed: bool = false
 var _pump_active: bool = false
+var _collision_debug_timer: float = 0.0
 var _pump_timer: float = 0.0
 var _pump_deflate_played: bool = false
 var _pump_sprite: AnimatedSprite2D = null
@@ -220,6 +221,15 @@ func _physics_process(delta: float) -> void:
 			var ratio := _pump_sprite.scale.x / 0.25
 			(_col_shape.shape as CapsuleShape2D).radius = _original_shape_radius * ratio
 			(_col_shape.shape as CapsuleShape2D).height = _original_shape_height * ratio
+
+		_collision_debug_timer += delta
+		if _collision_debug_timer >= 1.0:
+			_collision_debug_timer = 0.0
+			var cur_radius := (_col_shape.shape as CapsuleShape2D).radius
+			var cur_height := (_col_shape.shape as CapsuleShape2D).height
+			var pump_sc := _pump_sprite.scale if is_instance_valid(_pump_sprite) else Vector2.ZERO
+			var spr_size := sprite.texture.get_size() * sprite.scale if sprite.texture else Vector2.ZERO
+			print("[COLLISION DEBUG] pump_scale=", pump_sc, " radius=", cur_radius, " height=", cur_height, " sprite_size=", spr_size)
 
 		var dir := _get_move_direction()
 		velocity.x = move_toward(velocity.x, dir * MOVE_SPEED, PUMP_ACCEL * delta)
