@@ -68,6 +68,7 @@ var _last_was_double: bool = false
 var _score_result_handled: bool = false
 var _pending_is_new_record: int = -1  # -1=未知, 0=keep it up, 1=new record
 var _fireworks_active: bool = false
+var _score_check_timer: float = 0.0
 
 func _ready() -> void:
 	var _vp_scale := get_viewport().get_screen_transform().get_scale().y
@@ -225,6 +226,14 @@ func _process(delta: float) -> void:
 			_status += "  "
 		_status += "膨脹 %ds" % ceili(player.PUMP_DURATION - player._pump_timer)
 	_status_label.text = _status
+
+	if player._pump_active:
+		_score_check_timer += delta
+		if _score_check_timer >= 0.5:
+			_score_check_timer = 0.0
+			print("[SCORE CHECK] start_y=", start_y, " player.global_position.y=", player.global_position.y, " player.position.y=", player.position.y, " pump=", player._pump_active)
+	else:
+		_score_check_timer = 0.0
 
 	var vp_h := get_viewport_rect().size.y
 
