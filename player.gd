@@ -29,6 +29,8 @@ var _sfx_jump: AudioStreamPlayer
 var _sfx_crumble: AudioStreamPlayer
 var _sfx_brick: AudioStreamPlayer
 var _sfx_death: AudioStreamPlayer
+var _sfx_pump_inflate: AudioStreamPlayer
+var _sfx_pump_deflate: AudioStreamPlayer
 
 var _touch_dir: float = 0.0
 var _touch_active: Dictionary = {}  # finger index -> bool (true = left half)
@@ -37,6 +39,7 @@ var _afterimage_timer: float = 0.0
 var _just_landed: bool = false
 var _pump_active: bool = false
 var _pump_timer: float = 0.0
+var _pump_deflate_played: bool = false
 var _pump_sprite: AnimatedSprite2D = null
 var _original_sprite_scale: Vector2
 
@@ -44,10 +47,12 @@ func _ready() -> void:
 	collision_mask = collision_mask | 2
 	set_collision_mask_value(4, true)
 	_original_sprite_scale = sprite.scale
-	_sfx_jump    = _make_sfx("res://assets/audio/sfx/jump.wav")
-	_sfx_crumble = _make_sfx("res://assets/audio/sfx/crumble.wav")
-	_sfx_brick   = _make_sfx("res://assets/audio/sfx/brick_hit.wav")
-	_sfx_death   = _make_sfx("res://assets/audio/sfx/death.wav")
+	_sfx_jump          = _make_sfx("res://assets/audio/sfx/jump.wav")
+	_sfx_crumble       = _make_sfx("res://assets/audio/sfx/crumble.wav")
+	_sfx_brick         = _make_sfx("res://assets/audio/sfx/brick_hit.wav")
+	_sfx_death         = _make_sfx("res://assets/audio/sfx/death.wav")
+	_sfx_pump_inflate  = _make_sfx("res://assets/audio/sfx/sfx_pump_inflate.wav")
+	_sfx_pump_deflate  = _make_sfx("res://assets/audio/sfx/sfx_pump_deflate.wav")
 	_pump_sprite = AnimatedSprite2D.new()
 	var frames := SpriteFrames.new()
 	frames.add_animation("pump")
@@ -79,8 +84,11 @@ func play_death_sfx() -> void:
 func apply_pump() -> void:
 	_pump_active = true
 	_pump_timer = 0.0
+	_pump_deflate_played = false
 	velocity = Vector2.ZERO
 	set_collision_mask_value(4, false)
+	if _sfx_pump_inflate and _sfx_pump_inflate.stream:
+		_sfx_pump_inflate.play()
 	sprite.visible = false
 	_pump_sprite.visible = true
 	_pump_sprite.play("pump")
@@ -186,6 +194,10 @@ func _physics_process(delta: float) -> void:
 				_pump_sprite.frame = 1
 				_pump_sprite.scale = Vector2(0.5, 0.5)
 		else:
+			if not _pump_deflate_played:
+				_pump_deflate_played = true
+				if _sfx_pump_deflate and _sfx_pump_deflate.stream:
+					_sfx_pump_deflate.play()
 			var t := (_pump_timer - PUMP_MAX_END) / (PUMP_DURATION - PUMP_MAX_END)
 			velocity.y = lerpf(PUMP_MAX_VEL, 0.0, t)
 			if is_instance_valid(_pump_sprite):
