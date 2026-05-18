@@ -31,6 +31,7 @@ var _sfx_brick: AudioStreamPlayer
 var _sfx_death: AudioStreamPlayer
 var _sfx_pump_inflate: AudioStreamPlayer
 var _sfx_pump_deflate: AudioStreamPlayer
+var _sfx_enemy_crush: AudioStreamPlayer
 
 var _touch_dir: float = 0.0
 var _touch_active: Dictionary = {}  # finger index -> bool (true = left half)
@@ -53,6 +54,7 @@ func _ready() -> void:
 	_sfx_death         = _make_sfx("res://assets/audio/sfx/death.wav")
 	_sfx_pump_inflate  = _make_sfx("res://assets/audio/sfx/sfx_pump_inflate.wav")
 	_sfx_pump_deflate  = _make_sfx("res://assets/audio/sfx/sfx_pump_deflate.wav")
+	_sfx_enemy_crush   = _make_sfx("res://assets/audio/sfx/enemy_crush.wav")
 	_pump_sprite = AnimatedSprite2D.new()
 	var frames := SpriteFrames.new()
 	frames.add_animation("pump")
@@ -220,6 +222,8 @@ func _physics_process(delta: float) -> void:
 			if collider.is_in_group("enemy"):
 				collider.die()
 				enemy_crushed.emit()
+				if _sfx_enemy_crush and _sfx_enemy_crush.stream:
+					_sfx_enemy_crush.play()
 
 		var w := get_viewport_rect().size.x
 		if position.x < -22.0:
