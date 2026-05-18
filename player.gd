@@ -79,14 +79,15 @@ func apply_pump() -> void:
 	velocity = Vector2.ZERO
 	sprite.visible = false
 	_pump_sprite.visible = true
+	_pump_sprite.play("pump")
 	_pump_sprite.frame = 0
-	_pump_sprite.stop()
 	print("[PUMP DEBUG] _pump_sprite valid: ", is_instance_valid(_pump_sprite))
 	print("[PUMP DEBUG] _pump_sprite in tree: ", _pump_sprite.is_inside_tree() if is_instance_valid(_pump_sprite) else "N/A")
 	print("[PUMP DEBUG] _pump_sprite visible=", _pump_sprite.visible, " pos=", _pump_sprite.position, " scale=", _pump_sprite.scale, " z_index=", _pump_sprite.z_index)
 	print("[PUMP DEBUG] sprite visible=", sprite.visible, " pos=", sprite.position, " scale=", sprite.scale)
 	var sf := _pump_sprite.sprite_frames
 	print("[PUMP DEBUG] sprite_frames valid: ", is_instance_valid(sf), " has pump: ", sf.has_animation("pump") if is_instance_valid(sf) else "N/A", " frame_count: ", sf.get_frame_count("pump") if (is_instance_valid(sf) and sf.has_animation("pump")) else "N/A")
+	print("[PUMP DEBUG] after play, frame=", _pump_sprite.frame, " is_playing=", _pump_sprite.is_playing())
 
 func _end_pump() -> void:
 	_pump_active = false
