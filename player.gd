@@ -81,6 +81,10 @@ func apply_pump() -> void:
 	_pump_sprite.visible = true
 	_pump_sprite.frame = 0
 	_pump_sprite.stop()
+	print("[PUMP DEBUG] _pump_sprite valid: ", is_instance_valid(_pump_sprite))
+	print("[PUMP DEBUG] _pump_sprite in tree: ", _pump_sprite.is_inside_tree() if is_instance_valid(_pump_sprite) else "N/A")
+	print("[PUMP DEBUG] _pump_sprite visible=", _pump_sprite.visible, " pos=", _pump_sprite.position, " scale=", _pump_sprite.scale, " z_index=", _pump_sprite.z_index)
+	print("[PUMP DEBUG] sprite visible=", sprite.visible, " pos=", sprite.position, " scale=", sprite.scale)
 
 func _end_pump() -> void:
 	_pump_active = false
